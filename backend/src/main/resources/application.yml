@@ -10,11 +10,22 @@ spring:
     username: ${SUPABASE_DB_USER:postgres}
     password: ${SUPABASE_DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 5
+      data-source-properties:
+        sslmode: require
+        ssl: true
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
   flyway:
     enabled: true
   mail:
