@@ -1,0 +1,13 @@
+package com.healthcare.clinic.doctor.repository;
+
+import com.healthcare.clinic.doctor.entity.PrescriptionTemplate;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface PrescriptionTemplateRepository extends JpaRepository<PrescriptionTemplate, Long> {
+    List<PrescriptionTemplate> findByDoctorId(Long doctorId);
+    List<PrescriptionTemplate> findByDoctorIdAndCategory(Long doctorId, String category);
+}

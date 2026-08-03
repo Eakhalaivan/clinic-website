@@ -1,0 +1,52 @@
+--- src/main/java/com/healthcare/clinic/reception/controller/QueueController.java
++++ src/main/java/com/healthcare/clinic/reception/controller/QueueController.java
+@@ -7,9 +7,16 @@
+ import com.healthcare.clinic.reception.entity.WalkInRegistration;
+ import com.healthcare.clinic.reception.repository.QueueTokenRepository;
+ import com.healthcare.clinic.reception.repository.WalkInRegistrationRepository;
++import com.healthcare.clinic.nursing.entity.NursePatientAssignment;
++import com.healthcare.clinic.nursing.repository.NursePatientAssignmentRepository;
++import com.healthcare.clinic.identity.repository.UserRepository;
++import com.healthcare.clinic.identity.entity.User;
++import com.healthcare.clinic.security.SecurityUtils;
+ import lombok.RequiredArgsConstructor;
+ import org.springframework.http.ResponseEntity;
++import org.springframework.security.core.Authentication;
++import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.web.bind.annotation.*;
+ 
+@@ -20,18 +27,33 @@
+ @RestController
+ @RequestMapping("/api/reception")
+ @RequiredArgsConstructor
+-@PreAuthorize("hasRole('RECEPTION') or hasRole('SUPER_ADMIN')")
++@PreAuthorize("hasRole('RECEPTION') or hasRole('NURSE') or hasRole('SUPER_ADMIN')")
+ public class QueueController {
+ 
+     private final QueueTokenRepository queueTokenRepository;
+     private final WalkInRegistrationRepository walkInRegistrationRepository;
+     private final BranchRepository branchRepository;
++    private final NursePatientAssignmentRepository nursePatientAssignmentRepository;
++    private final UserRepository userRepository;
+ 
+     @PostMapping("/branches/{branchId}/walk-ins")
+     public ResponseEntity<WalkInRegistration> registerWalkIn(@PathVariable Long branchId, @RequestBody WalkInRegistration registration) {
+         Branch branch = branchRepository.findById(branchId).orElseThrow();
+         registration.setBranch(branch);
+         registration.setStatus("WAITING");
++        
++        long count = walkInRegistrationRepository.count() + 1;
++        String opNumber = String.format("OP-%s-%05d", LocalDate.now().getYear(), count);
++        registration.setOpNumber(opNumber);
++        
++        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
++        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_NURSE"))) {
++            if (registration.getPatient() != null) {
++                User nurse = userRepository.findById(SecurityUtils.getCurrentUserId()).orElseThrow();
++                nursePatientAssignmentRepository.save(NursePatientAssignment.builder().nurse(nurse).patient(registration.getPatient()).status("ACTIVE").build());
++            }
++        }
++        
+         return ResponseEntity.ok(walkInRegistrationRepository.save(registration));
+     }

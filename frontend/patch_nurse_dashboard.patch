@@ -1,0 +1,116 @@
+--- src/pages/nurse/NurseDashboard.jsx
++++ src/pages/nurse/NurseDashboard.jsx
+@@ -28,8 +28,14 @@
+   const queryClient = useQueryClient();
+   const [selectedPatientId, setSelectedPatientId] = useState(null);
+   const [showTokenForm, setShowTokenForm] = useState(false);
+-  const [tokenPatientId, setTokenPatientId] = useState('');
++  
++  const [walkInForm, setWalkInForm] = useState({
++    patientId: '',
++    firstName: '',
++    lastName: '',
++    phone: '',
++    reasonForVisit: ''
++  });
++  
+   const [vitalSign, setVitalSign] = useState({ 
+     temperature: '', bloodPressure: '', heartRate: '', respiratoryRate: '', oxygenSaturation: '', notes: '' 
+   });
+@@ -67,17 +73,29 @@
+     }
+   });
+ 
+-  const generateToken = useMutation({
++  const registerWalkIn = useMutation({
+     mutationFn: async (data) => {
+-      const res = await axiosPrivate.post(`/nursing/op-token`, data);
+-      return res.data;
++      // data contains patientId, firstName, lastName, phone, reasonForVisit
++      const payload = {
++        firstName: data.firstName,
++        lastName: data.lastName,
++        phone: data.phone,
++        reasonForVisit: data.reasonForVisit
++      };
++      if (data.patientId) {
++        payload.patient = { id: parseInt(data.patientId) };
++      }
++      
++      const res = await axiosPrivate.post(`/reception/branches/1/walk-ins`, payload);
++      const walkIn = res.data;
++      const tokenRes = await axiosPrivate.post(`/reception/branches/1/queue/generate?walkInId=${walkIn.id}`);
++      return { walkIn, token: tokenRes.data };
+     },
+     onSuccess: (data) => {
+-      toast.success(`OP Token generated! Token No: ${data.tokenNumber}`);
+-      setTokenPatientId('');
++      toast.success(`OP Registered! OP No: ${data.walkIn.opNumber} | Token No: ${data.token.tokenNumber}`);
++      setWalkInForm({ patientId: '', firstName: '', lastName: '', phone: '', reasonForVisit: '' });
+       setShowTokenForm(false);
+       queryClient.invalidateQueries({ queryKey: ['nurseAssignments'] });
+     },
+     onError: (err) => {
+-      toast.error(err.response?.data?.message || 'Failed to generate OP token');
++      toast.error(err.response?.data?.message || 'Failed to register walk-in');
+     }
+   });
+@@ -141,22 +159,47 @@
+             </Button>
+           </Card.Header>
+           <Card.Body className="p-2 flex-1 overflow-y-auto">
+             {showTokenForm && (
+-              <div className="p-3 mb-2 bg-[var(--color-surface-alt)] rounded-md border border-[var(--color-border)] space-y-2">
+-                <p className="text-xs font-semibold text-[var(--color-text)] m-0">Generate OP Token</p>
+-                <input 
+-                  type="text" 
+-                  placeholder="Patient ID" 
+-                  className="input-field py-1 px-2 text-sm"
+-                  value={tokenPatientId}
+-                  onChange={e => setTokenPatientId(e.target.value)}
+-                />
++              <div className="p-3 mb-2 bg-[var(--color-surface-alt)] rounded-md border border-[var(--color-border)] space-y-3">
++                <p className="text-xs font-semibold text-[var(--color-text)] m-0">Register Walk-in / OP Token</p>
++                
++                <input
++                  type="text"
++                  placeholder="Existing Patient ID (optional)"
++                  className="input-field py-1 px-2 text-sm w-full"
++                  value={walkInForm.patientId}
++                  onChange={e => setWalkInForm({...walkInForm, patientId: e.target.value})}
++                />
++                {!walkInForm.patientId && (
++                  <div className="space-y-2">
++                    <div className="grid grid-cols-2 gap-2">
++                      <input type="text" placeholder="First Name" className="input-field py-1 px-2 text-sm"
++                        value={walkInForm.firstName} onChange={e => setWalkInForm({...walkInForm, firstName: e.target.value})} />
++                      <input type="text" placeholder="Last Name" className="input-field py-1 px-2 text-sm"
++                        value={walkInForm.lastName} onChange={e => setWalkInForm({...walkInForm, lastName: e.target.value})} />
++                    </div>
++                    <input type="text" placeholder="Phone Number" className="input-field py-1 px-2 text-sm w-full"
++                      value={walkInForm.phone} onChange={e => setWalkInForm({...walkInForm, phone: e.target.value})} />
++                  </div>
++                )}
++                <input type="text" placeholder="Reason for Visit" className="input-field py-1 px-2 text-sm w-full"
++                  value={walkInForm.reasonForVisit} onChange={e => setWalkInForm({...walkInForm, reasonForVisit: e.target.value})} />
++
+                 <div className="flex gap-2">
+-                  <Button variant="primary" size="sm" className="w-full" onClick={() => generateToken.mutate({ patientId: parseInt(tokenPatientId) })} isLoading={generateToken.isPending}>
+-                    Generate
++                  <Button 
++                    variant="primary" 
++                    size="sm" 
++                    className="w-full" 
++                    onClick={() => registerWalkIn.mutate(walkInForm)} 
++                    isLoading={registerWalkIn.isPending}
++                  >
++                    Register OP
+                   </Button>
+-                  <Button variant="outline" size="sm" onClick={() => setShowTokenForm(false)}>
++                  <Button variant="outline" size="sm" onClick={() => {
++                    setShowTokenForm(false);
++                    setWalkInForm({ patientId: '', firstName: '', lastName: '', phone: '', reasonForVisit: '' });
++                  }}>
+                     Cancel
+                   </Button>
+                 </div>

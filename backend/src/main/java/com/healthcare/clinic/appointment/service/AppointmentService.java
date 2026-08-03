@@ -1,0 +1,128 @@
+package com.healthcare.clinic.appointment.service;
+
+import com.healthcare.clinic.appointment.entity.Appointment;
+import com.healthcare.clinic.appointment.entity.AppointmentSlot;
+import com.healthcare.clinic.doctor.entity.DoctorProfile;
+import com.healthcare.clinic.patient.entity.PatientProfile;
+import com.healthcare.clinic.appointment.repository.AppointmentRepository;
+import com.healthcare.clinic.appointment.repository.AppointmentSlotRepository;
+import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
+import com.healthcare.clinic.patient.repository.PatientProfileRepository;
+import com.healthcare.clinic.identity.repository.UserRepository;
+import com.healthcare.clinic.identity.entity.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import com.healthcare.clinic.appointment.event.AppointmentBookedEvent;
+import org.springframework.context.ApplicationEventPublisher;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AppointmentService {
+
+    private final AppointmentSlotRepository slotRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final PatientProfileRepository patientRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final UserRepository userRepository;
+
+    @Transactional(readOnly = true)
+    public List<AppointmentSlot> getAvailableSlots(Long doctorId, ZonedDateTime start, ZonedDateTime end) {
+        ZonedDateTime now = ZonedDateTime.now();
+        return slotRepository.findByDoctorUserIdAndStartTimeBetweenAndIsBookedFalse(doctorId, start, end).stream()
+                .filter(slot -> slot.getStartTime().isAfter(now))
+                .toList();
+    }
+
+    @Transactional
+    public Appointment bookAppointment(Long patientUserId, Long slotId, String reasonForVisit) {
+        // Auto-create a minimal PatientProfile if one doesn't exist yet (new patient registration flow)
+        PatientProfile patient = patientRepository.findByUserId(patientUserId)
+                .orElseGet(() -> {
+                    log.info("No PatientProfile found for user ID: {}. Auto-creating a minimal profile.", patientUserId);
+                    PatientProfile newProfile = PatientProfile.builder()
+                            .userId(patientUserId)
+                            .emergencyContactName("Not provided")
+                            .emergencyContactPhone("+10000000000")
+                            .branchId(1L)
+                            .build();
+                    return patientRepository.save(newProfile);
+                });
+
+        AppointmentSlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Slot not found: " + slotId));
+
+        if (slot.getIsBooked()) {
+            throw new RuntimeException("Slot is already booked.");
+        }
+
+        // Optimistic locking handles concurrent modifications to the slot
+        slot.setIsBooked(true);
+        slotRepository.save(slot);
+
+        Appointment appointment = Appointment.builder()
+                .patient(patient)
+                .doctor(slot.getDoctor())
+                .slot(slot)
+                .status("BOOKED")
+                .reasonForVisit(reasonForVisit)
+                .branchId(slot.getBranchId())
+                .build();
+
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        User patientUser = userRepository.findById(patient.getUserId())
+                .orElseThrow(() -> new RuntimeException("Patient user not found"));
+        User doctorUser = userRepository.findById(slot.getDoctor().getUserId())
+                .orElseThrow(() -> new RuntimeException("Doctor user not found"));
+
+        // Publish Event — NotificationEventListener handles in-app + email
+        AppointmentBookedEvent event = AppointmentBookedEvent.builder()
+                .appointmentId(savedAppointment.getId())
+                .patientId(patient.getId())
+                .doctorId(slot.getDoctor().getId())
+                .startTime(slot.getStartTime())
+                .endTime(slot.getEndTime())
+                .doctorName("Dr. " + doctorUser.getFirstName() + " " + doctorUser.getLastName())
+                .patientEmail(patientUser.getEmail())
+                .build();
+        eventPublisher.publishEvent(event);
+
+        return savedAppointment;
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.healthcare.clinic.appointment.dto.AppointmentResponseDto> getPatientAppointments(Long userId) {
+        return appointmentRepository.findAppointmentsForPatientWithNames(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.healthcare.clinic.appointment.dto.AppointmentResponseDto> getDoctorAppointments(Long userId) {
+        return appointmentRepository.findAppointmentsForDoctorWithNames(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.healthcare.clinic.appointment.dto.AppointmentResponseDto> getTodayAppointments(Long doctorUserId) {
+        ZonedDateTime startOfDay = ZonedDateTime.now().toLocalDate().atStartOfDay(java.time.ZoneId.systemDefault());
+        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+        return appointmentRepository.findAppointmentsForDoctorToday(doctorUserId, startOfDay, endOfDay);
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.healthcare.clinic.appointment.dto.AppointmentResponseDto> getAppointmentsInRange(Long doctorUserId, ZonedDateTime start, ZonedDateTime end) {
+        return appointmentRepository.findAppointmentsForDoctorToday(doctorUserId, start, end);
+    }
+
+    @Transactional
+    public void updateAppointmentStatus(Long appointmentId, String status) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        appointment.setStatus(status);
+        appointmentRepository.save(appointment);
+    }
+}

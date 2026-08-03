@@ -1,0 +1,22 @@
+@@ -375,6 +375,21 @@
+     }
+   });
+ 
++  const sendToPharmacyMutation = useMutation({
++    mutationFn: async () => {
++      if (!prescriptionId) {
++        const res = await axiosPrivate.post(`/prescriptions`, buildPayload());
++        return axiosPrivate.post(`/prescriptions/${res.data.id}/send-to-pharmacy`);
++      }
++      return axiosPrivate.post(`/prescriptions/${prescriptionId}/send-to-pharmacy`);
++    },
++    onSuccess: (res) => {
++      setPrescriptionStatus('PENDING'); // Sent to pharmacy sets status to PENDING
++      queryClient.invalidateQueries(['patientPrescriptions', patientId]);
++      toast.success('Prescription sent to pharmacy successfully');
++    }
++  });
++
+   const handleSaveDraft = () => {
+       if (profileError || !profile) { toast.error("Cannot proceed: Patient data failed to load."); return; }
+       saveDraftMutation.mutate();

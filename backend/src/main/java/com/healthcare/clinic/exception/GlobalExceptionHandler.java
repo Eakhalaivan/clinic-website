@@ -1,0 +1,106 @@
+package com.healthcare.clinic.exception;
+
+import com.healthcare.clinic.clinicaldecision.exception.CdsCriticalSafetyException;
+import com.healthcare.clinic.common.dto.ApiResponse;
+import com.healthcare.clinic.inventory.pharmacy.exception.ExpiredStockException;
+import com.healthcare.clinic.inventory.pharmacy.exception.InsufficientStockException;
+import com.healthcare.clinic.inventory.pharmacy.exception.InvalidReturnException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = ex.getBindingResult().getAllErrors().stream()
+                .filter(e -> e instanceof FieldError)
+                .map(e -> (FieldError) e)
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid value",
+                        (a, b) -> a
+                ));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, "Validation failed", fieldErrors));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.error("Data integrity violation: ", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Missing required field or database constraint violation."));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInsufficientStock(InsufficientStockException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidReturnException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidReturn(InvalidReturnException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ExpiredStockException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExpiredStock(ExpiredStockException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(CdsCriticalSafetyException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleCdsCriticalSafety(CdsCriticalSafetyException ex) {
+        Map<String, Object> body = Map.of(
+                "error", "CRITICAL_SAFETY_VIOLATION",
+                "message", ex.getMessage(),
+                "alerts", ex.getSafetyAlerts()
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ApiResponse<>(false, "Prescription blocked due to critical safety contraindication: " + ex.getMessage(), body));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthentication(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Invalid email or password"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("You do not have permission to perform this action"));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("An unexpected error occurred"));
+    }
+}

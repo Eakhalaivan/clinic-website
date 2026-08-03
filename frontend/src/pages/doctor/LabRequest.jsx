@@ -1,0 +1,153 @@
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { axiosPrivate } from '../../api/axios';
+import { FlaskConical, ChevronLeft, Send, Check } from 'lucide-react';
+
+const LabRequest = () => {
+  const { patientId } = useParams();
+  const navigate = useNavigate();
+
+  const [selectedTests, setSelectedTests] = useState([]);
+  const [clinicalNotes, setClinicalNotes] = useState('');
+  const [priority, setPriority] = useState('ROUTINE');
+
+  // Fetch test catalog
+  const { data: testCatalog = [], isLoading } = useQuery({
+    queryKey: ['lab-test-catalog'],
+    queryFn: async () => (await axiosPrivate.get('/lab/catalog')).data,
+  });
+
+  const toggleTest = (test) => {
+    if (selectedTests.some(t => t.id === test.id)) {
+      setSelectedTests(prev => prev.filter(t => t.id !== test.id));
+    } else {
+      setSelectedTests(prev => [...prev, test]);
+    }
+  };
+
+  const submitOrder = useMutation({
+    mutationFn: async () => {
+      return axiosPrivate.post(`/lab/requests`, {
+        patientId,
+        testIds: selectedTests.map(t => t.id),
+        clinicalNotes,
+        priority
+      });
+    },
+    onSuccess: () => {
+      alert('Lab order placed successfully!');
+      navigate(`/doctor/patients/${patientId}/notes`);
+    }
+  });
+
+  return (
+    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+          <ChevronLeft size={16} />
+        </button>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Order Laboratory Tests</h1>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px' }}>
+        {/* Test catalog grid */}
+        <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px' }}>
+          <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <FlaskConical size={16} color="#0e7490" /> Test Catalog
+          </h2>
+
+          {isLoading ? (
+            <div style={{ padding: '30px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading catalog...</div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
+              {(testCatalog.length > 0 ? testCatalog : [
+                { id: 1, testName: 'Complete Blood Count (CBC)', category: 'Hematology', price: 350 },
+                { id: 2, testName: 'Fasting Blood Sugar (FBS)', category: 'Biochemistry', price: 150 },
+                { id: 3, testName: 'Lipid Profile', category: 'Biochemistry', price: 600 },
+                { id: 4, testName: 'Liver Function Test (LFT)', category: 'Biochemistry', price: 750 },
+                { id: 5, testName: 'Thyroid Profile (T3, T4, TSH)', category: 'Endocrinology', price: 550 },
+                { id: 6, testName: 'Urine Routine & Microscopy', category: 'Pathology', price: 200 },
+              ]).map(test => {
+                const isSelected = selectedTests.some(t => t.id === test.id);
+                return (
+                  <div
+                    key={test.id}
+                    onClick={() => toggleTest(test)}
+                    style={{
+                      padding: '12px', borderRadius: '8px', border: `1.5px solid ${isSelected ? '#0e7490' : 'var(--color-border)'}`,
+                      background: isSelected ? '#ecfeff' : 'var(--color-surface)', cursor: 'pointer', transition: 'all 0.15s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.825rem', color: 'var(--color-text)' }}>{test.testName}</span>
+                      {isSelected && <Check size={16} color="#0e7490" />}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                      <span>{test.category}</span>
+                      <span style={{ fontWeight: 600, color: '#0e7490' }}>₹{test.price}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Selected tests & order submission */}
+        <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '12px' }}>Order Summary</h3>
+
+          <div style={{ flex: 1, minHeight: '120px', marginBottom: '16px' }}>
+            {selectedTests.length === 0 ? (
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>No tests selected from catalog</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {selectedTests.map(t => (
+                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '6px 0', borderBottom: '1px solid var(--color-surface-alt)' }}>
+                    <span style={{ fontWeight: 500, color: 'var(--color-text)' }}>{t.testName}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>₹{t.price}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '4px' }}>Priority</label>
+            <select value={priority} onChange={e => setPriority(e.target.value)} style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}>
+              <option value="ROUTINE">Routine</option>
+              <option value="URGENT">Urgent</option>
+              <option value="STAT">STAT (Emergency)</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '4px' }}>Clinical Indications</label>
+            <textarea
+              value={clinicalNotes}
+              onChange={e => setClinicalNotes(e.target.value)}
+              placeholder="Reason for test / relevant symptoms..."
+              rows={3}
+              style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.8rem', resize: 'vertical', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <button
+            onClick={() => submitOrder.mutate()}
+            disabled={selectedTests.length === 0 || submitOrder.isPending}
+            style={{
+              width: '100%', padding: '10px', background: selectedTests.length === 0 ? 'var(--color-text-muted)' : '#0e7490',
+              color: 'var(--color-surface)', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem',
+              cursor: selectedTests.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+            }}
+          >
+            <Send size={15} /> Submit Lab Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LabRequest;

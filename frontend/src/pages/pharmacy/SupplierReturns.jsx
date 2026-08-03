@@ -1,0 +1,114 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../utils/pharmacy/api';
+import { ArrowLeft, Loader2, Plus, RefreshCw, FileText } from 'lucide-react';
+import Badge from '../../components/ui/Badge';
+
+export default function SupplierReturns({ onBack }) {
+  const [returns, setReturns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchReturns = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/supplier-returns');
+      setReturns(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch returns from server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReturns();
+  }, []);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'INITIATED': return <Badge variant="warning">{status}</Badge>;
+      case 'DISPATCHED': return <Badge variant="info">{status}</Badge>;
+      case 'CREDIT_NOTE_RECEIVED': return <Badge variant="success">{status}</Badge>;
+      case 'SETTLED': return <Badge variant="success">{status}</Badge>;
+      default: return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          {onBack && (
+            <button onClick={onBack} className="inline-flex items-center text-xs font-semibold text-slate-600 hover:underline mb-2 gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Suppliers
+            </button>
+          )}
+          <h2 className="text-xl font-bold text-slate-800">Returns to Supplier</h2>
+          <p className="text-sm text-slate-500 mt-1">Manage stock returns and track credit notes.</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={fetchReturns} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+            <Plus className="w-4 h-4" /> New Return
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+          {error}
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center items-center p-12">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Return #</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Supplier</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Reason</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Expected Credit</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200">
+                {returns.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-5 py-8 text-center text-sm text-slate-500">
+                      <FileText className="w-8 h-8 mx-auto text-slate-300 mb-3" />
+                      No supplier returns found
+                    </td>
+                  </tr>
+                ) : (
+                  returns.map((ret, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{ret.returnNumber}</td>
+                      <td className="px-5 py-4 whitespace-nowrap text-sm text-slate-600">{ret.supplier?.name || 'Unknown'}</td>
+                      <td className="px-5 py-4 whitespace-nowrap text-sm text-slate-600">{ret.reason}</td>
+                      <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-emerald-600">₹{ret.expectedCreditValue?.toLocaleString() || '0'}</td>
+                      <td className="px-5 py-4 whitespace-nowrap text-sm">{getStatusBadge(ret.status)}</td>
+                      <td className="px-5 py-4 whitespace-nowrap text-sm text-right">
+                        <button className="text-indigo-600 hover:text-indigo-800 font-medium">View</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

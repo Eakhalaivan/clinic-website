@@ -1,0 +1,32 @@
+CREATE TABLE lab_test_catalog (
+    id BIGSERIAL PRIMARY KEY,
+    test_name VARCHAR(255) NOT NULL,
+    test_code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    is_active BOOLEAN DEFAULT true
+);
+
+CREATE TABLE lab_test_requests (
+    id BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+    doctor_id BIGINT REFERENCES doctor_profiles(id) ON DELETE SET NULL, -- Ordering doctor
+    test_catalog_id BIGINT NOT NULL REFERENCES lab_test_catalog(id) ON DELETE CASCADE,
+    status VARCHAR(50) NOT NULL DEFAULT 'REQUESTED', -- REQUESTED, SAMPLE_COLLECTED, PROCESSING, RESULT_ENTERED, VERIFIED, RELEASED
+    requested_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    sample_collected_at TIMESTAMP WITH TIME ZONE,
+    priority VARCHAR(50) DEFAULT 'ROUTINE' -- ROUTINE, URGENT, STAT
+);
+
+CREATE TABLE lab_results (
+    id BIGSERIAL PRIMARY KEY,
+    request_id BIGINT NOT NULL REFERENCES lab_test_requests(id) ON DELETE CASCADE,
+    lab_tech_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    result_value TEXT NOT NULL,
+    reference_range VARCHAR(255),
+    unit VARCHAR(50),
+    is_abnormal BOOLEAN DEFAULT false,
+    entered_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    verified_by BIGINT REFERENCES users(id) ON DELETE SET NULL
+);

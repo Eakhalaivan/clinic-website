@@ -1,0 +1,45 @@
+server:
+  port: 8080
+  forward-headers-strategy: NATIVE
+
+spring:
+  application:
+    name: clinic-app
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://localhost:5432/clinic_platform}
+    username: ${SUPABASE_DB_USER:eakhalaivan}
+    password: ${SUPABASE_DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+jwt:
+  secret: ${JWT_SECRET:?JWT_SECRET environment variable must be set}
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes (dev default; override via JWT_EXPIRATION_MS env var in production)
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:dummy}
+  auth-token: ${TWILIO_AUTH_TOKEN:dummy}
+  from-number: ${TWILIO_FROM_NUMBER:dummy}

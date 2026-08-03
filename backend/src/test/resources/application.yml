@@ -1,0 +1,22 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  mail:
+    host: localhost
+    port: 2525
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+cors:
+  allowed-origins: '*'
+jwt:
+  secret: 'mock-secret-key-that-is-at-least-32-chars-long-for-testing'
+  expirationMs: 3600000
+  access-token-expiration-ms: 3600000

@@ -1,0 +1,14 @@
+@@ -91,7 +91,12 @@
+   const { data: todayAppointments = [], isLoading: loadingToday } = useQuery({
+       queryKey: ['doctor-today-appointments'],
+       queryFn: async () => {
+-          const res = await axiosPrivate.get('/appointments/today');
++          const start = new Date();
++          start.setHours(0, 0, 0, 0);
++          const end = new Date();
++          end.setHours(23, 59, 59, 999);
++          // Instead of /appointments/today, we should probably fetch /appointments/doctor/me and filter it, or use a new endpoint.
++          const res = await axiosPrivate.get(`/appointments/doctor/me`);
+           return res.data;
+       }
+   });

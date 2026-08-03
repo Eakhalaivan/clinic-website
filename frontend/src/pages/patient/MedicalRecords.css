@@ -1,0 +1,79 @@
+.medical-records-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.records-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.record-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.record-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-4);
+}
+
+.record-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-hover);
+  flex-shrink: 0;
+}
+
+.record-meta h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--text-lg);
+  color: var(--color-navy-900);
+}
+
+.record-date {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-navy-500);
+  margin-bottom: var(--space-2);
+}
+
+.record-body p {
+  margin: 0;
+  color: var(--color-navy-700);
+}
+
+.record-notes {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-md);
+}
+
+.record-notes h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-sm);
+  color: var(--color-navy-900);
+}
+
+.record-notes p {
+  white-space: pre-wrap;
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 768px) {
+  .record-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

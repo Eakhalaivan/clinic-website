@@ -1,0 +1,14 @@
+package com.healthcare.clinic.identity.repository;
+
+import com.healthcare.clinic.identity.entity.RefreshToken;
+import com.healthcare.clinic.identity.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+    Optional<RefreshToken> findByToken(String token);
+    int deleteByUser(User user);
+}

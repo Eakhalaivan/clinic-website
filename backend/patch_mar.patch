@@ -1,0 +1,23 @@
+--- src/main/java/com/healthcare/clinic/doctor/service/PrescriptionService.java
++++ src/main/java/com/healthcare/clinic/doctor/service/PrescriptionService.java
+@@ -142,6 +142,20 @@
+ 
+         pharmacyPrescriptionRepository.save(pharmRx);
+ 
++        // ── Auto-create MAR records for Injections ─────────────────────────
++        saved.getItems().forEach(item -> {
++            if ("Injection".equalsIgnoreCase(item.getType())) {
++                com.healthcare.clinic.nursing.entity.MedicationAdministrationRecord mar = 
++                        new com.healthcare.clinic.nursing.entity.MedicationAdministrationRecord();
++                mar.setPatientId(saved.getPatientId());
++                mar.setPrescriptionItemId(item.getId());
++                mar.setPatientName(patientName);
++                mar.setMedicationName(item.getMedicationName());
++                mar.setDosage(item.getDosage());
++                mar.setStatus(com.healthcare.clinic.nursing.entity.MarStatus.SCHEDULED);
++                marRepository.save(mar);
++            }
++        });
++
+         // ── Build Lab Requests ───────────────────────────────────────────────
+         if (request.getLabTestCatalogIds() != null && !request.getLabTestCatalogIds().isEmpty()) {
