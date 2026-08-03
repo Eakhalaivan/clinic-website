@@ -28,6 +28,8 @@ spring:
             non_contextual_creation: true
   flyway:
     enabled: true
+    baseline-on-migrate: true
+    out-of-order: true
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:587}
