@@ -1,13 +1,14 @@
 # Stage 1: Build the application
 FROM maven:3.9.6-eclipse-temurin-21-jammy AS build
 WORKDIR /app
-COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
-COPY src ./src
 
-# Download dependencies and build
-RUN mvn clean package -DskipTests
+# Copy only pom.xml first to cache dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+
+# Copy source and build
+COPY src ./src
+RUN mvn clean package -DskipTests -q
 
 # Stage 2: Run the application
 FROM eclipse-temurin:21-jre-jammy
