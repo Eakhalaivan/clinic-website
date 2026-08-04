@@ -89,6 +89,7 @@ import DicomViewer from './pages/radiologist/DicomViewer';
 // Pharmacy full module routes
 import { PharmacyRoutes } from './pages/pharmacy/PharmacyRoutes';
 import MainLayout from './components/pharmacy/layout/MainLayout';
+import { AuthProvider as PharmacyAuthProvider } from './context/pharmacy/AuthContext';
 
 // Generic placeholder for unbuilt sub-pages
 import PlaceholderPage from './pages/common/PlaceholderPage';
@@ -587,7 +588,9 @@ function App() {
             path="/pharmacy" 
             element={
               <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_PHARMACY_STAFF', 'ROLE_STOREKEEPER', 'ROLE_MEDICAL_STAFF']} portalSlug="pharmacy">
-                <MainLayout />
+                <PharmacyAuthProvider>
+                  <MainLayout />
+                </PharmacyAuthProvider>
               </RoleRoute>
             }
           >
