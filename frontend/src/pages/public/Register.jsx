@@ -60,7 +60,19 @@ const Register = () => {
       setTimeout(() => navigate('/patient/login'), 1500);
       
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data || 'Registration failed. Please check details.');
+      let errorMsg = 'Registration failed. Please check details.';
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data === 'string') {
+          errorMsg = data;
+        } else if (data.data && typeof data.data === 'object') {
+          const fieldErrors = Object.values(data.data).join(', ');
+          errorMsg = data.message + (fieldErrors ? `: ${fieldErrors}` : '');
+        } else if (data.message) {
+          errorMsg = data.message;
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

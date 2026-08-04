@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import useAuthStore from '../../store/authStore';
 import { ROLES } from '../../config/pharmacy/roles.config';
 import api from '../../utils/pharmacy/api';
+import { axiosPublic, axiosPrivate } from '../../api/axios';
 
 const AuthContext = createContext();
 
@@ -57,7 +58,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (username, password) => {
     try {
       // We explicitly call the pharmacy endpoint, using the old payload to ensure it works
-      const response = await api.post('/auth/pharmacy/login', { username, password });
+      const response = await axiosPublic.post('/auth/pharmacy/login', { email: username, password });
       const data = response.data.data ? response.data.data : response.data;
       
       const { token, refreshToken } = data;
@@ -119,7 +120,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     if (store.token) {
-      try { await api.post('/auth/logout'); } catch (err) {}
+      try { await axiosPrivate.post('/auth/logout', { refreshToken: store.refreshToken }); } catch (err) {}
     }
     store.logout();
     setActiveRole(null);
