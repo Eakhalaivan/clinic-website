@@ -74,14 +74,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        if (allowedOrigins != null && !allowedOrigins.isEmpty() && !allowedOrigins.equals("http://localhost:5173")) {
+        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
+            // Support comma-separated list of allowed origins (e.g. Render frontend URL + localhost for dev)
             configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            configuration.setAllowedOriginPatterns(Arrays.asList("*")); // fallback to allow all for dev/testing
+            // No explicit origins configured — allow all via pattern (compatible with allowCredentials)
+            configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         }
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
-        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "authorization", "content-type", "x-auth-token", "*"));
+        configuration.setExposedHeaders(Arrays.asList("x-auth-token", "Authorization"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

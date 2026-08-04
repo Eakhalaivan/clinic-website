@@ -1,7 +1,15 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'; // API Gateway
+// Resolve API base URL:
+//   1. window.__ENV__ — injected at container start by docker-entrypoint.sh (Render / Docker deployment)
+//   2. import.meta.env — set at build time by Vite (works in local dev and CI builds)
+//   3. Hard-coded localhost fallback (local dev without Docker)
+const BASE_URL =
+    (typeof window !== 'undefined' && window.__ENV__?.VITE_API_BASE_URL) ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://localhost:8080/api';
+
 
 export const axiosPrivate = axios.create({
     baseURL: BASE_URL,

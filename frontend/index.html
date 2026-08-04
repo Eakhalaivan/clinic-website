@@ -15,6 +15,9 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Runtime env injection (written by docker-entrypoint.sh at container start).
+         Falls back silently in local dev where this file doesn't exist. -->
+    <script src="/env-config.js" onerror="window.__ENV__={}"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

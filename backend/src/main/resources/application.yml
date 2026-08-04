@@ -48,7 +48,10 @@ jwt:
   access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes (dev default; override via JWT_EXPIRATION_MS env var in production)
 
 cors:
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+  # In production (Render), override via the ALLOWED_ORIGINS environment variable.
+  # Set it to your Render frontend URL, e.g.: https://your-app.onrender.com
+  # For multiple origins: https://your-app.onrender.com,http://localhost:5173
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
 
 management:
   endpoints:

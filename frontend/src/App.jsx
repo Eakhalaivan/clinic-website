@@ -122,10 +122,13 @@ const PH = (title, subtitle) => <PlaceholderPage title={title} subtitle={subtitl
 function App() {
   useEffect(() => {
     // Wake up backend (e.g., Render free tier) on app load
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    const baseUrl =
+      (typeof window !== 'undefined' && window.__ENV__?.VITE_API_BASE_URL) ||
+      import.meta.env.VITE_API_BASE_URL ||
+      'http://localhost:8080/api';
     fetch(`${baseUrl}/health`)
       .then(res => res.json())
-      .catch(err => {
+      .catch(() => {
         // Silently fail if unavailable
       });
   }, []);
