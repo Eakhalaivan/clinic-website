@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
@@ -35,7 +36,7 @@ export default function MonthOverMonth() {
       });
       setData(res.data.data);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to load Month-over-Month comparison data');
     } finally {
       setLoading(false);

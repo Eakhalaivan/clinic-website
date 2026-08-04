@@ -112,7 +112,7 @@ const BookAppointment = () => {
             <PageHeader 
                 title="Book Appointment" 
                 subtitle="Select an available time slot and provide a reason for your visit."
-                icon={<Calendar className="w-8 h-8 text-primary" />}
+                icon={<Calendar className="w-8 h-8 text-primary" aria-hidden="true" />}
             />
             
             {workingHours.length > 0 && (
@@ -143,15 +143,17 @@ const BookAppointment = () => {
                 </Card.Header>
                 <Card.Body>
                     {doctorsLoading ? (
-                        <div className="text-text-secondary text-sm">Loading doctors...</div>
+                        <div className="text-text-secondary text-sm" aria-live="polite" aria-busy="true">Loading doctors...</div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div role="group" aria-label="Select a doctor" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {doctors.map(doc => {
                                 const isSelected = selectedDoctorId === String(doc.userId);
                                 return (
                                     <button
                                         key={doc.id}
                                         type="button"
+                                        role="radio"
+                                        aria-checked={isSelected}
                                         onClick={() => {
                                             setSelectedDoctorId(String(doc.userId));
                                             setSelectedSlotId(''); // Reset slot on doctor change
@@ -175,16 +177,18 @@ const BookAppointment = () => {
                 </Card.Body>
             </Card>
 
-            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
+                 aria-hidden={!selectedDoctorId}>
                 <Card>
                     <Card.Header>
                         <h3 className="text-lg font-semibold">2. Select a Date</h3>
                     </Card.Header>
                     <Card.Body>
-                        <div className="flex overflow-x-auto gap-3 pb-2 -mx-2 px-2 snap-x">
+                        <div role="group" aria-label="Select appointment date" className="flex overflow-x-auto gap-3 pb-2 -mx-2 px-2 snap-x">
                             {upcomingDays.map((date, idx) => {
                                 const isSelected = selectedDate.getTime() === date.getTime();
                                 const isWorkingDay = workingHours.some(wh => wh.dayOfWeek === date.getDay() && wh.isActive);
+                                const dateLabel = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                                 
                                 return (
                                     <button
@@ -192,6 +196,8 @@ const BookAppointment = () => {
                                         type="button"
                                         onClick={() => { setSelectedDate(date); setSelectedSlotId(''); }}
                                         disabled={!isWorkingDay}
+                                        aria-label={`${dateLabel}${!isWorkingDay ? ' — unavailable' : ''}`}
+                                        aria-pressed={isSelected}
                                         className={`
                                             snap-start min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200
                                             ${isSelected ? 'bg-primary border-primary text-primary-foreground shadow-md scale-105' : 'bg-surface border-surface-border text-text-primary hover:border-primary/50'}
@@ -201,7 +207,7 @@ const BookAppointment = () => {
                                         <span className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">{DAYS[date.getDay()]}</span>
                                         <span className="text-2xl font-bold">{date.getDate()}</span>
                                         <span className="text-[10px] mt-1">{date.toLocaleDateString('en-US', { month: 'short' })}</span>
-                                        {!isWorkingDay && <span className="text-[9px] mt-1 text-red-500 font-bold bg-white/20 px-1 rounded">UNAVAILABLE</span>}
+                                        {!isWorkingDay && <span className="text-[9px] mt-1 text-red-500 font-bold bg-white/20 px-1 rounded" aria-hidden="true">UNAVAILABLE</span>}
                                     </button>
                                 );
                             })}
@@ -210,15 +216,16 @@ const BookAppointment = () => {
                 </Card>
             </div>
 
-            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
+                 aria-hidden={!selectedDoctorId}>
                 <Card>
                     <Card.Header>
                         <h3 className="text-lg font-semibold">3. Select a Time Slot</h3>
                     </Card.Header>
                     <Card.Body>
                         {slotsLoading || slotsFetching ? (
-                            <div className="py-8 text-center text-text-secondary flex flex-col items-center">
-                                <Clock className="w-8 h-8 animate-spin opacity-20 mb-2" />
+                            <div className="py-8 text-center text-text-secondary flex flex-col items-center" aria-live="polite" aria-busy="true">
+                                <Clock className="w-8 h-8 animate-spin opacity-20 mb-2" aria-hidden="true" />
                                 Loading available slots...
                             </div>
                         ) : slots.length > 0 ? (
@@ -228,12 +235,14 @@ const BookAppointment = () => {
                                     return (
                                         <div key={period}>
                                             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                {period === 'Morning' && '🌅'}
-                                                {period === 'Afternoon' && '☀️'}
-                                                {period === 'Evening' && '🌙'}
+                                                <span aria-hidden="true">
+                                                    {period === 'Morning' && '🌅'}
+                                                    {period === 'Afternoon' && '☀️'}
+                                                    {period === 'Evening' && '🌙'}
+                                                </span>
                                                 {period}
                                             </h3>
-                                            <div className="flex flex-wrap gap-3">
+                                            <div role="group" aria-label={`${period} time slots`} className="flex flex-wrap gap-3">
                                                 {periodSlots.map(slot => {
                                                     const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
                                                     const isSelected = selectedSlotId === slot.id;
@@ -242,6 +251,8 @@ const BookAppointment = () => {
                                                             key={slot.id}
                                                             type="button"
                                                             onClick={() => setSelectedSlotId(slot.id)}
+                                                            aria-pressed={isSelected}
+                                                            aria-label={`${period} slot at ${timeStr}${isSelected ? ', selected' : ''}`}
                                                             className={`
                                                                 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                                                                 ${isSelected 
@@ -260,7 +271,7 @@ const BookAppointment = () => {
                             </div>
                         ) : (
                             <div className="py-12 text-center bg-surface-hover rounded-xl border border-dashed border-surface-border">
-                                <Calendar className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-20" />
+                                <Calendar className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-20" aria-hidden="true" />
                                 <p className="text-text-primary font-medium">No slots available on this date.</p>
                                 <p className="text-text-secondary text-sm mt-1">Please select another date from the calendar above.</p>
                             </div>
@@ -269,21 +280,36 @@ const BookAppointment = () => {
                 </Card>
             </div>
 
-            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
+                 aria-hidden={!selectedDoctorId}>
                 <Card>
                     <Card.Header>
                         <h3 className="text-lg font-semibold">4. Confirm Details</h3>
                     </Card.Header>
                     <Card.Body>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            {error && <div className="bg-destructive/10 text-destructive border border-destructive/20 p-3 rounded-lg text-sm">{error}</div>}
+                        <form onSubmit={handleSubmit} className="space-y-6" aria-label="Confirm appointment booking">
+                            {error && (
+                                <div 
+                                    id="booking-error"
+                                    role="alert"
+                                    aria-live="assertive"
+                                    className="bg-destructive/10 text-destructive border border-destructive/20 p-3 rounded-lg text-sm"
+                                >
+                                    {error}
+                                </div>
+                            )}
                             
                             <div>
-                                <label className="block text-sm font-medium text-text-primary mb-2">Reason for Visit <span className="text-destructive">*</span></label>
+                                <label htmlFor="reason-for-visit" className="block text-sm font-medium text-text-primary mb-2">
+                                    Reason for Visit <span className="text-destructive" aria-hidden="true">*</span>
+                                </label>
                                 <textarea 
+                                    id="reason-for-visit"
                                     value={reason} 
                                     onChange={(e) => setReason(e.target.value)} 
                                     required
+                                    aria-required="true"
+                                    aria-describedby={error ? 'booking-error' : undefined}
                                     rows="3"
                                     placeholder="Briefly describe your symptoms or reason for visit..."
                                     className="w-full form-input bg-surface border-input rounded-xl focus:ring-2 focus:ring-primary/20 resize-y"
@@ -294,8 +320,13 @@ const BookAppointment = () => {
                                 <Button type="button" variant="ghost" onClick={() => navigate('/doctors')}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={mutation.isPending || !selectedSlotId} isLoading={mutation.isPending}>
-                                    Confirm Booking <ArrowRight className="w-4 h-4 ml-2" />
+                                <Button 
+                                    type="submit" 
+                                    disabled={mutation.isPending || !selectedSlotId} 
+                                    isLoading={mutation.isPending}
+                                    aria-disabled={mutation.isPending || !selectedSlotId}
+                                >
+                                    Confirm Booking <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                                 </Button>
                             </div>
                         </form>

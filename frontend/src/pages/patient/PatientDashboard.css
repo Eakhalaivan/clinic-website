@@ -147,3 +147,32 @@
 .border-brand-purple {
   border-color: #5145CD;
 }
+
+/* ── Responsive breakpoints ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .patient-main-grid {
+    grid-template-columns: 1fr 2fr;
+  }
+  .patient-main-grid .col-right {
+    display: none; /* hide right sidebar on tablet; move content below */
+  }
+  .patient-bottom-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .patient-dashboard-root {
+    padding: 8px;
+  }
+  .patient-main-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .patient-main-grid .col-right {
+    display: flex; /* restore on single column */
+  }
+  .patient-bottom-row {
+    grid-template-columns: 1fr;
+  }
+}

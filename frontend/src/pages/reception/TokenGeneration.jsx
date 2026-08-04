@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { Ticket, Printer, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -27,7 +28,7 @@ const TokenGeneration = () => {
       setWalkIns(res.data || []);
     } catch (err) {
       toast.error('Failed to load walk-in registrations');
-      console.error(err);
+      logger.error(err);
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ const TokenGeneration = () => {
       // but the backend keeps it WAITING until called, so we don't strictly need to.
     } catch (err) {
       toast.error('Failed to issue token');
-      console.error(err);
+      logger.error(err);
     } finally {
       setIssuing(false);
     }

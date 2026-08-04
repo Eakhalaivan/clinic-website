@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from '../../../utils/logger';
 import { Printer, Download, X, MessageCircle } from 'lucide-react';
 import { numberToWords } from "../../../utils/pharmacy/numberToWords";
 import api from "../../../utils/pharmacy/api";
@@ -35,7 +36,7 @@ export default function PharmacyInvoice({ bill, onClose }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to download PDF:', error);
+      logger.error('Failed to download PDF:', error);
       alert('Failed to generate PDF. Please try again.');
     }
   };

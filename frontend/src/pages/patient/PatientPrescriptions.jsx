@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from '../../utils/logger';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
@@ -91,7 +92,7 @@ const PatientPrescriptions = () => {
                        link.click();
                        link.remove();
                      } catch (e) {
-                       console.error('Failed to download PDF', e);
+                       logger.error('Failed to download PDF', e);
                        alert('Failed to download PDF');
                      }
                   }}

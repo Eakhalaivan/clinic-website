@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import api from '../../../utils/pharmacy/api';
 import { Truck, Percent, Star, AlertCircle, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -18,7 +19,7 @@ export default function SupplierAnalytics() {
       const res = await api.get('/reports/supplier-performance');
       setData(res.data.data || []);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to load supplier performance data');
     } finally {
       setLoading(false);

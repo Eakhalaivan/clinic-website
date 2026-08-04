@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
@@ -60,7 +61,7 @@ const PatientDetail = ({ patientIdOverride }) => {
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '1200px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
       {!patientIdOverride && (
         <button onClick={() => navigate('/doctor/patients')} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', marginBottom: '20px', padding: 0 }}>
           <ArrowLeft size={16} /> Back to Patients
@@ -68,32 +69,32 @@ const PatientDetail = ({ patientIdOverride }) => {
       )}
 
       {/* Header Profile */}
-      <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '24px', display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '24px' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--color-info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <UserRound size={40} color="var(--color-info)" />
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-center mb-6" style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px 24px' }}>
+        <div className="flex-shrink-0" style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--color-info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <UserRound size={36} color="var(--color-info)" />
         </div>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ margin: '0 0 8px 0', fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text)' }}>{patient.name}</h1>
-          <div style={{ display: 'flex', gap: '24px', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-            <span style={{ display: 'flex', gap: '6px', alignItems: 'center' }}><Phone size={14}/> {patient.phone}</span>
-            <span style={{ display: 'flex', gap: '6px', alignItems: 'center' }}><Mail size={14}/> {patient.email}</span>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>{patient.name}</h1>
+          <div className="flex flex-wrap gap-x-5 gap-y-1" style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+            <span style={{ display: 'flex', gap: '6px', alignItems: 'center' }}><Phone size={13}/> {patient.phone}</span>
+            <span style={{ display: 'flex', gap: '6px', alignItems: 'center' }}><Mail size={13}/> {patient.email}</span>
             <span><strong>Age:</strong> {patient.age}</span>
             <span><strong>Gender:</strong> {patient.gender}</span>
             <span><strong>Blood:</strong> {patient.bloodGroup}</span>
             <span><strong>ID:</strong> {patient.patientId}</span>
           </div>
-          <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          <div style={{ marginTop: '8px', fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
             <strong>Emergency Contact:</strong> {patient.emergencyContactName || 'N/A'} ({patient.emergencyContactPhone || 'N/A'})
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="flex flex-row sm:flex-col lg:flex-row gap-2 flex-wrap">
           <button onClick={() => navigate(`/doctor/patients/${patient.patientId}/notes`)}
-            style={{ background: 'var(--color-surface-alt)', color: '#334155', border: '1px solid var(--color-border)', padding: '10px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer' }}>
-            <ClipboardList size={16} /> View Clinical Notes
+            style={{ background: 'var(--color-surface-alt)', color: '#334155', border: '1px solid var(--color-border)', padding: '9px 14px', borderRadius: '8px', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer', fontSize: '0.85rem' }}>
+            <ClipboardList size={15} /> View Clinical Notes
           </button>
           <button onClick={() => navigate(`/doctor/patients/${patient.patientId}/prescriptions/new`)}
-            style={{ background: 'var(--color-info)', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer' }}>
-            <Pill size={16} /> Send Prescription
+            style={{ background: 'var(--color-info)', color: 'white', border: 'none', padding: '9px 14px', borderRadius: '8px', fontWeight: 600, display: 'flex', gap: '8px', alignItems: 'center', cursor: 'pointer', fontSize: '0.85rem' }}>
+            <Pill size={15} /> Send Prescription
           </button>
         </div>
       </div>
@@ -200,7 +201,7 @@ const PatientDetail = ({ patientIdOverride }) => {
                            link.click();
                            link.remove();
                          } catch (e) {
-                           console.error('Failed to download PDF', e);
+                           logger.error('Failed to download PDF', e);
                            alert('Failed to download PDF');
                          }
                       }}

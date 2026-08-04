@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { TrendingUp, TrendingDown, IndianRupee, Package, Activity, AlertTriangle, ArrowUpRight, ArrowDownRight, Download } from 'lucide-react';
@@ -31,7 +32,7 @@ export default function AnalyticsDashboard() {
       });
       setData(res.data.data);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);

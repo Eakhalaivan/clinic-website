@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import logger from '../../utils/logger';
 import { useClinicalDecisionStore } from '../../store/useClinicalDecisionStore';
 import AppModal from '../../components/pharmacy/ui/AppModal';
 
@@ -21,7 +22,7 @@ export default function OrderSetPicker({ isOpen, onClose, patientId = 1, diagnos
       setApplyResult(res);
       if (onApplied) onApplied(res);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 

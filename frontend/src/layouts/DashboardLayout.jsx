@@ -189,8 +189,17 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
         <DashboardGrid tiles={dashboardTiles} />
       )}
       
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-hidden w-full flex flex-col">
+      {/* Main Content Area
+          - Dashboard routes: overflow-hidden → tiles fill the viewport, no scrollbars.
+          - All other routes:  overflow-y-auto  → page content scrolls naturally inside
+            the fixed shell (header + nav bar remain sticky at top). */}
+      <main
+        className={`flex-1 w-full flex flex-col ${
+          location.pathname.endsWith('/dashboard')
+            ? 'overflow-hidden'
+            : 'overflow-y-auto'
+        }`}
+      >
         <Outlet />
       </main>
     </div>

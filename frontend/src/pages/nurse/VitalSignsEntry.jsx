@@ -27,13 +27,13 @@ const VitalSignsEntry = () => {
   });
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <HeartPulse size={24} color="#0f766e" /> Record Vital Signs
+    <div className="p-4 sm:p-6 max-w-2xl mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+        <HeartPulse size={24} color="#0f766e" aria-hidden="true" /> Record Vital Signs
       </h1>
 
-      <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px 24px' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '4px' }}>Systolic BP (mmHg)</label>
             <input type="number" value={vitals.systolicBp} onChange={e => setVitals({ ...vitals, systolicBp: +e.target.value })} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />

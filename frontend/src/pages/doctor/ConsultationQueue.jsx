@@ -21,8 +21,8 @@ const ConsultationQueue = () => {
   const inProgress = queue.find(q => q.status === 'IN_PROGRESS');
 
   return (
-    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '20px' }}>Consultation Queue</h1>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <h1 className="text-xl sm:text-2xl font-bold mb-5" style={{ color: 'var(--color-text)' }}>Consultation Queue</h1>
 
       {/* Currently in room */}
       {inProgress && (

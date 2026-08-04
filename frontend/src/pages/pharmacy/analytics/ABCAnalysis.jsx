@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -29,7 +30,7 @@ export default function ABCAnalysis() {
       });
       setData(res.data.data);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to load ABC Analysis data');
     } finally {
       setLoading(false);

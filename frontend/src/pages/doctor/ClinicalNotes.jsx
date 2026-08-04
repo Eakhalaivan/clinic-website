@@ -37,17 +37,19 @@ const ClinicalNotes = () => {
   ];
 
   return (
-    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
       {/* Back + header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <ChevronLeft size={16} />
-        </button>
-        <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Clinical Notes</h1>
-          {patient && <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{patient.name} · {patient.age}y · {patient.bloodGroup}</p>}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <ChevronLeft size={16} />
+          </button>
+          <div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Clinical Notes</h1>
+            {patient && <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{patient.name} · {patient.age}y · {patient.bloodGroup}</p>}
+          </div>
         </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+        <div className="flex gap-2 sm:ml-auto flex-wrap">
           <button onClick={() => navigate(`/doctor/patients/${patientId}/prescriptions/new`)}
             style={{ background: 'var(--color-info)', color: 'var(--color-surface)', border: 'none', padding: '7px 14px', borderRadius: '7px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Pill size={13} /> Prescribe

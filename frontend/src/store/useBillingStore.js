@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { create } from 'zustand';
 import pharmacyService from '../utils/pharmacy/pharmacyService';
 import { toast } from 'react-hot-toast';
@@ -17,7 +18,7 @@ export const useBillingStore = create((set) => ({
         set({ creditBillsList: [], creditBillsLoading: false });
       }
     } catch (error) {
-      console.error('Credit Bills Error:', error);
+      logger.error('Credit Bills Error:', error);
       set({ creditBillsList: [], creditBillsLoading: false });
     }
   },
@@ -75,7 +76,7 @@ export const useBillingStore = create((set) => ({
         set({ advancesList: [], advancesLoading: false });
       }
     } catch (error) {
-      console.error('Pharmacy Advances Error:', error);
+      logger.error('Pharmacy Advances Error:', error);
       set({ advancesList: [], advancesLoading: false });
     }
   }

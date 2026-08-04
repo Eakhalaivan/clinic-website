@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -143,7 +144,7 @@ export const usePOSStore = create(
               });
             } catch (err) {
               if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
-              console.error('Error searching patients:', err);
+              logger.error('Error searching patients:', err);
               toast.error('Failed to search patient records');
               set(state => {
                 state.patientSearchResults = [];
@@ -185,7 +186,7 @@ export const usePOSStore = create(
               });
             } catch (err) {
               if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
-              console.error('Error searching doctors:', err);
+              logger.error('Error searching doctors:', err);
               set(state => {
                 state.doctorSearchResults = [];
                 state.isSearchingDoctor = false;
@@ -238,7 +239,7 @@ export const usePOSStore = create(
             });
             return true;
           } catch (err) {
-            console.error('Failed to create patient:', err);
+            logger.error('Failed to create patient:', err);
             toast.error(err.response?.data?.message || 'Failed to create patient');
             set(s => { s.saving = false; });
             return false;
@@ -278,7 +279,7 @@ export const usePOSStore = create(
               });
             } catch (err) {
               if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
-              console.error('Error searching stock:', err);
+              logger.error('Error searching stock:', err);
               set(state => {
                 if (state.rows[idx]) {
                   state.rows[idx].searchResults = [];

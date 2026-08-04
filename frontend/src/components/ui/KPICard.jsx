@@ -20,7 +20,7 @@ const renderIcon = (Icon, className) => {
  * @param {string|number} props.value
  * @param {Object} [props.trend] - { value: string|number, isPositive: boolean }
  * @param {string} [props.subtext]
- * @param {'navy'|'success'|'warning'|'danger'|'info'} [props.colorToken='navy']
+ * @param {'navy'|'success'|'warning'|'danger'|'info'|'gold'} [props.colorToken='navy']
  * @param {boolean} [props.isLoading=false]
  */
 export default function KPICard({
@@ -35,11 +35,22 @@ export default function KPICard({
   onClick
 }) {
   const iconColors = {
-    navy: "bg-[var(--color-navy-800)]/10 text-[var(--color-navy-800)] dark:text-[var(--color-navy-600)]",
+    navy:    "bg-[var(--color-navy-800)]/10 text-[var(--color-navy-800)] dark:text-[var(--color-navy-600)]",
     success: "bg-[var(--color-success-bg)] text-[var(--color-success)]",
     warning: "bg-[var(--color-warning-bg)] text-[var(--color-warning)]",
-    danger: "bg-[var(--color-danger-bg)] text-[var(--color-danger)]",
-    info: "bg-[var(--color-info-bg)] text-[var(--color-info)]"
+    danger:  "bg-[var(--color-danger-bg)] text-[var(--color-danger)]",
+    info:    "bg-[var(--color-info-bg)] text-[var(--color-info)]",
+    gold:    "bg-[var(--color-gold-muted)] text-[var(--color-gold)]",
+  };
+
+  // Value text: gold gives warm premium accent; navy gets gold tint in dark mode
+  const valueColors = {
+    navy:    "text-[var(--color-navy-900)] dark:text-[var(--color-gold)]",
+    gold:    "text-[var(--color-gold)]",
+    success: "text-[var(--color-success)]",
+    warning: "text-[var(--color-warning)]",
+    danger:  "text-[var(--color-danger)]",
+    info:    "text-[var(--color-info)]",
   };
 
   return (
@@ -67,7 +78,9 @@ export default function KPICard({
           </div>
         ) : (
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-2xl font-bold font-display text-[var(--color-navy-900)] tracking-tight">
+            <span className={`text-2xl font-bold font-display tracking-tight ${
+              valueColors[colorToken] || valueColors.navy
+            }`}>
               {value}
             </span>
             {trend && (

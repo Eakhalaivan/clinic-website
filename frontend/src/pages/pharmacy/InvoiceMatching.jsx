@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { FileText, Loader2, RefreshCw, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -23,7 +24,7 @@ export default function InvoiceMatching({ onBack }) {
       const res = await api.get('/supplier-invoices');
       setInvoices(res.data.data || []);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to load supplier invoices');
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from '../../../utils/logger';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../../context/pharmacy/AuthContext';
 import { ROLES, DASHBOARD_ROUTES, getBaseRoleForUI } from '../../../config/pharmacy/roles.config';
@@ -27,7 +28,7 @@ export default function RoleGuard({ allowedRoles, children, fallback }) {
   // redirect them to their active role's dashboard or a fallback
   if (user) {
     const fallbackRoute = fallback || DASHBOARD_ROUTES[getBaseRoleForUI(activeRole)] || '/dashboard/pharmacy';
-    console.warn('RoleGuard: Access denied.', 'User roles:', userRoles, 'Required:', allowedRoles);
+    logger.warn('RoleGuard: Access denied.', 'User roles:', userRoles, 'Required:', allowedRoles);
     
     // Guard against infinite redirect if already at fallback
     if (window.location.pathname === fallbackRoute) {

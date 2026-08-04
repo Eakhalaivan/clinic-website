@@ -19,8 +19,8 @@ const DoctorEarnings = () => {
   const recentPayouts = earningsData.recentPayouts || [];
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '20px' }}>Earnings & Consultations</h1>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <h1 className="text-xl sm:text-2xl font-bold mb-5" style={{ color: 'var(--color-text)' }}>Earnings &amp; Consultations</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
         {[
@@ -38,7 +38,8 @@ const DoctorEarnings = () => {
 
       <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '16px' }}>Recent Consultation Payouts</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div className="overflow-x-auto">
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '480px' }}>
           <thead style={{ background: 'var(--color-surface-alt)', borderBottom: '1px solid var(--color-border)' }}>
             <tr>
               <th style={{ padding: '10px 14px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Date</th>
@@ -62,6 +63,7 @@ const DoctorEarnings = () => {
             ))}
           </tbody>
         </table>
+        </div>{/* overflow-x-auto */}
       </div>
     </div>
   );

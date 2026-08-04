@@ -42,15 +42,15 @@ const LabRequest = () => {
   });
 
   return (
-    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <div className="flex items-center gap-3 mb-5">
+        <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0 }}>
           <ChevronLeft size={16} />
         </button>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Order Laboratory Tests</h1>
+        <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--color-text)', margin: 0 }}>Order Laboratory Tests</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px' }}>
+      <div className="flex flex-col sm:grid gap-5" style={{ gridTemplateColumns: '1fr 300px' }}>
         {/* Test catalog grid */}
         <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px' }}>
           <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>

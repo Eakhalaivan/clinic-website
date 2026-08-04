@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from '../../../utils/logger';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 
 class ErrorBoundary extends React.Component {
@@ -16,7 +17,7 @@ class ErrorBoundary extends React.Component {
       error: error,
       errorInfo: errorInfo
     });
-    console.error("ErrorBoundary caught an error", error, errorInfo);
+    logger.error("ErrorBoundary caught an error", error, errorInfo);
   }
 
   render() {

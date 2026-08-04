@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import { ROLE_LABELS } from '../../config/pharmacy/roles.config';
 import { Save, UserCircle, Shield, Clock, MapPin, Briefcase } from 'lucide-react';
@@ -54,7 +55,7 @@ export default function ProfileSettings() {
         toast.success('Profile updated successfully (Offline)');
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.success('Profile updated successfully (Offline fallback)');
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+import logger from '../../utils/logger';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
@@ -52,7 +53,7 @@ api.interceptors.response.use(
       }
     }
     if (error.response?.status === 403) {
-      console.error('403 Forbidden:', error.config?.url,
+      logger.error('403 Forbidden:', error.config?.url,
         '| Check: 1) token sent? 2) role allowed in SecurityConfig?');
     }
     return Promise.reject(error);
@@ -73,7 +74,7 @@ export const fetchWithRetry = async (url, options = {}, retries = 2) => {
       if (attempt === retries || (error.response && error.response.status !== 429 && (error.response.status >= 400))) {
         throw error;
       }
-      console.warn(`Fetch failed (attempt ${attempt + 1}/${retries + 1}). Retrying in ${delays[attempt]}ms...`);
+      logger.warn(`Fetch failed (attempt ${attempt + 1}/${retries + 1}). Retrying in ${delays[attempt]}ms...`);
       await new Promise(res => setTimeout(res, delays[attempt] || 1000));
       attempt++;
     }

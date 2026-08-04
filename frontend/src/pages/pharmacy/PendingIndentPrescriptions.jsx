@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { Eye, CheckCircle, XCircle, Plus, Send, Search, Trash2, PlusCircle } from 'lucide-react';
@@ -17,7 +18,7 @@ export default function PendingIndentPrescriptions() {
   useEffect(() => {
     pharmacyService.api.get('/prescriptions/pending')
       .then(res => setIndents(res.data?.data || []))
-      .catch(err => console.error('Failed to load pending prescriptions', err));
+      .catch(err => logger.error('Failed to load pending prescriptions', err));
   }, [location.key]);
 
   const [isFulfillModalOpen, setIsFulfillModalOpen] = useState(false);
@@ -53,7 +54,7 @@ export default function PendingIndentPrescriptions() {
     try {
       const response = await pharmacyService.searchStocks(val);
       setSearchResults(response?.data || response || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { logger.error(e); }
   };
 
   const selectMedicine = (stock, idx) => {

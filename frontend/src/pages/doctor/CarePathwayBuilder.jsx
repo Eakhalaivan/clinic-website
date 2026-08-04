@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useClinicalDecisionStore } from '../../store/useClinicalDecisionStore';
 import useAuthStore from '../../store/authStore';
 import DataTable from '../../components/pharmacy/ui/DataTable';
@@ -61,7 +62,7 @@ export default function CarePathwayBuilder() {
       setIndication('');
       setDurationDays(7);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 

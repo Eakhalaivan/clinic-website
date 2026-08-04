@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useCallback, useMemo, useEffect, useState } from 'react';
+import logger from '../../utils/logger';
 import useAuthStore from '../../store/authStore';
 import { ROLES } from '../../config/pharmacy/roles.config';
 import api from '../../utils/pharmacy/api';
@@ -111,7 +112,7 @@ export function AuthProvider({ children }) {
       return data;
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      console.error('AuthContext: Login failed', error);
+      logger.error('AuthContext: Login failed', error);
       throw new Error(message);
     }
   }, [getHighestPriorityRole]);

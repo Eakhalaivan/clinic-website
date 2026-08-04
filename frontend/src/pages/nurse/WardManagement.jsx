@@ -17,9 +17,9 @@ const WardManagement = () => {
   if (error) return <div className="p-6 text-sm text-red-600 font-medium">Failed to load patient assignments.</div>;
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <BedDouble size={24} color="#0f766e" /> My Patient Assignments
+    <div className="p-4 sm:p-6" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <h1 className="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+        <BedDouble size={22} color="#0f766e" aria-hidden="true" /> My Patient Assignments
       </h1>
 
       {assignments.length === 0 ? (

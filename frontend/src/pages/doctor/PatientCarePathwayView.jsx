@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import logger from '../../utils/logger';
 import { useClinicalDecisionStore } from '../../store/useClinicalDecisionStore';
 import CarePathwayTimeline from '../../components/doctor/CarePathwayTimeline';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -33,7 +34,7 @@ export default function PatientCarePathwayView({ patientId = 1 }) {
       setIsAssignModalOpen(false);
       setSelectedTemplateId('');
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 

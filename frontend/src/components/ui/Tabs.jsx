@@ -35,19 +35,19 @@ export default function Tabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`relative px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap focus-visible:outline-none ${
+            className={`relative px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)] focus-visible:ring-inset rounded-t-sm ${
               isActive
-                ? 'text-[var(--color-navy-800)] dark:text-[var(--color-navy-600)] font-semibold'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+                ? 'text-[var(--color-gold)] dark:text-[var(--color-gold)] font-semibold'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] dark:hover:text-[var(--color-navy-900)]'
             }`}
           >
             {renderIcon(Icon, "w-4 h-4 shrink-0")}
             <span>{tab.label}</span>
             
             {tab.badge !== undefined && (
-              <span className={`px-2 py-0.5 text-[11px] rounded-pill font-semibold ${
+              <span className={`px-2 py-0.5 text-[11px] rounded-pill font-semibold transition-colors ${
                 isActive
-                  ? 'bg-[var(--color-navy-800)]/10 text-[var(--color-navy-800)] dark:text-[var(--color-navy-600)]'
+                  ? 'bg-[var(--color-gold-muted)] text-[var(--color-gold)]'
                   : 'bg-[var(--color-surface-alt)] text-[var(--color-text-muted)]'
               }`}>
                 {tab.badge}
@@ -57,7 +57,7 @@ export default function Tabs({
             {isActive && (
               <motion.div
                 layoutId="activeTabUnderline"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-navy-800)] dark:bg-[var(--color-navy-600)] rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--color-gold)] rounded-full"
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}

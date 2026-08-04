@@ -13,7 +13,7 @@ const renderIcon = (Icon, className) => {
 /**
  * Enterprise Status Badge Primitive
  * @param {Object} props
- * @param {'success'|'warning'|'danger'|'info'|'neutral'} [props.variant='neutral']
+ * @param {'success'|'warning'|'danger'|'info'|'neutral'|'premium'} [props.variant='neutral']
  * @param {'sm'|'md'} [props.size='md']
  * @param {React.ReactNode} [props.icon]
  */
@@ -28,9 +28,11 @@ export default function Badge({
   const variants = {
     success: "bg-[var(--color-success-bg)] text-[var(--color-success)] border border-[var(--color-success)]/20",
     warning: "bg-[var(--color-warning-bg)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
-    danger: "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
-    info: "bg-[var(--color-info-bg)] text-[var(--color-info)] border border-[var(--color-info)]/20",
-    neutral: "bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+    danger:  "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+    info:    "bg-[var(--color-info-bg)] text-[var(--color-info)] border border-[var(--color-info)]/20",
+    neutral: "bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] border border-[var(--color-border)] dark:border-white/10",
+    // Gold/luxury tier indicator
+    premium: "bg-[var(--color-gold-muted)] text-[var(--color-gold)] border border-[var(--color-gold)]/30 font-semibold",
   };
 
   const sizes = {

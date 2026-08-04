@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../../utils/logger';
 import PropTypes from 'prop-types';
 import AppModal from './AppModal';
 import { Users, Shield } from 'lucide-react';
@@ -62,7 +63,7 @@ export default function UserFormModal({ isOpen, onClose, onSave, editingUser = n
       // Response is ApiResponse<List<Role>>, so we need response.data.data
       setAvailableRoles(Array.isArray(response.data) ? response.data : response.data.data || []);
     } catch (error) {
-      console.error('Failed to fetch roles', error);
+      logger.error('Failed to fetch roles', error);
     }
   };
 

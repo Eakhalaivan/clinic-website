@@ -215,6 +215,31 @@ export const PORTAL_CONFIGS = [
     ],
   },
 
+  // ── 7b. Pharmacy (Full Module) ──────────────────────────────────────────────
+  {
+    slug: 'pharmacy',
+    displayName: 'Pharmacy System',
+    role: 'ROLE_PHARMACY_STAFF',
+    themeColor: '#065f46', // Dark emerald
+    dashboardRoute: '/pharmacy/dashboard',
+    authConfig: {
+      heroTitle: 'Comprehensive Pharmacy Management.',
+      heroSubtitle: 'Inventory control, billing, prescription verification, and complete medical stock administration.',
+      sideBadge: 'PHARMACY CORE',
+      sideQuoteTitle: 'Precision in inventory and dispensing.',
+      sideQuoteText: 'Manage stock alerts, multi-branch transfers, expiration trackers, and retail billing from a unified command center.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Dashboard', path: '/pharmacy/dashboard', icon: 'LayoutDashboard', description: 'View dashboard metrics' },
+      { label: 'Billing', path: '/pharmacy/billing-dashboard', icon: 'Receipt', description: 'Manage billing' },
+      { label: 'Inventory', path: '/pharmacy/medicine-stock', icon: 'Package', description: 'Manage stock' },
+      { label: 'Prescriptions', path: '/pharmacy/pending-prescriptions', icon: 'ClipboardList', description: 'Verify prescriptions' },
+      { label: 'Purchase Orders', path: '/pharmacy/purchase-orders', icon: 'FileText', description: 'Manage procurement' },
+      { label: 'Reports', path: '/pharmacy/analytics/analytics-dashboard', icon: 'BarChart2', description: 'View analytics' },
+    ],
+  },
+
   // ── 8. Lab Tech ───────────────────────────────────────────────────────────
   {
     slug: 'lab',

@@ -14,7 +14,7 @@ const renderIcon = (Icon, className) => {
 /**
  * Enterprise Button Primitive
  * @param {Object} props
- * @param {'primary'|'secondary'|'ghost'|'danger'|'outline'} [props.variant='primary']
+ * @param {'primary'|'secondary'|'ghost'|'danger'|'outline'|'gold'} [props.variant='primary']
  * @param {'sm'|'md'|'lg'} [props.size='md']
  * @param {boolean} [props.isLoading=false]
  * @param {boolean} [props.fullWidth=false]
@@ -33,14 +33,51 @@ export default function Button({
   type = 'button',
   ...rest
 }) {
-  const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none select-none";
+  const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none select-none";
 
   const variants = {
-    primary: "bg-[var(--color-navy-800)] text-white hover:bg-[var(--color-navy-900)] active:scale-[0.99] shadow-sm hover:shadow-card",
-    secondary: "bg-[var(--color-surface-alt)] text-[var(--color-navy-900)] border border-[var(--color-border)] hover:bg-[var(--color-border)] active:scale-[0.99]",
-    outline: "bg-transparent text-[var(--color-navy-900)] border border-[var(--color-navy-800)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]",
-    ghost: "bg-transparent text-[var(--color-navy-900)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]",
-    danger: "bg-[var(--color-danger)] text-white hover:bg-red-700 active:scale-[0.99] shadow-sm"
+    // Gold gradient primary — the premium default CTA
+    primary: [
+      "bg-[var(--color-navy-800)] text-white",
+      "hover:bg-[var(--color-navy-900)]",
+      "dark:bg-[var(--color-navy-800)] dark:hover:bg-[var(--color-navy-900)]",
+      "active:scale-[0.99] shadow-sm hover:shadow-card",
+      "focus-visible:ring-[var(--color-navy-600)]",
+    ].join(' '),
+    // Explicit gold/luxury CTA variant
+    gold: [
+      "bg-[var(--color-gold)] text-white font-semibold",
+      "hover:bg-[var(--color-gold-hover)]",
+      "active:scale-[0.99] shadow-sm hover:shadow-card",
+      "focus-visible:ring-[var(--color-gold)]",
+    ].join(' '),
+    secondary: [
+      "bg-[var(--color-surface-alt)] text-[var(--color-navy-900)] border border-[var(--color-border)]",
+      "hover:bg-[var(--color-border)]",
+      "dark:border-white/15 dark:text-[var(--color-text)] dark:hover:bg-white/8",
+      "active:scale-[0.99]",
+      "focus-visible:ring-[var(--color-navy-600)]",
+    ].join(' '),
+    outline: [
+      "bg-transparent text-[var(--color-navy-900)] border border-[var(--color-navy-800)]",
+      "hover:bg-black/5",
+      "dark:border-white/20 dark:text-[var(--color-text)] dark:hover:bg-white/8",
+      "active:scale-[0.99]",
+      "focus-visible:ring-[var(--color-navy-600)]",
+    ].join(' '),
+    ghost: [
+      "bg-transparent text-[var(--color-navy-900)]",
+      "hover:bg-black/5 dark:hover:bg-white/8",
+      "dark:text-[var(--color-text)]",
+      "active:scale-[0.99]",
+      "focus-visible:ring-[var(--color-navy-600)]",
+    ].join(' '),
+    danger: [
+      "bg-[var(--color-danger)] text-white",
+      "hover:bg-red-700 dark:hover:bg-red-500",
+      "active:scale-[0.99] shadow-sm",
+      "focus-visible:ring-[var(--color-danger)]",
+    ].join(' '),
   };
 
   const sizes = {

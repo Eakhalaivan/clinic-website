@@ -23,11 +23,11 @@ export default function FormField({
       {label && (
         <label 
           htmlFor={id} 
-          className="text-xs font-semibold uppercase tracking-wider text-[var(--color-navy-900)] flex items-center justify-between"
+          className="text-xs font-semibold uppercase tracking-wider text-[var(--color-navy-900)] dark:text-[var(--color-text-muted)] flex items-center justify-between"
         >
           <span>
             {label}
-            {required && <span className="text-[var(--color-danger)] ml-1">*</span>}
+            {required && <span className="text-[var(--color-danger)] ml-1" aria-hidden="true">*</span>}
           </span>
         </label>
       )}

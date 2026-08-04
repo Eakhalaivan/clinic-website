@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { Plus, Search, Eye, Printer, Layers, Trash2 } from 'lucide-react';
@@ -18,7 +19,7 @@ export default function ConsolidatedBills() {
     import('../../utils/pharmacy/api').then(({ default: api }) => {
       api.get('/credit-bills')
         .then(res => setConsolidatedList(res.data?.data || []))
-        .catch(err => console.error('Failed to load consolidated bills', err));
+        .catch(err => logger.error('Failed to load consolidated bills', err));
     });
   }, [location.key]);
   const [isModalOpen, setIsModalOpen] = useState(false);

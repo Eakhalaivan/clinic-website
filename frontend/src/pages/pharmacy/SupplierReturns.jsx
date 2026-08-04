@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { ArrowLeft, Loader2, Plus, RefreshCw, FileText } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
@@ -15,7 +16,7 @@ export default function SupplierReturns({ onBack }) {
       const res = await api.get('/supplier-returns');
       setReturns(res.data.data || []);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError('Failed to fetch returns from server');
     } finally {
       setLoading(false);

@@ -17,8 +17,8 @@ const DoctorAnalytics = () => {
     monthlyVolume = [] 
   } = analytics;
   return (
-    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '20px' }}>Performance Analytics</h1>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <h1 className="text-xl sm:text-2xl font-bold mb-5" style={{ color: 'var(--color-text)' }}>Performance Analytics</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
         <div style={{ background: 'var(--color-surface)', padding: '20px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>

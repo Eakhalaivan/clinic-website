@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useShallow } from 'zustand/react/shallow';
 import { Search, Plus, Eye, FileText, CheckCircle, XCircle, Trash2, Edit3, Loader2 } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
@@ -89,7 +90,7 @@ export default function PurchaseOrders() {
       const response = await pharmacyService.searchStocks(val);
       setSearchResults(response?.data || response || []);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   };
 

@@ -92,7 +92,7 @@ export default function DataTable({
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[var(--color-surface-alt)] border-b border-[var(--color-border)] text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] select-none">
+                <tr className="bg-[var(--color-surface-alt)] dark:bg-white/[0.03] border-b border-[var(--color-border)] dark:border-white/[0.07] text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] select-none">
                   {columns.map((col) => (
                     <th
                       key={col.key}
@@ -103,7 +103,9 @@ export default function DataTable({
                         <span>{col.title}</span>
                         {col.sortable && (
                           sortConfig.key === col.key ? (
-                            sortConfig.direction === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-[var(--color-navy-800)]" /> : <ChevronDown className="w-3.5 h-3.5 text-[var(--color-navy-800)]" />
+                            sortConfig.direction === 'asc'
+                              ? <ChevronUp className="w-3.5 h-3.5 text-[var(--color-gold)]" />
+                              : <ChevronDown className="w-3.5 h-3.5 text-[var(--color-gold)]" />
                           ) : (
                             <ArrowUpDown className="w-3.5 h-3.5 opacity-40 hover:opacity-100" />
                           )
@@ -117,7 +119,7 @@ export default function DataTable({
                 {sortedData.map((row, index) => (
                   <tr 
                     key={row.id || index} 
-                    className="hover:bg-[var(--color-surface-alt)]/50 transition-colors"
+                    className="hover:bg-[var(--color-surface-alt)]/70 dark:hover:bg-white/[0.04] transition-colors"
                   >
                     {columns.map((col) => (
                       <td 

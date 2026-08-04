@@ -99,6 +99,9 @@ const queryClient = new QueryClient();
 
 /**
  * Helper — wraps a route block in DashboardLayout with role guard.
+ * Note: ROLE_ADMIN and ROLE_SUPER_ADMIN bypass allowedRoles by design.
+ * See the comment in components/auth/RoleRoute.jsx for rationale and
+ * instructions on how to restrict the bypass if ever needed.
  */
 const DashboardRoute = ({ path, portalSlug, allowedRoles, defaultRedirect, children }) => (
   <Route

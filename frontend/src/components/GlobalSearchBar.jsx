@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import logger from '../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, UserRound, CalendarDays, FileText } from 'lucide-react';
 import useAuthStore from '../store/authStore';
@@ -35,7 +36,7 @@ const GlobalSearchBar = () => {
         }));
         setResults(mapped);
       } catch (err) {
-        console.error('Search failed', err);
+        logger.error('Search failed', err);
         setResults([]);
       }
     };

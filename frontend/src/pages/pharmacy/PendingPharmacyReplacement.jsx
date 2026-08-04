@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { Eye, CheckCircle, XCircle, Plus, ClipboardList, Trash2, Search, PlusCircle } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function PendingPharmacyReplacement() {
       const res = await pharmacyService.api.get('/returns/pending-replacements');
       setReplacements(res.data?.data || []);
     } catch (err) {
-      console.error('Failed to load pending replacements', err);
+      logger.error('Failed to load pending replacements', err);
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ export default function PendingPharmacyReplacement() {
     try {
       const response = await pharmacyService.searchStocks(val);
       setSearchResults(response?.data || response || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { logger.error(e); }
   };
 
   const selectMedicine = (item, idx) => {

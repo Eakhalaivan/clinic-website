@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { Eye, CheckCircle, XCircle } from 'lucide-react';
@@ -28,7 +29,7 @@ export default function PendingReplacementReturns() {
   useEffect(() => {
     api.get('/returns/pending-replacements')
       .then(res => setReturns(res.data?.data || []))
-      .catch(err => console.error('Failed to load replacement returns', err));
+      .catch(err => logger.error('Failed to load replacement returns', err));
   }, [location.key]);
 
   const filteredReturns = returns.filter(row => {

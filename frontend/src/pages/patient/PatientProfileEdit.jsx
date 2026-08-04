@@ -80,16 +80,16 @@ const PatientProfileEdit = () => {
     }
 
     return (
-        <div>
-            <div style={{ marginBottom: 'var(--space-8)' }}>
-                <h2 style={{ fontSize: '2rem', marginBottom: 'var(--space-2)' }}>Edit Profile</h2>
+        <div className="p-4 sm:p-6 lg:p-8">
+            <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>Edit Profile</h2>
                 <p style={{ color: 'var(--color-text-muted)' }}>Keep your medical information up to date.</p>
             </div>
             
             <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
                 {error && <div className="error-message">{error}</div>}
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-6)' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="label-caps" style={{ display: 'block', marginBottom: 'var(--space-2)' }}>Emergency Contact Name *</label>
                         <input 
@@ -182,7 +182,7 @@ const PatientProfileEdit = () => {
                     ></textarea>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-4)', paddingTop: 'var(--space-6)', borderTop: '1px solid var(--color-border)' }}>
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-4 pt-6 border-t" style={{ borderColor: 'var(--color-border)' }}>
                     <button 
                         type="button" 
                         onClick={() => navigate('/patient/dashboard')}

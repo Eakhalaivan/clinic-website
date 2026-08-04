@@ -19,8 +19,8 @@ const PharmacistDashboard = () => {
       tabs={['Dashboard', 'My Dispensed', 'Inventory']}
       activeTab="Dashboard"
       quickActions={[
-        { label: 'Dispense Prescription', icon: Pill, color: 'text-emerald-500', bg: 'bg-emerald-500/10', action: () => console.log('dispense') },
-        { label: 'Check Stock', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-500/10', action: () => console.log('stock') }
+        { label: 'Dispense Prescription', icon: Pill, color: 'text-emerald-500', bg: 'bg-emerald-500/10', action: () => {} },
+        { label: 'Check Stock', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-500/10', action: () => {} }
       ]}
     >
       <div className="mb-6">

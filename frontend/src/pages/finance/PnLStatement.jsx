@@ -3,7 +3,7 @@ import { BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 
 const PnLStatement = () => {
   return (
-    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
+    <div className="p-4 sm:p-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <BarChart3 size={24} color="#3f6212" /> Profit & Loss Statement (P&L)
       </h1>

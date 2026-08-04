@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
@@ -77,7 +78,7 @@ const NewPrescription = () => {
         })
         .catch(err => {
           toast.error("Failed to load draft prescription.");
-          console.error(err);
+          logger.error(err);
         });
     }
   }, [routePrescriptionId]);
@@ -512,9 +513,14 @@ const NewPrescription = () => {
 
       
       {profileError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+        <div 
+          id="patient-load-error"
+          role="alert"
+          aria-live="assertive"
+          className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between"
+        >
             <div className="flex items-center gap-3">
-                <AlertTriangle className="text-red-500 w-5 h-5" />
+                <AlertTriangle className="text-red-500 w-5 h-5" aria-hidden="true" />
                 <span className="text-sm font-semibold text-red-700">Unable to load patient data. Please ensure the patient ID is valid or try again.</span>
             </div>
             <button onClick={() => window.location.reload()} className="px-4 py-1.5 bg-white border border-red-200 text-red-600 rounded-md text-xs font-bold hover:bg-red-50">Retry</button>
@@ -609,56 +615,65 @@ const NewPrescription = () => {
             <h3 className="text-sm font-bold text-slate-900 mb-5">Diagnosis & Visit Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-5">
               <div className="col-span-1">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Chief Complaint</label>
+                <label htmlFor="rx-chief-complaint" className="block text-[11px] font-semibold text-slate-500 mb-2">Chief Complaint</label>
                 <input 
+                  id="rx-chief-complaint"
                   type="text" 
                   value={chiefComplaint} 
                   onChange={e => setChiefComplaint(e.target.value)} 
                   disabled={isReadOnly}
+                  aria-label="Chief complaint"
                   className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 placeholder-slate-400 font-medium" 
                 />
               </div>
               <div className="col-span-1">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Diagnosis</label>
+                <label htmlFor="rx-diagnosis" className="block text-[11px] font-semibold text-slate-500 mb-2">Diagnosis</label>
                 <input 
+                  id="rx-diagnosis"
                   type="text" 
                   value={diagnosis} 
                   onChange={e => setDiagnosis(e.target.value)} 
                   disabled={isReadOnly}
+                  aria-label="Diagnosis"
                   className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 font-medium" 
                 />
               </div>
               <div className="col-span-1">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Symptoms</label>
+                <label htmlFor="rx-symptoms" className="block text-[11px] font-semibold text-slate-500 mb-2">Symptoms</label>
                 <input 
+                  id="rx-symptoms"
                   type="text" 
                   value={symptoms} 
                   onChange={e => setSymptoms(e.target.value)} 
                   disabled={isReadOnly}
+                  aria-label="Symptoms"
                   className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 font-medium" 
                 />
               </div>
               <div className="col-span-1 relative">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Visit Date</label>
+                <label htmlFor="rx-visit-date" className="block text-[11px] font-semibold text-slate-500 mb-2">Visit Date</label>
                 <div className="relative">
                     <input 
+                    id="rx-visit-date"
                     type="date" 
                     value={visitDate} 
                     onChange={e => setVisitDate(e.target.value)}
                     disabled={isReadOnly}
                     className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 font-medium" 
                     />
-                    <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-[11px]" />
+                    <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-[11px]" aria-hidden="true" />
                 </div>
               </div>
             </div>
             <div className="col-span-4">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Medical History</label>
+                <label htmlFor="rx-medical-history" className="block text-[11px] font-semibold text-slate-500 mb-2">Medical History</label>
                 <input 
+                  id="rx-medical-history"
                   type="text" 
                   value={medicalHistory} 
                   onChange={e => setMedicalHistory(e.target.value)} 
                   disabled={isReadOnly}
+                  aria-label="Medical history"
                   className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 font-medium" 
                 />
             </div>
@@ -705,6 +720,9 @@ const NewPrescription = () => {
                             }}
                             onBlur={() => setTimeout(() => setActiveSearchIndex(null), 200)}
                             placeholder="Medicine Name"
+                            aria-label={`Medicine name for row ${idx + 1}`}
+                            aria-autocomplete="list"
+                            aria-expanded={activeSearchIndex === idx && showSearchDropdown}
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                         />
                         {activeSearchIndex === idx && showSearchDropdown && debouncedSearch.length >= 1 && (
@@ -863,9 +881,10 @@ const NewPrescription = () => {
                           <td className="p-1.5 align-top text-center">
                             <button 
                               onClick={() => removeItem(idx)}
+                              aria-label={`Remove medicine row ${idx + 1}: ${item.medicineName || 'empty'}`}
                               className="p-1.5 text-slate-400 hover:text-red-500 rounded transition-colors mt-0.5 border border-transparent hover:border-red-100"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
                             </button>
                           </td>
                       )}
@@ -879,9 +898,10 @@ const NewPrescription = () => {
                 {!isReadOnly && (
                     <button 
                     onClick={() => addItem()}
+                    aria-label="Add another medicine row"
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-white hover:bg-slate-50 rounded-md transition-colors border border-blue-200"
                     >
-                        <Plus className="w-3.5 h-3.5" /> Add Medicine
+                        <Plus className="w-3.5 h-3.5" aria-hidden="true" /> Add Medicine
                     </button>
                 )}
                 <div className="text-xs font-bold text-slate-800">
@@ -899,6 +919,7 @@ const NewPrescription = () => {
                   onChange={e => setNotes(e.target.value)} 
                   disabled={isReadOnly}
                   rows={4} 
+                  aria-label="Clinical notes"
                   className="w-full p-3 bg-[#F8FAFC] border-none rounded-lg text-[13px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-200 transition-colors resize-none disabled:bg-slate-50 font-medium" 
                 />
             </div>
@@ -923,16 +944,17 @@ const NewPrescription = () => {
             </div>
             <div className="md:col-span-3 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
                 <h3 className="text-[13px] font-semibold text-slate-900 mb-3">Follow-up</h3>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-2">Follow-up Date</label>
+                <label htmlFor="rx-followup-date" className="block text-[11px] font-semibold text-slate-500 mb-2">Follow-up Date</label>
                 <div className="relative">
                     <input 
+                        id="rx-followup-date"
                         type="date" 
                         value={followUpDate} 
                         onChange={e => setFollowUpDate(e.target.value)}
                         disabled={isReadOnly}
                         className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 focus:outline-none focus:border-blue-500 transition-colors disabled:bg-slate-50" 
                     />
-                    <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-[9px]" />
+                    <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-[9px]" aria-hidden="true" />
                 </div>
             </div>
           </div>
@@ -1091,12 +1113,21 @@ const NewPrescription = () => {
 
       {/* Patient Edit Modal */}
       {isEditModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-patient-modal-title"
+          >
               <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
                   <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                      <h3 className="font-bold text-slate-800">Edit Patient Details</h3>
-                      <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                          <X className="w-5 h-5" />
+                      <h3 id="edit-patient-modal-title" className="font-bold text-slate-800">Edit Patient Details</h3>
+                      <button 
+                        onClick={() => setIsEditModalOpen(false)} 
+                        aria-label="Close edit patient details dialog"
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                          <X className="w-5 h-5" aria-hidden="true" />
                       </button>
                   </div>
                   <div className="p-5 flex flex-col gap-4">

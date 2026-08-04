@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { Shield, Edit2, Users, Plus, Check, X, Loader2, Trash2 } from 'lucide-react';
 import { MODULE_PERMISSIONS } from '../../config/pharmacy/roles.config';
 import api from '../../utils/pharmacy/api';
@@ -21,7 +22,7 @@ export default function RoleManagementPanel({ onBack }) {
       setRoles(res.data?.data || res.data || []);
     } catch (err) {
       toast.error('Failed to load roles');
-      console.error(err);
+      logger.error(err);
     } finally {
       setLoading(false);
     }

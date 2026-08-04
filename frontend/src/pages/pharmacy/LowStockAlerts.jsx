@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../utils/logger';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 import DataTable from '../../components/pharmacy/ui/DataTable';
@@ -43,7 +44,7 @@ export default function LowStockAlerts() {
       refetch(true).then(() => {
         setLastUpdated(new Date());
       }).catch(() => {
-        console.warn('Low stock polling failed');
+        logger.warn('Low stock polling failed');
       });
     }, 30000);
 
