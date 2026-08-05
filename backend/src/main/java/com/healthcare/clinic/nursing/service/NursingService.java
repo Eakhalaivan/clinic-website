@@ -1,6 +1,7 @@
 package com.healthcare.clinic.nursing.service;
 
 import com.healthcare.clinic.appointment.entity.Appointment;
+import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.nursing.dto.NurseAssignmentResponse;
 import com.healthcare.clinic.nursing.entity.NursePatientAssignment;
@@ -38,8 +39,8 @@ public class NursingService {
     private final BranchRepository branchRepository;
     private final PatientProfileRepository patientProfileRepository;
 
-    private static final Set<String> VALID_OP_STATUSES = Set.of(
-            "BOOKED", "CHECKED_IN", "IN_PROGRESS", "COMPLETED"
+    private static final Set<AppointmentStatus> VALID_OP_STATUSES = Set.of(
+            AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN, AppointmentStatus.WAITING, AppointmentStatus.IN_CONSULTATION, AppointmentStatus.COMPLETED
     );
 
     private String getUserName(Long userId) {
@@ -82,6 +83,13 @@ public class NursingService {
                             latest.getBloodPressure() != null ? latest.getBloodPressure() : "--",
                             latest.getOxygenSaturation() != null ? latest.getOxygenSaturation().toString() : "--");
                 }
+                
+                String tokenNumber = null;
+                List<QueueToken> tokens = queueTokenRepository.findByAppointmentId(validAppointment.getId());
+                if (!tokens.isEmpty()) {
+                    QueueToken latestToken = tokens.get(0); // Assuming ordered by time desc or we just take first
+                    tokenNumber = String.valueOf(latestToken.getTokenNumber());
+                }
 
                 responses.add(NurseAssignmentResponse.builder()
                         .id(assignment.getId())
@@ -95,6 +103,7 @@ public class NursingService {
                         .status(assignment.getStatus())
                         .insuranceStatus(assignment.getPatient().getInsuranceStatus())
                         .injuryStatus(assignment.getPatient().getInjuryStatus())
+                        .tokenNumber(tokenNumber)
                         .build());
             }
         }

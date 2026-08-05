@@ -6,6 +6,8 @@ import com.healthcare.clinic.identity.repository.RoleRepository;
 import com.healthcare.clinic.identity.repository.UserRepository;
 import com.healthcare.clinic.doctor.entity.DoctorProfile;
 import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
+import com.healthcare.clinic.doctor.entity.DoctorWorkingHours;
+import com.healthcare.clinic.doctor.repository.DoctorWorkingHoursRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * Seeds initial admin and doctor accounts on first boot.
  *
@@ -25,6 +29,7 @@ import java.util.Set;
  * weak default credentials from reaching production.
  */
 @Component
+@Profile("dev")
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
@@ -35,6 +40,7 @@ public class DataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final DoctorProfileRepository doctorProfileRepository;
+    private final DoctorWorkingHoursRepository doctorWorkingHoursRepository;
 
     @Value("${SEED_ADMIN_PASSWORD:AdminPass123!}")
     private String seedAdminPassword;
@@ -108,6 +114,23 @@ public class DataSeeder implements CommandLineRunner {
                     .build();
             doctorProfileRepository.save(profile);
             log.info("DataSeeder: created default DoctorProfile for doctor@clinic.com.");
+        }
+        
+        DoctorProfile savedProfile = doctorProfileRepository.findByUserId(doctor.getId()).orElse(null);
+        if (savedProfile != null && doctorWorkingHoursRepository.findByDoctorIdAndIsActiveTrue(savedProfile.getId()).isEmpty()) {
+            for (int day = 1; day <= 5; day++) { // Monday to Friday
+                DoctorWorkingHours hours = DoctorWorkingHours.builder()
+                        .doctor(savedProfile)
+                        .dayOfWeek(day)
+                        .startTime(java.time.LocalTime.of(9, 0))
+                        .endTime(java.time.LocalTime.of(17, 0))
+                        .slotDurationMinutes(20)
+                        .isActive(true)
+                        .branchId(savedProfile.getBranchId())
+                        .build();
+                doctorWorkingHoursRepository.save(hours);
+            }
+            log.info("DataSeeder: created default DoctorWorkingHours for doctor@clinic.com.");
         }
 
         // Seed / Reset Nurse User

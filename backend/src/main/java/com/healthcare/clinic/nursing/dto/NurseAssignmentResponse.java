@@ -23,4 +23,6 @@ public class NurseAssignmentResponse {
     private String status;
     private String insuranceStatus;
     private String injuryStatus;
+    private String tokenNumber;
+    private Integer tokenSequence;
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bot, Send, User, X, MessageSquare } from 'lucide-react';
+import { axiosPrivate } from '../../api/axios';
 
 const AIAssistantWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,21 +9,18 @@ const AIAssistantWidget = () => {
   ]);
   const [input, setInput] = useState('');
 
-  const send = () => {
+  const send = async () => {
     if (!input.trim()) return;
     const userMsg = { sender: 'user', text: input };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    setTimeout(() => {
-      let reply = 'Thank you for your message. For acute medical symptoms, please book an appointment with our specialist doctor or contact emergency services.';
-      if (input.toLowerCase().includes('fever') || input.toLowerCase().includes('headache')) {
-        reply = 'Fever and headache can stem from viral infections or fatigue. Make sure to stay hydrated. If fever exceeds 101°F for > 2 days, please consult Dr. Ramesh Rao.';
-      } else if (input.toLowerCase().includes('timing') || input.toLowerCase().includes('hour')) {
-        reply = 'Aurelian Health Clinic is open Monday to Saturday from 08:00 AM to 08:00 PM. Emergency services operate 24/7.';
-      }
-      setMessages(prev => [...prev, { sender: 'bot', text: reply }]);
-    }, 600);
+    try {
+      const res = await axiosPrivate.post('/api/v1/ai/chat', { message: input });
+      setMessages(prev => [...prev, { sender: 'bot', text: res.data.reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I am having trouble connecting to the server.' }]);
+    }
   };
 
   return (

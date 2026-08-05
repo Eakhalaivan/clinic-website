@@ -2,6 +2,7 @@ package com.healthcare.clinic.doctor.controller;
 
 import com.healthcare.clinic.doctor.dto.MyPatientResponse;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
+import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.identity.repository.UserRepository;
 import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
@@ -44,13 +45,13 @@ public class DoctorPatientController {
             var patientAppointments = entry.getValue();
 
             LocalDateTime lastVisit = patientAppointments.stream()
-                .filter(a -> "COMPLETED".equals(a.getStatus()) && a.getCreatedAt() != null)
+                .filter(a -> AppointmentStatus.COMPLETED == a.getStatus() && a.getCreatedAt() != null)
                 .map(a -> a.getCreatedAt().toLocalDateTime())
                 .max(LocalDateTime::compareTo)
                 .orElse(null);
 
             LocalDateTime upcoming = patientAppointments.stream()
-                .filter(a -> "BOOKED".equals(a.getStatus()) && a.getSlot() != null && a.getSlot().getStartTime() != null)
+                .filter(a -> AppointmentStatus.BOOKED == a.getStatus() && a.getSlot() != null && a.getSlot().getStartTime() != null)
                 .map(a -> a.getSlot().getStartTime().toLocalDateTime())
                 .min(LocalDateTime::compareTo)
                 .orElse(null);
@@ -98,7 +99,7 @@ public class DoctorPatientController {
                 .appointmentId(a.getId())
                 .date(a.getSlot() != null && a.getSlot().getStartTime() != null ? a.getSlot().getStartTime().toString() : "N/A")
                 .reason(a.getReasonForVisit())
-                .status(a.getStatus())
+                .status(a.getStatus() != null ? a.getStatus().name() : "N/A")
                 .notes(a.getNotes())
                 .build())
             .collect(Collectors.toList());

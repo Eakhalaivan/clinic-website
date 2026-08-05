@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { ConfigDrivenDashboard } from '../../components/dashboard/ConfigDrivenDashboard';
 import { dashboardConfig } from '../../config/dashboardConfig';
@@ -9,6 +9,22 @@ const NurseDashboard = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState(null);
+  const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+      const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/sse/appointments`);
+      
+      const invalidate = () => {
+          queryClient.invalidateQueries(['nurseAssignments']);
+          queryClient.invalidateQueries(['nurse-assigned-patients']);
+          queryClient.invalidateQueries(['nursingRecentActivity']);
+      };
+      
+      evtSource.addEventListener('appointment-status-changed', invalidate);
+      evtSource.addEventListener('queue-token-called', invalidate);
+      
+      return () => evtSource.close();
+  }, [queryClient]);
 
   const { data: assignments, isLoading: isAssignmentsLoading } = useQuery({
     queryKey: ['nurseAssignments'],

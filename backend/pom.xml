@@ -105,7 +105,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
-			<version>1.18.36</version>
+			<version>1.18.38</version>
 		</dependency>
 
 		<!-- Testing -->
@@ -138,6 +138,17 @@
 			<artifactId>twilio</artifactId>
 			<version>9.14.0</version>
 		</dependency>
+		<!-- FHIR -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>6.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>6.10.0</version>
+		</dependency>
 
 
 	</dependencies>
@@ -153,7 +164,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-						<version>1.18.36</version>
+						<version>1.18.38</version>
 						</path>
 					
 						<!-- MapStruct + Lombok binding -->

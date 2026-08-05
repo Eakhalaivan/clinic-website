@@ -42,7 +42,9 @@ const NurseAssignedPatients = () => {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)' }}>{p.patientName} ({p.age}y)</h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Reason: {p.appointmentReason} · Attending: {p.attendingDoctorName}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    {p.tokenNumber ? `Token #${p.tokenNumber} · ` : ''}Reason: {p.appointmentReason} · Attending: {p.attendingDoctorName}
+                  </p>
                   <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#0f766e', fontWeight: 500 }}>Vitals: {p.lastVitalsSummary}</p>
                 </div>
               </div>

@@ -19,19 +19,23 @@ const PatientBilling = () => {
   });
 
   const payMutation = useMutation({
-    mutationFn: async (invoiceId) => {
-      const res = await axiosPrivate.put(`/billing/${invoiceId}/pay`);
+    mutationFn: async ({ invoiceId, amount }) => {
+      const res = await axiosPrivate.post(`/api/v1/finance/payments/checkout/${invoiceId}`, { amount });
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['patientInvoices', user?.id]);
+    onSuccess: (data) => {
+      if (data && data.checkoutUrl) {
+        // Redirect to the generated Stripe Checkout session URL
+        window.location.href = data.checkoutUrl;
+      }
     }
   });
 
-  const handlePay = (invoiceId) => {
-    if (window.confirm('Are you sure you want to pay this invoice? (Simulated Online Payment)')) {
-      payMutation.mutate(invoiceId);
-    }
+  const handlePay = (invoice) => {
+    payMutation.mutate({ 
+      invoiceId: invoice.id, 
+      amount: invoice.totalAmount || invoice.amount || 0 
+    });
   };
 
   const handleDownloadPdf = async (id, invoiceNumber) => {
@@ -79,7 +83,7 @@ const PatientBilling = () => {
                   <div className="invoice-amount">₹{(invoice.totalAmount || invoice.amount || 0).toFixed(2)}</div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {invoice.status === 'PENDING' && (
-                      <button className="btn-primary" onClick={() => handlePay(invoice.id)} disabled={payMutation.isPending}>
+                      <button className="btn-primary" onClick={() => handlePay(invoice)} disabled={payMutation.isPending}>
                         <CreditCard size={14} style={{ marginRight: '4px' }} />
                         {payMutation.isPending ? 'Processing...' : 'Pay Now'}
                       </button>

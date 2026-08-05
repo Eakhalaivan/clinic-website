@@ -11,4 +11,5 @@ public class AppointmentCancelledEvent {
     private ZonedDateTime startTime;
     private String doctorName;
     private String patientEmail;
+    private Long branchId;
 }

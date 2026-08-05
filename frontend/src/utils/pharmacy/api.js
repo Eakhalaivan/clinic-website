@@ -23,6 +23,11 @@ const api = axios.create({
 // Request interceptor – attach token directly from shared auth store (useAuthStore)
 api.interceptors.request.use(
   (config) => {
+    // Prevent double /pharmacy/pharmacy due to baseURL and component URLs
+    if (config.url && config.url.startsWith('/pharmacy/')) {
+      config.url = config.url.substring('/pharmacy'.length);
+    }
+    
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;

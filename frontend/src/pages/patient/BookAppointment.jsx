@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import PageHeader from '../doctor/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -64,14 +65,55 @@ const BookAppointment = () => {
             return res.data;
         },
         onSuccess: () => {
+            const selectedDoctor = doctors.find(d => String(d.userId) === String(selectedDoctorId));
+            const selectedSlot = slots.find(s => s.id === selectedSlotId);
+            const doctorName = selectedDoctor ? `Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName}` : 'the doctor';
+            const timeStr = selectedSlot ? new Date(selectedSlot.startTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'your selected time';
+            
+            toast.success(`Appointment booked with ${doctorName} for ${timeStr}`);
+            
             queryClient.invalidateQueries(['patientAppointments', user?.id]);
             queryClient.invalidateQueries(['doctor-today-appointments']);
+            
+            // Invalidate notification queries to update the bell instantly
+            queryClient.invalidateQueries(['notificationCount']);
+            queryClient.invalidateQueries(['notifications']);
+            
+            // TODO: Apply this same toast + notification invalidation pattern to cancel/reschedule flows when built
+            
             navigate('/patient/dashboard');
         },
         onError: (err) => {
-            setError(err.response?.data?.message || 'Failed to book appointment');
+            if (err.response?.status === 409) {
+                setError(err.response?.data?.message || 'This time slot was just booked by someone else. Please choose another.');
+                // Refresh slots for the current date
+                queryClient.invalidateQueries(['availableSlots', selectedDoctorId, selectedDate.toISOString()]);
+                setSelectedSlotId('');
+            } else {
+                setError(err.response?.data?.message || 'Failed to book appointment');
+            }
         }
     });
+
+    // Subscribe to real-time slot updates
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/sse/appointments`);
+        
+        evtSource.addEventListener('appointment-booked', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                // If the booked slot is for the currently viewed doctor, invalidate the query
+                if (String(data.doctorId) === String(selectedDoctorId)) {
+                    queryClient.invalidateQueries(['availableSlots', selectedDoctorId, selectedDate.toISOString()]);
+                }
+            } catch (err) {
+                console.error("Failed to parse SSE message", err);
+            }
+        });
+
+        return () => evtSource.close();
+    }, [selectedDoctorId, selectedDate, queryClient]);
 
     // Generate upcoming 14 days array
     const upcomingDays = useMemo(() => {
@@ -179,105 +221,119 @@ const BookAppointment = () => {
 
             <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
                  aria-hidden={!selectedDoctorId}>
-                <Card>
-                    <Card.Header>
-                        <h3 className="text-lg font-semibold">2. Select a Date</h3>
-                    </Card.Header>
-                    <Card.Body>
-                        <div role="group" aria-label="Select appointment date" className="flex overflow-x-auto gap-3 pb-2 -mx-2 px-2 snap-x">
-                            {upcomingDays.map((date, idx) => {
-                                const isSelected = selectedDate.getTime() === date.getTime();
-                                const isWorkingDay = workingHours.some(wh => wh.dayOfWeek === date.getDay() && wh.isActive);
-                                const dateLabel = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-                                
-                                return (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => { setSelectedDate(date); setSelectedSlotId(''); }}
-                                        disabled={!isWorkingDay}
-                                        aria-label={`${dateLabel}${!isWorkingDay ? ' — unavailable' : ''}`}
-                                        aria-pressed={isSelected}
-                                        className={`
-                                            snap-start min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200
-                                            ${isSelected ? 'bg-primary border-primary text-primary-foreground shadow-md scale-105' : 'bg-surface border-surface-border text-text-primary hover:border-primary/50'}
-                                            ${!isWorkingDay && !isSelected ? 'opacity-50 grayscale bg-surface-hover cursor-not-allowed' : ''}
-                                        `}
-                                    >
-                                        <span className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">{DAYS[date.getDay()]}</span>
-                                        <span className="text-2xl font-bold">{date.getDate()}</span>
-                                        <span className="text-[10px] mt-1">{date.toLocaleDateString('en-US', { month: 'short' })}</span>
-                                        {!isWorkingDay && <span className="text-[9px] mt-1 text-red-500 font-bold bg-white/20 px-1 rounded" aria-hidden="true">UNAVAILABLE</span>}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </Card.Body>
-                </Card>
-            </div>
-
-            <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
-                 aria-hidden={!selectedDoctorId}>
-                <Card>
-                    <Card.Header>
-                        <h3 className="text-lg font-semibold">3. Select a Time Slot</h3>
-                    </Card.Header>
-                    <Card.Body>
-                        {slotsLoading || slotsFetching ? (
-                            <div className="py-8 text-center text-text-secondary flex flex-col items-center" aria-live="polite" aria-busy="true">
-                                <Clock className="w-8 h-8 animate-spin opacity-20 mb-2" aria-hidden="true" />
-                                Loading available slots...
-                            </div>
-                        ) : slots.length > 0 ? (
-                            <div className="space-y-6">
-                                {Object.entries(groupedSlots).map(([period, periodSlots]) => {
-                                    if (periodSlots.length === 0) return null;
-                                    return (
-                                        <div key={period}>
-                                            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                <span aria-hidden="true">
-                                                    {period === 'Morning' && '🌅'}
-                                                    {period === 'Afternoon' && '☀️'}
-                                                    {period === 'Evening' && '🌙'}
-                                                </span>
-                                                {period}
-                                            </h3>
-                                            <div role="group" aria-label={`${period} time slots`} className="flex flex-wrap gap-3">
-                                                {periodSlots.map(slot => {
-                                                    const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                                                    const isSelected = selectedSlotId === slot.id;
-                                                    return (
-                                                        <button
-                                                            key={slot.id}
-                                                            type="button"
-                                                            onClick={() => setSelectedSlotId(slot.id)}
-                                                            aria-pressed={isSelected}
-                                                            aria-label={`${period} slot at ${timeStr}${isSelected ? ', selected' : ''}`}
-                                                            className={`
-                                                                px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
-                                                                ${isSelected 
-                                                                    ? 'bg-primary border-primary text-primary-foreground shadow-md ring-2 ring-primary/20 ring-offset-1' 
-                                                                    : 'bg-surface border-surface-border text-text-primary hover:border-primary hover:text-primary hover:bg-primary/5'}
-                                                            `}
-                                                        >
-                                                            {timeStr}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
+                {selectedDoctorId && workingHours.length === 0 ? (
+                    <Card>
+                        <Card.Body>
                             <div className="py-12 text-center bg-surface-hover rounded-xl border border-dashed border-surface-border">
                                 <Calendar className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-20" aria-hidden="true" />
-                                <p className="text-text-primary font-medium">No slots available on this date.</p>
-                                <p className="text-text-secondary text-sm mt-1">Please select another date from the calendar above.</p>
+                                <p className="text-text-primary font-medium text-lg">Schedule not yet configured</p>
+                                <p className="text-text-secondary mt-1">This doctor has not yet set up their working hours.</p>
                             </div>
-                        )}
-                    </Card.Body>
-                </Card>
+                        </Card.Body>
+                    </Card>
+                ) : (
+                    <>
+                        <Card>
+                            <Card.Header>
+                                <h3 className="text-lg font-semibold">2. Select a Date</h3>
+                            </Card.Header>
+                            <Card.Body>
+                                <div role="group" aria-label="Select appointment date" className="flex overflow-x-auto gap-3 pb-2 -mx-2 px-2 snap-x">
+                                    {upcomingDays.map((date, idx) => {
+                                        const isSelected = selectedDate.getTime() === date.getTime();
+                                        const isWorkingDay = workingHours.some(wh => wh.dayOfWeek === date.getDay() && wh.isActive);
+                                        const dateLabel = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                                        
+                                        return (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => { setSelectedDate(date); setSelectedSlotId(''); }}
+                                                disabled={!isWorkingDay}
+                                                aria-label={`${dateLabel}${!isWorkingDay ? ' — unavailable' : ''}`}
+                                                aria-pressed={isSelected}
+                                                className={`
+                                                    snap-start min-w-[100px] flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200
+                                                    ${isSelected ? 'bg-primary border-primary text-primary-foreground shadow-md scale-105' : 'bg-surface border-surface-border text-text-primary hover:border-primary/50'}
+                                                    ${!isWorkingDay && !isSelected ? 'opacity-50 grayscale bg-surface-hover cursor-not-allowed' : ''}
+                                                `}
+                                            >
+                                                <span className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">{DAYS[date.getDay()]}</span>
+                                                <span className="text-2xl font-bold">{date.getDate()}</span>
+                                                <span className="text-[10px] mt-1">{date.toLocaleDateString('en-US', { month: 'short' })}</span>
+                                                {!isWorkingDay && <span className="text-[9px] mt-1 text-red-500 font-bold bg-white/20 px-1 rounded" aria-hidden="true">UNAVAILABLE</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </Card.Body>
+                        </Card>
+
+                        <div className={`mt-6 transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}
+                             aria-hidden={!selectedDoctorId}>
+                            <Card>
+                                <Card.Header>
+                                    <h3 className="text-lg font-semibold">3. Select a Time Slot</h3>
+                                </Card.Header>
+                                <Card.Body>
+                                    {slotsLoading || slotsFetching ? (
+                                        <div className="py-8 text-center text-text-secondary flex flex-col items-center" aria-live="polite" aria-busy="true">
+                                            <Clock className="w-8 h-8 animate-spin opacity-20 mb-2" aria-hidden="true" />
+                                            Loading available slots...
+                                        </div>
+                                    ) : slots.length > 0 ? (
+                                        <div className="space-y-6">
+                                            {Object.entries(groupedSlots).map(([period, periodSlots]) => {
+                                                if (periodSlots.length === 0) return null;
+                                                return (
+                                                    <div key={period}>
+                                                        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
+                                                            <span aria-hidden="true">
+                                                                {period === 'Morning' && '🌅'}
+                                                                {period === 'Afternoon' && '☀️'}
+                                                                {period === 'Evening' && '🌙'}
+                                                            </span>
+                                                            {period}
+                                                        </h3>
+                                                        <div role="group" aria-label={`${period} time slots`} className="flex flex-wrap gap-3">
+                                                            {periodSlots.map(slot => {
+                                                                const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                                                                const isSelected = selectedSlotId === slot.id;
+                                                                return (
+                                                                    <button
+                                                                        key={slot.id}
+                                                                        type="button"
+                                                                        onClick={() => setSelectedSlotId(slot.id)}
+                                                                        aria-pressed={isSelected}
+                                                                        aria-label={`${period} slot at ${timeStr}${isSelected ? ', selected' : ''}`}
+                                                                        className={`
+                                                                            px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
+                                                                            ${isSelected 
+                                                                                ? 'bg-primary border-primary text-primary-foreground shadow-md ring-2 ring-primary/20 ring-offset-1' 
+                                                                                : 'bg-surface border-surface-border text-text-primary hover:border-primary hover:text-primary hover:bg-primary/5'}
+                                                                        `}
+                                                                    >
+                                                                        {timeStr}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="py-12 text-center bg-surface-hover rounded-xl border border-dashed border-surface-border">
+                                            <Calendar className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-20" aria-hidden="true" />
+                                            <p className="text-text-primary font-medium">No slots available on this date.</p>
+                                            <p className="text-text-secondary text-sm mt-1">Please select another date from the calendar above.</p>
+                                        </div>
+                                    )}
+                                </Card.Body>
+                            </Card>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className={`transition-opacity duration-300 ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}

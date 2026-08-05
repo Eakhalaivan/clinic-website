@@ -129,7 +129,7 @@ export default function MedicineStock() {
 
   // Group stocks by medicine
   const groupedStocks = {};
-  stocks.forEach(s => {
+  (Array.isArray(stocks) ? stocks : []).forEach(s => {
     if (!s.medicine) return;
     const mId = s.medicine.id;
     if (!groupedStocks[mId]) {

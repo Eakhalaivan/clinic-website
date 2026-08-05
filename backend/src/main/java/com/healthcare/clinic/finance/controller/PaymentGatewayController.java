@@ -1,0 +1,39 @@
+package com.healthcare.clinic.finance.controller;
+
+import com.healthcare.clinic.finance.service.StripePaymentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.HashMap;
+
+@RestController
+@RequestMapping("/api/v1/finance/payments")
+@RequiredArgsConstructor
+public class PaymentGatewayController {
+
+    private final StripePaymentService stripePaymentService;
+
+    @PostMapping("/checkout/{invoiceId}")
+    public ResponseEntity<Map<String, String>> createCheckoutSession(
+            @PathVariable Long invoiceId,
+            @RequestBody Map<String, Double> payload) {
+        
+        Double amount = payload.getOrDefault("amount", 0.0);
+        String checkoutUrl = stripePaymentService.createCheckoutSession(invoiceId, amount);
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("checkoutUrl", checkoutUrl);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/webhook/stripe")
+    public ResponseEntity<Void> stripeWebhook(
+            @RequestBody String payload,
+            @RequestHeader(value = "Stripe-Signature", required = false) String signature) {
+        
+        stripePaymentService.processWebhook(payload, signature);
+        return ResponseEntity.ok().build();
+    }
+}

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout';
@@ -19,6 +20,11 @@ import Register from './pages/public/Register';
 // Patient pages
 import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientProfileEdit from './pages/patient/PatientProfileEdit';
+import HealthTimeline from './pages/patient/HealthTimeline';
+import Orders from './pages/patient/Orders';
+import AIAssistantComingSoon from './pages/patient/AIAssistantComingSoon';
+import RadiologyReports from './pages/patient/RadiologyReports';
+import Insurance from './pages/patient/Insurance';
 import BookAppointment from './pages/patient/BookAppointment';
 import MedicalRecords from './pages/patient/MedicalRecords';
 import PatientBilling from './pages/patient/PatientBilling';
@@ -140,6 +146,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <Toaster position="top-right" />
         <AIAssistantWidget />
         <Routes>
 
@@ -176,10 +183,11 @@ function App() {
             <Route path="prescriptions" element={<PatientPrescriptions />} />
             <Route path="lab-reports" element={<LabReports />} />
             {/* Previously missing patient routes */}
-            <Route path="radiology-reports" element={PH('Radiology Reports', 'Your radiology and imaging reports will appear here once uploaded by the radiologist.')} />
-            <Route path="insurance" element={PH('Insurance', 'View your insurance coverage, claims, and pre-authorization requests here.')} />
-            <Route path="timeline" element={PH('Health Timeline', 'A chronological view of all your medical events, visits, and reports.')} />
-            <Route path="orders" element={PH('Orders', 'Track your medical equipment, prescription refill, and wellness product orders here.')} />
+            <Route path="radiology-reports" element={<RadiologyReports />} />
+            <Route path="insurance" element={<Insurance />} />
+            <Route path="timeline" element={<HealthTimeline />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="ai-assistant" element={<AIAssistantComingSoon />} />
           </Route>
 
           {/* ── Doctor Routes ───────────────────────────────────────────── */}

@@ -3,6 +3,7 @@ package com.healthcare.clinic.appointment.controller;
 import com.healthcare.clinic.appointment.entity.Appointment;
 import com.healthcare.clinic.appointment.entity.AppointmentSlot;
 import com.healthcare.clinic.appointment.service.AppointmentService;
+import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -78,15 +79,35 @@ public class AppointmentController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> updateAppointmentStatus(@PathVariable Long id, @RequestParam String status) {
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_NURSE')")
+    public ResponseEntity<Void> updateAppointmentStatus(@PathVariable Long id, @RequestParam AppointmentStatus status) {
         appointmentService.updateAppointmentStatus(id, status);
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_PATIENT')")
+    public ResponseEntity<Void> cancelAppointment(@PathVariable Long id, @RequestParam String reason) {
+        appointmentService.cancelAppointment(id, reason);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PatchMapping("/{id}/reschedule")
+    @PreAuthorize("hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_PATIENT')")
+    public ResponseEntity<Appointment> rescheduleAppointment(@PathVariable Long id, @RequestParam Long newSlotId) {
+        Appointment newAppt = appointmentService.rescheduleAppointment(id, newSlotId);
+        return ResponseEntity.ok(newAppt);
+    }
+
     @GetMapping("/queue")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_NURSE')")
     public ResponseEntity<List<com.healthcare.clinic.appointment.dto.AppointmentResponseDto>> getAppointmentQueue() {
-        return ResponseEntity.ok(List.of());
+        Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+        // Since we don't have the user's role here trivially without injecting something else, 
+        // we'll just return all today's appointments for the entire branch/clinic, assuming a single branch for now,
+        // or we can fetch by doctor if it's a doctor. For simplicity and as required, returning today's queue.
+        // I will need to add `getAllTodayAppointments()` to `AppointmentService`. Let's add it in the next step.
+        return ResponseEntity.ok(appointmentService.getAllTodayAppointments());
     }
 }
 

@@ -1,6 +1,7 @@
 package com.healthcare.clinic.doctor.service;
 
 import com.healthcare.clinic.appointment.entity.Appointment;
+import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.billing.entity.Invoice;
 import com.healthcare.clinic.billing.entity.InvoiceStatus;
@@ -60,9 +61,9 @@ public class DoctorDashboardService {
         int todayAppointmentsCount = todayAppointments.size();
         
         // 2. Queue Status
-        int waitingCount = (int) todayAppointments.stream().filter(a -> "PENDING".equalsIgnoreCase(a.getStatus())).count();
-        int completedCount = (int) todayAppointments.stream().filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus())).count();
-        int emergencyCount = (int) todayAppointments.stream().filter(a -> "EMERGENCY".equalsIgnoreCase(a.getStatus())).count();
+        int waitingCount = (int) todayAppointments.stream().filter(a -> AppointmentStatus.WAITING == a.getStatus() || AppointmentStatus.CHECKED_IN == a.getStatus()).count();
+        int completedCount = (int) todayAppointments.stream().filter(a -> AppointmentStatus.COMPLETED == a.getStatus()).count();
+        int emergencyCount = (int) todayAppointments.stream().filter(a -> AppointmentStatus.IN_CONSULTATION == a.getStatus()).count();
 
         // 3. Total Patients
         Set<Long> uniquePatients = allAppointments.stream()
@@ -104,7 +105,7 @@ public class DoctorDashboardService {
         
         // Add recent completed appointments
         allAppointments.stream()
-                .filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus()) && a.getSlot() != null && a.getSlot().getEndTime() != null)
+                .filter(a -> AppointmentStatus.COMPLETED == a.getStatus() && a.getSlot() != null && a.getSlot().getEndTime() != null)
                 .sorted((a1, a2) -> a2.getSlot().getEndTime().compareTo(a1.getSlot().getEndTime()))
                 .limit(3)
                 .forEach(a -> {

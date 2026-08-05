@@ -414,9 +414,9 @@ const NewPrescription = () => {
     mutationFn: async () => {
       if (!prescriptionId) {
         const res = await axiosPrivate.post(`/prescriptions`, buildPayload());
-        return axiosPrivate.post(`/prescriptions/${res.data.id}/send-to-pharmacy`);
+        return res;
       }
-      return axiosPrivate.post(`/prescriptions/${prescriptionId}/send-to-pharmacy`);
+      return axiosPrivate.post(`/prescriptions/${prescriptionId}/send`);
     },
     onSuccess: (res) => {
       setPrescriptionStatus('PENDING'); // Sent to pharmacy sets status to PENDING

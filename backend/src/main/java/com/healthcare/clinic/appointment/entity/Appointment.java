@@ -36,8 +36,9 @@ public class Appointment {
     @JoinColumn(name = "slot_id", nullable = false, unique = true)
     private AppointmentSlot slot;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status; // BOOKED, CANCELLED, COMPLETED, NO_SHOW
+    private AppointmentStatus status; // BOOKED, CANCELLED, COMPLETED, NO_SHOW, etc.
 
     @Column(columnDefinition = "TEXT")
     private String reasonForVisit;

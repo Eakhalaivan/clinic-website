@@ -17,4 +17,6 @@ public interface QueueTokenRepository extends JpaRepository<QueueToken, Long> {
     Optional<Integer> findMaxTokenForBranchToday(@Param("branchId") Long branchId, @Param("startOfDay") ZonedDateTime startOfDay);
 
     List<QueueToken> findByBranchIdAndStatusOrderByTokenNumberAsc(Long branchId, String status);
+    
+    List<QueueToken> findByAppointmentId(Long appointmentId);
 }

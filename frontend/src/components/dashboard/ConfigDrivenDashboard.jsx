@@ -230,8 +230,8 @@ export const ConfigDrivenDashboard = ({ config, data, activeTab, onTabChange }) 
   const { appointments, dashboardStats } = data || {};
 
   const widgetProps = {
-    appointments,
-    dashboardStats,
+    ...data,
+    activeTab,
     navigate
   };
 

@@ -31,12 +31,12 @@ public class AppointmentResponseDto {
     private String patientLastName;
 
     public AppointmentResponseDto(
-            Long id, String status, String reasonForVisit, String notes, Long branchId, ZonedDateTime createdAt,
+            Long id, com.healthcare.clinic.appointment.entity.AppointmentStatus status, String reasonForVisit, String notes, Long branchId, ZonedDateTime createdAt,
             Long slotId, ZonedDateTime startTime, ZonedDateTime endTime,
             Long doctorId, String doctorFirstName, String doctorLastName,
             Long patientId, String patientFirstName, String patientLastName) {
         this.id = id;
-        this.status = status;
+        this.status = status != null ? status.name() : null;
         this.reasonForVisit = reasonForVisit;
         this.notes = notes;
         this.branchId = branchId;

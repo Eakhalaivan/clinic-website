@@ -41,6 +41,16 @@ public class NotificationEventListener {
         userRepository.findById(event.getPatientId()).ifPresent(user -> {
             twilio.sendAppointmentConfirmationSms(user.getPhoneNumber(), event.getDoctorName(), event.getStartTime().toString());
         });
+        
+        inApp.sendToUser(event.getDoctorId(),
+                "New Appointment",
+                "New appointment booked for " + event.getStartTime(),
+                "APPOINTMENT", event.getAppointmentId());
+        
+        inApp.sendToRole("ROLE_ADMIN",
+                "New Appointment",
+                "New appointment booked with Dr. " + event.getDoctorName(),
+                "APPOINTMENT", event.getAppointmentId());
     }
 
     // ─── Appointment Cancelled ────────────────────────────────────────────────
@@ -58,6 +68,16 @@ public class NotificationEventListener {
         userRepository.findById(event.getPatientId()).ifPresent(user -> {
             twilio.sendAppointmentCancellationSms(user.getPhoneNumber(), event.getDoctorName(), event.getStartTime().toString());
         });
+        
+        inApp.sendToUser(event.getDoctorId(),
+                "Appointment Cancelled",
+                "Appointment on " + event.getStartTime() + " has been cancelled.",
+                "APPOINTMENT", event.getAppointmentId());
+                
+        inApp.sendToRole("ROLE_ADMIN",
+                "Appointment Cancelled",
+                "Appointment with Dr. " + event.getDoctorName() + " on " + event.getStartTime() + " cancelled.",
+                "APPOINTMENT", event.getAppointmentId());
     }
 
     // ─── Invoice Created ──────────────────────────────────────────────────────
@@ -108,5 +128,15 @@ public class NotificationEventListener {
                 twilio.sendQueueTokenCalledSms(user.getPhoneNumber(), event.getTokenNumber(), event.getBranchName());
             });
         }
+        
+        inApp.sendToRole("ROLE_NURSE",
+                "Queue Token Called",
+                "Token #" + event.getTokenNumber() + " called at " + event.getBranchName(),
+                "QUEUE", null);
+                
+        inApp.sendToRole("ROLE_ADMIN",
+                "Queue Token Called",
+                "Token #" + event.getTokenNumber() + " called at " + event.getBranchName(),
+                "QUEUE", null);
     }
 }

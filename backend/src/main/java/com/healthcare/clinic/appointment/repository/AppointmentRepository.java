@@ -56,4 +56,18 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
            @Param("userId") Long userId,
            @Param("startOfDay") ZonedDateTime startOfDay,
            @Param("endOfDay") ZonedDateTime endOfDay);
+
+    @Query("SELECT new com.healthcare.clinic.appointment.dto.AppointmentResponseDto(" +
+           "a.id, a.status, a.reasonForVisit, a.notes, a.branchId, a.createdAt, " +
+           "a.slot.id, a.slot.startTime, a.slot.endTime, " +
+           "a.doctor.userId, du.firstName, du.lastName, " +
+           "a.patient.userId, pu.firstName, pu.lastName) " +
+           "FROM Appointment a " +
+           "JOIN com.healthcare.clinic.identity.entity.User du ON a.doctor.userId = du.id " +
+           "JOIN com.healthcare.clinic.identity.entity.User pu ON a.patient.userId = pu.id " +
+           "WHERE a.slot.startTime >= :startOfDay AND a.slot.startTime <= :endOfDay " +
+           "ORDER BY a.slot.startTime ASC")
+    List<AppointmentResponseDto> findAllAppointmentsToday(
+           @Param("startOfDay") ZonedDateTime startOfDay,
+           @Param("endOfDay") ZonedDateTime endOfDay);
 }

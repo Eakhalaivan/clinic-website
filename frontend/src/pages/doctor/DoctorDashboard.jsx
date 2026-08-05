@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { 
@@ -110,7 +110,6 @@ const DoctorDashboard = () => {
     enabled: !!user?.id,
   });
 
-  // ─── API: Lab test requests for this doctor ───
   const { data: labRequests = [], isLoading: loadingLab } = useQuery({
     queryKey: ['doctorLabRequests'],
     queryFn: async () => {
@@ -119,6 +118,54 @@ const DoctorDashboard = () => {
     },
     enabled: !!user?.id,
   });
+
+  const queryClient = useQueryClient();
+
+  // Subscribe to real-time appointment updates
+  useEffect(() => {
+      const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/sse/appointments`);
+      
+      evtSource.addEventListener('appointment-booked', (event) => {
+          try {
+              const data = JSON.parse(event.data);
+              // If the booked appointment is for this doctor, invalidate their queries
+              if (String(data.doctorId) === String(user?.id)) {
+                  queryClient.invalidateQueries(['doctor-today-appointments']);
+                  queryClient.invalidateQueries(['doctorAllAppointments', user?.id]);
+              }
+          } catch (err) {
+              console.error("Failed to parse SSE message", err);
+          }
+      });
+      
+      evtSource.addEventListener('appointment-cancelled', (event) => {
+          try {
+              const data = JSON.parse(event.data);
+              if (String(data.doctorId) === String(user?.id)) {
+                  queryClient.invalidateQueries(['doctor-today-appointments']);
+                  queryClient.invalidateQueries(['doctorAllAppointments', user?.id]);
+                  queryClient.invalidateQueries(['doctor-queue']);
+              }
+          } catch (err) {
+              console.error("Failed to parse SSE message", err);
+          }
+      });
+
+      evtSource.addEventListener('appointment-status-changed', (event) => {
+          try {
+              const data = JSON.parse(event.data);
+              if (String(data.doctorId) === String(user?.id)) {
+                  queryClient.invalidateQueries(['doctor-today-appointments']);
+                  queryClient.invalidateQueries(['doctorAllAppointments', user?.id]);
+                  queryClient.invalidateQueries(['doctor-queue']);
+              }
+          } catch (err) {
+              console.error("Failed to parse SSE message", err);
+          }
+      });
+
+      return () => evtSource.close();
+  }, [user?.id, queryClient]);
 
   const handlePatientClick = (id) => {
     const newParams = new URLSearchParams(searchParams);
@@ -325,7 +372,7 @@ const DoctorDashboard = () => {
             <FlaskConical className="w-4 h-4" />
             Lab Reports
           </button>
-          <button onClick={() => setSearchParams({ panel: 'patients' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition ml-auto">
+          <button onClick={() => navigate('/doctor/schedule-settings')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition ml-auto">
             <SettingsIcon className="w-4 h-4" />
             Settings
           </button>

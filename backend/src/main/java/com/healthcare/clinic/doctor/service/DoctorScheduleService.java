@@ -207,6 +207,11 @@ public class DoctorScheduleService {
 
         for (DoctorProfile doctor : activeDoctors) {
             try {
+                List<DoctorWorkingHours> workingHours = workingHoursRepository.findByDoctorIdAndIsActiveTrue(doctor.getId());
+                if (workingHours.isEmpty()) {
+                    log.warn("Doctor {} (User ID: {}) has zero active working hours configured. No slots will be generated.", doctor.getId(), doctor.getUserId());
+                }
+                
                 int created = generateSlotsForRange(doctor.getUserId(), today, to);
                 if (created > 0) {
                     log.info("Generated {} slots for doctor {}", created, doctor.getId());

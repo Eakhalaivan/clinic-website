@@ -2,6 +2,8 @@ package com.healthcare.clinic.doctor.controller;
 
 import com.healthcare.clinic.appointment.entity.Appointment;
 import com.healthcare.clinic.appointment.entity.AppointmentSlot;
+import com.healthcare.clinic.appointment.entity.AppointmentSlot;
+import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.doctor.dto.MyPatientResponse;
 import com.healthcare.clinic.doctor.entity.DoctorProfile;
@@ -76,7 +78,7 @@ public class DoctorPatientControllerTest {
 
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
-        appointment.setStatus("BOOKED");
+        appointment.setStatus(AppointmentStatus.BOOKED);
         appointment.setCreatedAt(ZonedDateTime.now());
         // Slot is null
 

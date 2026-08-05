@@ -6,6 +6,8 @@ import { NAV_BY_ROLE, getBaseRoleForUI, ROLE_LABELS } from '../../../config/phar
 import DashboardGrid from '../../dashboard/DashboardGrid';
 import { ChevronRight } from 'lucide-react';
 
+import Sidebar from './Sidebar';
+
 export default function MainLayout() {
   const { activeRole, roles } = useAuth();
   const location = useLocation();
@@ -48,28 +50,26 @@ export default function MainLayout() {
   const portalName = ROLE_LABELS[currentRole] || 'Pharmacy';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       <TopNav />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full mx-auto max-w-7xl flex flex-col overflow-x-hidden">
-        
-        {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm font-medium mb-4">
-          <span className="text-gray-500">{portalName}</span>
-          <ChevronRight size={14} className="text-gray-400" />
-          <span className="text-gray-900">{currentPageName}</span>
-        </div>
-
+      <div className="flex flex-1 overflow-hidden">
         {dashboardTiles && dashboardTiles.length > 0 && (
-          <DashboardGrid 
-            tiles={dashboardTiles} 
-            themeColor={themeColor} 
-            isDashboardHome={isDashboardHome}
-          />
+          <Sidebar items={dashboardTiles} themeColor={themeColor} />
         )}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
-          <Outlet />
-        </div>
-      </main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full flex flex-col overflow-y-auto">
+          
+          {/* Breadcrumb */}
+          <div className="flex items-center space-x-2 text-sm font-medium mb-4 shrink-0">
+            <span className="text-gray-500">{portalName}</span>
+            <ChevronRight size={14} className="text-gray-400" />
+            <span className="text-gray-900">{currentPageName}</span>
+          </div>
+
+          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 flex flex-col">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface RadiologyReportRepository extends JpaRepository<RadiologyReport, Long> {
     Optional<RadiologyReport> findByRequestId(Long requestId);
+    java.util.List<RadiologyReport> findByRequestPatientId(Long patientId);
 }

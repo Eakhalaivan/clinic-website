@@ -2,6 +2,7 @@ package com.healthcare.clinic.nursing.entity;
 
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.patient.entity.PatientProfile;
+import com.healthcare.clinic.appointment.entity.Appointment;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,11 @@ public class VitalSign {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nurse_id", nullable = false)
     private User nurse;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
 
     @Column(precision = 5, scale = 2)
     private BigDecimal temperature;
