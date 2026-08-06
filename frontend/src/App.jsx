@@ -43,6 +43,10 @@ import ClinicalNotes from './pages/doctor/ClinicalNotes';
 import NewPrescription from './pages/doctor/NewPrescription';
 import LabRequest from './pages/doctor/LabRequest';
 import PrescriptionTemplates from './pages/doctor/PrescriptionTemplates';
+import DoctorPrescriptions from './pages/doctor/DoctorPrescriptions';
+import DoctorLabReports from './pages/doctor/DoctorLabReports';
+import UploadLabReport from './pages/doctor/UploadLabReport';
+import DoctorMedicalCertificates from './pages/doctor/DoctorMedicalCertificates';
 import FollowUps from './pages/doctor/FollowUps';
 import DoctorEarnings from './pages/doctor/DoctorEarnings';
 import DoctorAnalytics from './pages/doctor/DoctorAnalytics';
@@ -212,6 +216,10 @@ function App() {
 
             <Route path="patients/:patientId/lab-request" element={<LabRequest />} />
             <Route path="patients/:patientId/care-pathways" element={<PatientCarePathwayView />} />
+            <Route path="prescriptions" element={<DoctorPrescriptions />} />
+            <Route path="lab-reports" element={<DoctorLabReports />} />
+            <Route path="lab-reports/upload" element={<UploadLabReport />} />
+            <Route path="medical-certificate" element={<DoctorMedicalCertificates />} />
             <Route path="prescription-templates" element={<PrescriptionTemplates />} />
             <Route path="follow-ups" element={<FollowUps />} />
             <Route path="earnings" element={<DoctorEarnings />} />

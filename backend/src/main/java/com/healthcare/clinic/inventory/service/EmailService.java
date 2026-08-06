@@ -1,8 +1,8 @@
 package com.healthcare.clinic.inventory.service;
 
-import com.healthcare.clinic.inventory.entity.Medicine;
-import com.healthcare.clinic.inventory.entity.MedicineStock;
-import com.healthcare.clinic.inventory.pharmacy.repository.MedicineStockRepository;
+import com.healthcare.clinic.pharmacy.entity.Medicine;
+import com.healthcare.clinic.pharmacy.entity.MedicineStock;
+import com.healthcare.clinic.pharmacy.repository.MedicineStockRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

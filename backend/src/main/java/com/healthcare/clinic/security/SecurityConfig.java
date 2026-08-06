@@ -58,6 +58,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/api/auth/**", "/api/health").permitAll();
+                auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/finance/payments/webhook/stripe").permitAll();
                 if (!isProd) {
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                 }
@@ -75,11 +76,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         if (allowedOrigins != null && !allowedOrigins.isBlank()) {
-            // Support comma-separated list of allowed origins (e.g. Render frontend URL + localhost for dev)
             configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            // No explicit origins configured — allow all via pattern (compatible with allowCredentials)
-            configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+            // Fail fast rather than opening credentialed CORS to any origin
+            throw new IllegalStateException("cors.allowed-origins must be configured");
         }
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "authorization", "content-type", "x-auth-token", "*"));

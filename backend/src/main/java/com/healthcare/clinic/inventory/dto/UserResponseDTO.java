@@ -2,7 +2,7 @@ package com.healthcare.clinic.inventory.dto;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.healthcare.clinic.inventory.entity.PharmacyUser;
+import com.healthcare.clinic.pharmacy.entity.PharmacyUser;
 
 public class UserResponseDTO {
     public Long id;

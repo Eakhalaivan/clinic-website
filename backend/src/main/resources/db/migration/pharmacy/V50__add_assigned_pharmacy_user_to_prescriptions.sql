@@ -1,0 +1,1 @@
+ALTER TABLE pharmacy_prescriptions ADD COLUMN assigned_pharmacy_user_id BIGINT;

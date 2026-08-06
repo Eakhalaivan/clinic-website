@@ -6,34 +6,26 @@ spring:
   application:
     name: clinic-app
   datasource:
-    url: ${DB_URL:jdbc:postgresql://pg-2ec02a9b-eakhalaivanp-46d0.i.aivencloud.com:15783/defaultdb?sslmode=require}
-    username: ${DB_USER:avnadmin}
-    password: ${DB_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      connection-timeout: 10000
-      maximum-pool-size: 5
-      minimum-idle: 2
-      initialization-fail-timeout: 1
-      data-source-properties:
-        sslmode: require
-        ssl: true
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-        jdbc:
-          lob:
-            non_contextual_creation: true
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    out-of-order: true
+    clinic:
+      jdbc-url: ${DB_URL:jdbc:postgresql://pg-2ec02a9b-eakhalaivanp-46d0.i.aivencloud.com:15783/defaultdb?sslmode=require}
+      username: ${DB_USER:avnadmin}
+      password: ${DB_PASSWORD:}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 10000
+        maximum-pool-size: 5
+        minimum-idle: 2
+        initialization-fail-timeout: 1
+    pharmacy:
+      jdbc-url: ${PHARMACY_DB_URL:jdbc:mysql://gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/pms?useSSL=true&enabledTLSProtocols=TLSv1.2,TLSv1.3&sslMode=REQUIRED}
+      username: ${PHARMACY_DB_USER:3ZMzEHamXVuJdSt.root}
+      password: ${PHARMACY_DB_PASSWORD:o2ldKmVs3hjxipyi}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        connection-timeout: 10000
+        maximum-pool-size: 5
+        minimum-idle: 2
+        initialization-fail-timeout: 1
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:587}
@@ -63,3 +55,8 @@ twilio:
   account-sid: ${TWILIO_ACCOUNT_SID:dummy}
   auth-token: ${TWILIO_AUTH_TOKEN:dummy}
   from-number: ${TWILIO_FROM_NUMBER:dummy}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:dummy_secret_key}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:dummy_webhook_secret}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:dummy_publishable_key}

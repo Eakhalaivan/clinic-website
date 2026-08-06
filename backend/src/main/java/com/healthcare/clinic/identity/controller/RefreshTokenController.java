@@ -26,22 +26,26 @@ public class RefreshTokenController {
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
-        return refreshTokenService.findByToken(requestRefreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    
-                    String token = jwtUtils.generateJwtToken(auth);
-                    
-                    // Rotate refresh token
-                    refreshTokenService.deleteByUserId(user.getId());
-                    String newRefreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
-                    
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, newRefreshToken));
-                })
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+        try {
+            return refreshTokenService.findByToken(requestRefreshToken)
+                    .map(refreshTokenService::verifyExpiration)
+                    .map(RefreshToken::getUser)
+                    .map(user -> {
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        
+                        String token = jwtUtils.generateJwtToken(auth);
+                        
+                        // Rotate refresh token
+                        refreshTokenService.deleteByUserId(user.getId());
+                        String newRefreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
+                        
+                        return ResponseEntity.ok(new TokenRefreshResponse(token, newRefreshToken));
+                    })
+                    .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
     }
     
     @PostMapping("/logout")

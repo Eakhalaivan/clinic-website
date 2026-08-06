@@ -10,6 +10,7 @@ import { getPortalConfig } from '../config/portalConfig';
 import useAuthStore, { isTokenValid } from '../store/authStore';
 import DashboardGrid from '../components/dashboard/DashboardGrid';
 import ThemeToggle from '../components/ui/ThemeToggle';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 
 const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
@@ -45,6 +46,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const displayTitle = displayName || 'Doctor';
 
   return (
+    <ErrorBoundary>
     <div className="h-screen overflow-hidden bg-[var(--color-bg-app)] flex flex-col font-sans transition-colors duration-200">
       {/* Top Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shrink-0">
@@ -203,6 +205,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
         <Outlet />
       </main>
     </div>
+    </ErrorBoundary>
   );
 };
 

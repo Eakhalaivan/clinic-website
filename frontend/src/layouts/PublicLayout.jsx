@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import './PublicLayout.css';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 
 const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -24,6 +25,7 @@ const PublicLayout = () => {
   };
 
   return (
+    <ErrorBoundary>
     <div className="public-layout">
       {location.pathname !== '/' && (
         <header className="public-header">
@@ -58,6 +60,7 @@ const PublicLayout = () => {
         </footer>
       )}
     </div>
+    </ErrorBoundary>
   );
 };
 

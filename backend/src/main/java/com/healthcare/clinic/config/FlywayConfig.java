@@ -1,0 +1,36 @@
+package com.healthcare.clinic.config;
+
+import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+
+import javax.sql.DataSource;
+
+@Configuration
+public class FlywayConfig {
+
+    @Bean
+    public Flyway clinicFlyway(@Qualifier("clinicDataSource") DataSource clinicDataSource) {
+        Flyway flyway = Flyway.configure()
+                .dataSource(clinicDataSource)
+                .locations("classpath:db/migration/clinic")
+                .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
+                .load();
+        // flyway.migrate();
+        return flyway;
+    }
+
+    @Bean
+    @DependsOn("clinicFlyway")
+    public Flyway pharmacyFlyway(@Qualifier("pharmacyDataSource") DataSource pharmacyDataSource) {
+        Flyway flyway = Flyway.configure()
+                .dataSource(pharmacyDataSource)
+                .locations("classpath:db/migration/pharmacy")
+                .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
+                .load();
+        // flyway.migrate();
+        return flyway;
+    }
+}

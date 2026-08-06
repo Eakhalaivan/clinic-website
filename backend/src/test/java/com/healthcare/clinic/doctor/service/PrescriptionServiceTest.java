@@ -40,7 +40,7 @@ class PrescriptionServiceTest {
     private com.healthcare.clinic.doctor.repository.PrescriptionRepository prescriptionRepository;
 
     @Mock
-    private com.healthcare.clinic.inventory.pharmacy.repository.PrescriptionRepository pharmacyPrescriptionRepository;
+    private com.healthcare.clinic.pharmacy.repository.PrescriptionRepository pharmacyPrescriptionRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -174,15 +174,15 @@ class PrescriptionServiceTest {
         when(userRepository.findById(10L)).thenReturn(Optional.of(doctor));
 
         // Act
-        prescriptionService.sendPrescription(100L);
+        prescriptionService.sendPrescription(100L, null);
 
         // Assert
-        ArgumentCaptor<com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord> pharmacyRxCaptor = 
-                ArgumentCaptor.forClass(com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord.class);
+        ArgumentCaptor<com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord> pharmacyRxCaptor = 
+                ArgumentCaptor.forClass(com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord.class);
         
         verify(pharmacyPrescriptionRepository, times(1)).save(pharmacyRxCaptor.capture());
         
-        com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord savedPharmacyRx = pharmacyRxCaptor.getValue();
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord savedPharmacyRx = pharmacyRxCaptor.getValue();
         assertEquals("PENDING", savedPharmacyRx.getStatus());
         assertEquals("UNVERIFIED", savedPharmacyRx.getVerificationStatus());
         assertEquals(100L, savedPharmacyRx.getClinicalPrescriptionId());

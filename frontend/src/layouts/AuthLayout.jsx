@@ -3,6 +3,7 @@ import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 import './AuthLayout.css';
 
 const AuthLayout = ({ allowedRoles }) => {
@@ -47,7 +48,8 @@ const AuthLayout = ({ allowedRoles }) => {
     else if (location.pathname.includes('analytics')) pageTitle = "Analytics";
 
     return (
-        <div className="portal-layout">
+        <ErrorBoundary>
+            <div className="portal-layout">
             {/* Mobile Overlay */}
             <div className={`portal-overlay ${sidebarOpen ? 'is-open' : ''}`} onClick={closeSidebar}></div>
 
@@ -113,6 +115,7 @@ const AuthLayout = ({ allowedRoles }) => {
                 </div>
             </main>
         </div>
+        </ErrorBoundary>
     );
 };
 

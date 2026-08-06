@@ -19,6 +19,7 @@ public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
     private final com.healthcare.clinic.doctor.service.PrescriptionTemplateService prescriptionTemplateService;
+    private final com.healthcare.clinic.identity.repository.UserRepository userRepository;
 
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN') or (hasAuthority('ROLE_PATIENT') and principal.userId == #patientId)")
@@ -105,10 +106,35 @@ public class PrescriptionController {
         return ResponseEntity.ok(prescriptionService.updateDraft(id, request));
     }
 
+    @GetMapping("/pharmacy-recipients")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    public ResponseEntity<List<java.util.Map<String, Object>>> getPharmacyRecipients() {
+        List<com.healthcare.clinic.identity.entity.User> pharmacists = userRepository.findUsersByRoleName("ROLE_PHARMACIST");
+        List<java.util.Map<String, Object>> recipients = pharmacists.stream()
+                .map(u -> {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("id", u.getId());
+                    
+                    String fName = u.getFirstName() != null ? u.getFirstName() : "";
+                    String lName = u.getLastName() != null ? u.getLastName() : "";
+                    String fullName = (fName + " " + lName).trim();
+                    map.put("name", fullName.isEmpty() ? "Unknown Pharmacist" : fullName);
+                    
+                    map.put("email", u.getEmail() != null ? u.getEmail() : "");
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(recipients);
+    }
+
     @PostMapping("/{id}/send")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
-    public ResponseEntity<PrescriptionResponse> sendPrescription(@PathVariable Long id) {
-        return ResponseEntity.ok(prescriptionService.sendPrescription(id));
+    public ResponseEntity<PrescriptionResponse> sendPrescription(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, Object> payload) {
+        Long pharmacyUserId = null;
+        if (payload != null && payload.containsKey("pharmacyUserId") && payload.get("pharmacyUserId") != null) {
+            pharmacyUserId = Long.valueOf(payload.get("pharmacyUserId").toString());
+        }
+        return ResponseEntity.ok(prescriptionService.sendPrescription(id, pharmacyUserId));
     }
 
 

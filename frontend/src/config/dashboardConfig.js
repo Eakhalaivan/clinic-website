@@ -28,14 +28,14 @@ export const dashboardConfig = {
   ROLE_DOCTOR: {
     quickActions: [
       { label: 'New Appointment', icon: CalendarIcon, color: 'text-[#5244F2]', bg: 'bg-[#5244F2]/10', actionPath: '?panel=calendar' },
-      { label: 'Add Patient', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10', actionPath: '?panel=patients' },
+      { label: 'Add Patient', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10', actionPath: '/doctor/patients' },
       { label: 'New Prescription', icon: Pill, color: 'text-orange-500', bg: 'bg-orange-500/10', actionPath: '/doctor/prescription-templates' },
-      { label: 'Lab Request', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10', actionPath: '?panel=patients' },
-      { label: 'Upload Report', icon: UploadCloud, color: 'text-purple-500', bg: 'bg-purple-500/10', actionPath: '?panel=patients' },
+      { label: 'Lab Request', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10', actionPath: '/doctor/patients' },
+      { label: 'Upload Report', icon: UploadCloud, color: 'text-purple-500', bg: 'bg-purple-500/10', actionPath: '/doctor/patients' },
       { label: 'Start Consultation', icon: Video, color: 'text-emerald-500', bg: 'bg-emerald-500/10', actionPath: '?panel=queue' },
       { label: 'View Calendar', icon: CalendarIcon, color: 'text-[#5244F2]', bg: 'bg-[#5244F2]/10', actionPath: '?panel=calendar' }
     ],
-    tabs: ['Dashboard', 'Appointments', 'Patients', 'Calendar', 'Prescriptions', 'Follow-ups', 'Lab Reports', 'Settings'],
+    tabs: ['Dashboard', 'Appointments', 'Patients', 'Calendar', 'Prescriptions', 'Lab Reports', 'Follow-ups', 'Medical Certificate', 'Settings'],
     layout: {
       left: [WIDGETS.PATIENT_QUEUE, WIDGETS.NEXT_APPOINTMENT],
       center: [WIDGETS.CALENDAR_TIMELINE],

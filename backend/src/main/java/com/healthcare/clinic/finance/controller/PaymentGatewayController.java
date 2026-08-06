@@ -16,12 +16,11 @@ public class PaymentGatewayController {
     private final StripePaymentService stripePaymentService;
 
     @PostMapping("/checkout/{invoiceId}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'FINANCE', 'RECEPTIONIST')")
     public ResponseEntity<Map<String, String>> createCheckoutSession(
-            @PathVariable Long invoiceId,
-            @RequestBody Map<String, Double> payload) {
+            @PathVariable Long invoiceId) {
         
-        Double amount = payload.getOrDefault("amount", 0.0);
-        String checkoutUrl = stripePaymentService.createCheckoutSession(invoiceId, amount);
+        String checkoutUrl = stripePaymentService.createCheckoutSession(invoiceId);
         
         Map<String, String> response = new HashMap<>();
         response.put("checkoutUrl", checkoutUrl);

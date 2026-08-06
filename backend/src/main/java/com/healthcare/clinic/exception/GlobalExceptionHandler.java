@@ -2,9 +2,9 @@ package com.healthcare.clinic.exception;
 
 import com.healthcare.clinic.clinicaldecision.exception.CdsCriticalSafetyException;
 import com.healthcare.clinic.common.dto.ApiResponse;
-import com.healthcare.clinic.inventory.pharmacy.exception.ExpiredStockException;
-import com.healthcare.clinic.inventory.pharmacy.exception.InsufficientStockException;
-import com.healthcare.clinic.inventory.pharmacy.exception.InvalidReturnException;
+import com.healthcare.clinic.pharmacy.exception.ExpiredStockException;
+import com.healthcare.clinic.pharmacy.exception.InsufficientStockException;
+import com.healthcare.clinic.pharmacy.exception.InvalidReturnException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

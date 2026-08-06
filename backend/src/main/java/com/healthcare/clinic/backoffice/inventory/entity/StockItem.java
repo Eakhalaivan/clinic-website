@@ -1,6 +1,6 @@
 package com.healthcare.clinic.backoffice.inventory.entity;
 
-import com.healthcare.clinic.inventory.pharmacy.entity.MedicineBatch;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -45,9 +45,8 @@ public class StockItem {
     @Builder.Default
     private Integer reorderLevel = 10;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medicine_batch_id")
-    private MedicineBatch medicineBatch;
+    @Column(name = "medicine_batch_id")
+    private Long medicineBatchId;
 
     @UpdateTimestamp
     @Column(name = "last_updated", nullable = false)

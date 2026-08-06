@@ -1,7 +1,7 @@
 package com.healthcare.clinic.inventory.controller;
 
-import com.healthcare.clinic.inventory.entity.PharmacyRole;
-import com.healthcare.clinic.inventory.repository.PharmacyRoleRepository;
+import com.healthcare.clinic.pharmacy.entity.PharmacyRole;
+import com.healthcare.clinic.pharmacy.repository.PharmacyRoleRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

@@ -1,8 +1,8 @@
 package com.healthcare.clinic.inventory.service;
 
-import com.healthcare.clinic.inventory.entity.Doctor;
-import com.healthcare.clinic.inventory.repository.DoctorRepository;
-import com.healthcare.clinic.inventory.pharmacy.exception.ResourceNotFoundException;
+import com.healthcare.clinic.pharmacy.entity.Doctor;
+import com.healthcare.clinic.pharmacy.repository.DoctorRepository;
+import com.healthcare.clinic.pharmacy.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.healthcare.clinic.inventory.controller;
 
-import com.healthcare.clinic.inventory.entity.Doctor;
+import com.healthcare.clinic.pharmacy.entity.Doctor;
 import com.healthcare.clinic.inventory.service.DoctorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

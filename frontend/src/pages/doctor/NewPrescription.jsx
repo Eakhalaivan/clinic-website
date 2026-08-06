@@ -130,6 +130,9 @@ const NewPrescription = () => {
     pulseBpm: ''
   });
 
+  const [isPharmacyModalOpen, setIsPharmacyModalOpen] = useState(false);
+  const [selectedPharmacyUserId, setSelectedPharmacyUserId] = useState('');
+
   const isReadOnly = isPreview || prescriptionStatus === 'SENT' || prescriptionStatus === 'VOIDED';
 
   // --- Data Fetching ---
@@ -140,6 +143,14 @@ const NewPrescription = () => {
         return res.data;
     },
     enabled: !!patientId
+  });
+
+  const { data: pharmacyUsers = [] } = useQuery({
+    queryKey: ['pharmacyUsers'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get(`/prescriptions/pharmacy-recipients`);
+      return res.data.data || [];
+    }
   });
 
   const { data: doctorDetails } = useQuery({
@@ -411,17 +422,19 @@ const NewPrescription = () => {
   });
 
   const sendToPharmacyMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (pharmacyUserId) => {
+      const payload = pharmacyUserId ? { pharmacyUserId: parseInt(pharmacyUserId) } : {};
       if (!prescriptionId) {
         const res = await axiosPrivate.post(`/prescriptions`, buildPayload());
-        return res;
+        return axiosPrivate.post(`/prescriptions/${res.data.id}/send`, payload);
       }
-      return axiosPrivate.post(`/prescriptions/${prescriptionId}/send`);
+      return axiosPrivate.post(`/prescriptions/${prescriptionId}/send`, payload);
     },
     onSuccess: (res) => {
       setPrescriptionStatus('PENDING'); // Sent to pharmacy sets status to PENDING
       queryClient.invalidateQueries(['patientPrescriptions', patientId]);
       toast.success('Prescription sent to pharmacy successfully');
+      setIsPharmacyModalOpen(false);
     }
   });
   const saveDraftMutation = useMutation({
@@ -462,7 +475,11 @@ const NewPrescription = () => {
   const handleSendToPharmacy = () => {
       if (profileError || !profile) { toast.error("Cannot proceed: Patient data failed to load."); return; }
       if(!validate()) { toast.error("Please add medicines."); return; }
-      sendToPharmacyMutation.mutate();
+      setIsPharmacyModalOpen(true);
+  };
+
+  const confirmSendToPharmacy = () => {
+      sendToPharmacyMutation.mutate(selectedPharmacyUserId);
   };
 
   const getAge = (dob) => {
@@ -1157,10 +1174,12 @@ const NewPrescription = () => {
                                   value={editProfile.allergies} 
                                   onChange={e => setEditProfile({...editProfile, allergies: e.target.value})}
                                   placeholder="e.g. Peanuts, Penicillin"
-                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500 placeholder-slate-400"
                               />
+                              <p className="text-[10px] text-slate-400 mt-1">Separate multiple with commas</p>
                           </div>
                       </div>
+                      <hr className="border-slate-100" />
                       <div className="grid grid-cols-2 gap-4">
                           <div>
                               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Height (cm)</label>
@@ -1168,7 +1187,6 @@ const NewPrescription = () => {
                                   type="number" 
                                   value={editProfile.heightCm} 
                                   onChange={e => setEditProfile({...editProfile, heightCm: e.target.value})}
-                                  placeholder="e.g. 175"
                                   className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
                               />
                           </div>
@@ -1178,14 +1196,13 @@ const NewPrescription = () => {
                                   type="number" 
                                   value={editProfile.weightKg} 
                                   onChange={e => setEditProfile({...editProfile, weightKg: e.target.value})}
-                                  placeholder="e.g. 70"
                                   className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
                               />
                           </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                           <div>
-                              <label className="block text-xs font-semibold text-slate-600 mb-1.5">BP (mmHg)</label>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Blood Pressure</label>
                               <input 
                                   type="text" 
                                   value={editProfile.bloodPressure} 
@@ -1200,20 +1217,86 @@ const NewPrescription = () => {
                                   type="number" 
                                   value={editProfile.pulseBpm} 
                                   onChange={e => setEditProfile({...editProfile, pulseBpm: e.target.value})}
-                                  placeholder="e.g. 72"
                                   className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
                               />
                           </div>
                       </div>
                   </div>
-                  <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                      <button onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-md transition-colors">Cancel</button>
+                  <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
                       <button 
-                          onClick={handleSaveEdit} 
-                          disabled={editProfileMutation.isPending || saveVitalsMutation.isPending}
-                          className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors flex items-center gap-2"
+                          onClick={() => setIsEditModalOpen(false)}
+                          className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
-                          {(editProfileMutation.isPending || saveVitalsMutation.isPending) ? 'Saving...' : 'Save Details'}
+                          Cancel
+                      </button>
+                      <button 
+                          onClick={handleSaveEdit}
+                          disabled={editProfileMutation.isPending || saveVitalsMutation.isPending}
+                          className="px-4 py-2 text-sm font-bold text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      >
+                          {(editProfileMutation.isPending || saveVitalsMutation.isPending) ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                              <Save className="w-4 h-4" />
+                          )}
+                          Save Changes
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* Pharmacy Selection Modal */}
+      {isPharmacyModalOpen && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+          >
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+                  <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                      <h3 className="font-bold text-slate-800">Select Pharmacy / Pharmacist</h3>
+                      <button 
+                        onClick={() => setIsPharmacyModalOpen(false)} 
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                          <X className="w-5 h-5" aria-hidden="true" />
+                      </button>
+                  </div>
+                  <div className="p-5 flex flex-col gap-4">
+                      <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Assign To</label>
+                          <select 
+                              value={selectedPharmacyUserId} 
+                              onChange={e => setSelectedPharmacyUserId(e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                          >
+                              <option value="">Any Available Pharmacist</option>
+                              {pharmacyUsers.map(u => (
+                                  <option key={u.id} value={u.id}>{u.firstName} {u.lastName} ({u.role})</option>
+                              ))}
+                          </select>
+                          <p className="text-[10px] text-slate-400 mt-1">If "Any Available" is selected, all pharmacists will see this prescription in their pending queue.</p>
+                      </div>
+                  </div>
+                  <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                      <button 
+                          onClick={() => setIsPharmacyModalOpen(false)}
+                          className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                          Cancel
+                      </button>
+                      <button 
+                          onClick={confirmSendToPharmacy}
+                          disabled={sendToPharmacyMutation.isPending}
+                          className="px-4 py-2 text-sm font-bold text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      >
+                          {sendToPharmacyMutation.isPending ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                              <Send className="w-4 h-4" />
+                          )}
+                          Send Prescription
                       </button>
                   </div>
               </div>

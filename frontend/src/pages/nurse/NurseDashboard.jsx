@@ -12,7 +12,9 @@ const NurseDashboard = () => {
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
-      const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/sse/appointments`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+      const token = localStorage.getItem('access_token');
+      const evtSource = new EventSource(`${baseUrl.replace('/api', '')}/api/sse/appointments?token=${token}`);
       
       const invalidate = () => {
           queryClient.invalidateQueries(['nurseAssignments']);

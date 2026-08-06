@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Search, Stethoscope } from 'lucide-react';
+import { Search, AlertTriangle, Stethoscope } from 'lucide-react';
 import { axiosPublic } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
-import './DoctorList.css';
 
 const DoctorList = () => {
   const { token, roles } = useAuthStore();
@@ -22,7 +21,7 @@ const DoctorList = () => {
   const filteredDoctors = useMemo(() => {
     if (!doctors) return [];
     return doctors.filter(doc => {
-      const matchSearch = doc.userId.toString().includes(searchTerm) || doc.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchSearch = doc.userId.toString().includes(searchTerm) || doc.specialty.toLowerCase().includes(searchTerm.toLowerCase()) || doc.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || doc.lastName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchSpecialty = selectedSpecialty ? doc.specialty === selectedSpecialty : true;
       return matchSearch && matchSpecialty;
     });
@@ -33,16 +32,6 @@ const DoctorList = () => {
     return [...new Set(doctors.map(d => d.specialty))].sort();
   }, [doctors]);
 
-  if (error) {
-    return (
-      <div className="empty-state">
-        <div className="empty-state-icon"><AlertTriangle aria-hidden="true" size={48} /></div>
-        <h3 className="empty-state-title">System Error</h3>
-        <p className="empty-state-desc">Failed to load specialists at this time.</p>
-      </div>
-    );
-  }
-
   const getBookLink = (doctorId) => {
     if (token && roles.includes('ROLE_PATIENT')) {
       return `/patient/book/${doctorId}`;
@@ -50,69 +39,132 @@ const DoctorList = () => {
     return '/register';
   };
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] bg-red-50 text-red-700 p-8 rounded-2xl mx-auto max-w-2xl mt-12">
+        <AlertTriangle aria-hidden="true" size={48} className="mb-4" />
+        <h3 className="text-2xl font-bold mb-2">System Error</h3>
+        <p className="text-red-600">Failed to load specialists at this time. Please try again later.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="doctor-list-page">
-      <div className="doctor-list-header">
-        <span className="label-caps">Our Specialists</span>
-        <h1 className="page-title">Meet Our Physicians</h1>
-        <p>Expert care tailored to you. Browse our network of premium healthcare professionals.</p>
-      </div>
-
-      <div className="doctor-list-filters">
-        <div className="input-icon-wrapper" style={{ width: '100%' }}>
-          <span className="input-icon"><Search aria-hidden="true" size={20} /></span>
-          <input 
-            type="text" 
-            className="input-field has-icon" 
-            placeholder="Search by name or specialty..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="min-h-screen bg-gray-50/50 py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm mb-4 block">Our Specialists</span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
+            Meet Our Physicians
+          </h1>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Expert care tailored to you. Browse our network of premium healthcare professionals and schedule a consultation today.
+          </p>
         </div>
-        <select 
-          className="input-field" 
-          value={selectedSpecialty}
-          onChange={(e) => setSelectedSpecialty(e.target.value)}
-        >
-          <option value="">All Specialties</option>
-          {uniqueSpecialties.map(spec => (
-            <option key={spec} value={spec}>{spec}</option>
-          ))}
-        </select>
-      </div>
 
-      {isLoading ? (
-        <div className="doctor-grid">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="card">
-              <div className="skeleton card-shape" style={{ height: '250px' }}></div>
-            </div>
-          ))}
+        {/* Search and Filters */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 mb-12 max-w-4xl mx-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input 
+              type="text" 
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 text-gray-700 placeholder-gray-400"
+              placeholder="Search by name or specialty..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="md:w-64">
+            <select 
+              className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 text-gray-700 appearance-none cursor-pointer"
+              value={selectedSpecialty}
+              onChange={(e) => setSelectedSpecialty(e.target.value)}
+            >
+              <option value="">All Specialties</option>
+              {uniqueSpecialties.map(spec => (
+                <option key={spec} value={spec}>{spec}</option>
+              ))}
+            </select>
+          </div>
         </div>
-      ) : filteredDoctors.length > 0 ? (
-        <div className="doctor-grid">
-          {filteredDoctors.map((doctor, index) => (
-            <div key={doctor.id} className="card doctor-card card-enter" style={{ animationDelay: `${index * 50}ms` }}>
-              <div className="doctor-avatar">
-                {doctor.specialty.substring(0, 1).toUpperCase()}
+
+        {/* Doctor Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex flex-col items-center animate-pulse">
+                <div className="w-24 h-24 bg-gray-200 rounded-full mb-6"></div>
+                <div className="w-3/4 h-6 bg-gray-200 rounded-md mb-4"></div>
+                <div className="w-1/2 h-4 bg-gray-200 rounded-md mb-8"></div>
+                <div className="w-full h-10 bg-gray-200 rounded-lg"></div>
               </div>
-              <h3 className="doctor-name">Dr. {doctor.firstName} {doctor.lastName}</h3>
-              <span className="label-caps">{doctor.specialty}</span>
-              <p className="doctor-qualifications">{doctor.qualifications}</p>
-              <Link to={getBookLink(doctor.userId)} className="btn-secondary doctor-card-action">
-                Book Consultation
-              </Link>
+            ))}
+          </div>
+        ) : filteredDoctors.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredDoctors.map((doctor, index) => {
+              const initials = `${doctor.firstName?.[0] || ''}${doctor.lastName?.[0] || ''}`;
+              
+              return (
+                <div 
+                  key={doctor.id} 
+                  className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 flex flex-col items-center text-center group"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="w-24 h-24 rounded-full bg-indigo-50 flex items-center justify-center mb-6 group-hover:bg-indigo-100 transition-colors">
+                    {doctor.profileImageUrl ? (
+                      <img src={doctor.profileImageUrl} alt={`Dr. ${doctor.lastName}`} className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <span className="text-2xl font-bold text-indigo-700">{initials}</span>
+                    )}
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Dr. {doctor.firstName} {doctor.lastName}
+                  </h3>
+                  
+                  <div className="mb-4">
+                    <span className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase">
+                      {doctor.specialty}
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-500 text-sm mb-8 line-clamp-2">
+                    {doctor.qualifications || 'Board Certified Specialist'}
+                  </p>
+                  
+                  <div className="mt-auto w-full">
+                    <Link 
+                      to={getBookLink(doctor.userId)} 
+                      className="block w-full py-3 px-4 bg-white border-2 border-indigo-600 text-indigo-700 font-semibold rounded-xl hover:bg-indigo-600 hover:text-white transition-colors duration-200"
+                    >
+                      Book Consultation
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 px-4 bg-white rounded-3xl border border-gray-100 shadow-sm max-w-3xl mx-auto text-center">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+              <Stethoscope className="text-gray-400 w-10 h-10" />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon"><Stethoscope aria-hidden="true" size={48} /></div>
-          <h3 className="empty-state-title">No specialists found</h3>
-          <p className="empty-state-desc">Try adjusting your filters to see more results.</p>
-          <button className="btn-primary" onClick={() => { setSearchTerm(''); setSelectedSpecialty(''); }}>Clear Filters</button>
-        </div>
-      )}
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">No specialists found</h3>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              We couldn't find any doctors matching your search criteria. Try adjusting your filters to see more results.
+            </p>
+            <button 
+              className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+              onClick={() => { setSearchTerm(''); setSelectedSpecialty(''); }}
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

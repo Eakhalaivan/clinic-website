@@ -15,7 +15,6 @@ export default function DashboardGrid({ tiles = [] }) {
     '/doctor/queue': 'queue',
     '/doctor/calendar': 'calendar',
     '/doctor/follow-ups': 'follow-ups',
-    '/doctor/patients': 'patients',
     '/doctor/analytics': 'analytics',
     '/doctor/earnings': 'earnings'
   };

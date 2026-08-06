@@ -9,7 +9,7 @@ import com.healthcare.clinic.doctor.entity.Prescription;
 import com.healthcare.clinic.doctor.entity.PrescriptionItem;
 import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.security.SecurityUtils;
-import com.healthcare.clinic.inventory.entity.PharmacyPrescriptionItem;
+import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem;
 import com.healthcare.clinic.clinicaldecision.service.CdsSafetyCheckService;
 import com.healthcare.clinic.laboratory.entity.LabTestRequest;
 import com.healthcare.clinic.laboratory.repository.LabTestCatalogRepository;
@@ -20,6 +20,11 @@ import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
 import com.healthcare.clinic.branch.repository.BranchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+
+import com.healthcare.clinic.doctor.entity.ClinicOutboxEvent;
+import com.healthcare.clinic.doctor.repository.ClinicOutboxEventRepository;
+import com.healthcare.clinic.doctor.dto.OutboxPrescriptionPayload;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +37,9 @@ import java.util.stream.Collectors;
 public class PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
-    private final com.healthcare.clinic.inventory.pharmacy.repository.PrescriptionRepository pharmacyPrescriptionRepository;
+    private final ClinicOutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     private final UserRepository userRepository;
     private final CdsSafetyCheckService cdsSafetyCheckService;
     private final ApplicationEventPublisher eventPublisher;
@@ -117,31 +124,38 @@ public class PrescriptionService {
                 .map(u -> u.getFirstName() + " " + u.getLastName())
                 .orElse("Unknown Doctor");
 
-        com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord pharmRx =
-                new com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord();
-        pharmRx.setPatientName(patientName);
-        pharmRx.setDoctorName(doctorName);
-        pharmRx.setPrescriptionDate(LocalDateTime.now());
-        pharmRx.setStatus("PENDING");
-        pharmRx.setVerificationStatus("UNVERIFIED");
-        pharmRx.setClinicalPrescriptionId(saved.getId());
+        List<OutboxPrescriptionPayload.OutboxPrescriptionItem> outboxItems = request.getItems().stream().map(itemRequest -> 
+            OutboxPrescriptionPayload.OutboxPrescriptionItem.builder()
+                .medicationName(itemRequest.getMedicationName())
+                .type(itemRequest.getType())
+                .dosage(itemRequest.getDosage())
+                .frequency(itemRequest.getFrequency())
+                .duration(itemRequest.getDuration())
+                .instructions(itemRequest.getInstructions())
+                .strength(itemRequest.getStrength())
+                .timing(itemRequest.getTiming())
+                .build()
+        ).collect(Collectors.toList());
 
-        // Copy medication items so pharmacists see the actual drugs
-        request.getItems().forEach(itemRequest -> {
-            PharmacyPrescriptionItem pharmItem = PharmacyPrescriptionItem.builder()
-                    .medicationName(itemRequest.getMedicationName())
-                    .type(itemRequest.getType())
-                    .dosage(itemRequest.getDosage())
-                    .frequency(itemRequest.getFrequency())
-                    .duration(itemRequest.getDuration())
-                    .instructions(itemRequest.getInstructions())
-                    .strength(itemRequest.getStrength())
-                    .timing(itemRequest.getTiming())
+        OutboxPrescriptionPayload payload = OutboxPrescriptionPayload.builder()
+                .patientName(patientName)
+                .doctorName(doctorName)
+                .clinicalPrescriptionId(saved.getId())
+                .items(outboxItems)
+                .build();
+        
+        try {
+            ClinicOutboxEvent event = ClinicOutboxEvent.builder()
+                    .aggregateType("PRESCRIPTION")
+                    .aggregateId(saved.getId().toString())
+                    .eventType("PRESCRIPTION_CREATED")
+                    .payload(objectMapper.writeValueAsString(payload))
+                    .status("PENDING")
                     .build();
-            pharmRx.addItem(pharmItem);
-        });
-
-        pharmacyPrescriptionRepository.save(pharmRx);
+            outboxEventRepository.save(event);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize outbox event", e);
+        }
 
         // ── Auto-create MAR records for Injections ─────────────────────────
         saved.getItems().forEach(item -> {
@@ -271,7 +285,7 @@ public class PrescriptionService {
     }
 
     @Transactional
-    public PrescriptionResponse sendPrescription(Long id) {
+    public PrescriptionResponse sendPrescription(Long id, Long pharmacyUserId) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescription not found with id: " + id));
 
@@ -289,6 +303,9 @@ public class PrescriptionService {
         }
 
         prescription.setPharmacyStatus("PENDING");
+        if (pharmacyUserId != null) {
+            prescription.setAssignedPharmacyUserId(pharmacyUserId);
+        }
         Prescription saved = prescriptionRepository.save(prescription);
 
         String patientName = userRepository.findById(prescription.getPatientId())
@@ -298,30 +315,39 @@ public class PrescriptionService {
                 .map(u -> u.getFirstName() + " " + u.getLastName())
                 .orElse("Unknown Doctor");
 
-        com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord pharmRx =
-                new com.healthcare.clinic.inventory.entity.PharmacyPrescriptionRecord();
-        pharmRx.setPatientName(patientName);
-        pharmRx.setDoctorName(doctorName);
-        pharmRx.setPrescriptionDate(LocalDateTime.now());
-        pharmRx.setStatus("PENDING");
-        pharmRx.setVerificationStatus("UNVERIFIED");
-        pharmRx.setClinicalPrescriptionId(saved.getId());
+        List<OutboxPrescriptionPayload.OutboxPrescriptionItem> outboxItems = prescription.getItems().stream().map(item -> 
+            OutboxPrescriptionPayload.OutboxPrescriptionItem.builder()
+                .medicationName(item.getMedicationName())
+                .type(item.getType())
+                .dosage(item.getDosage())
+                .frequency(item.getFrequency())
+                .duration(item.getDuration())
+                .instructions(item.getInstructions())
+                .strength(item.getStrength())
+                .timing(item.getTiming())
+                .build()
+        ).collect(Collectors.toList());
 
-        prescription.getItems().forEach(item -> {
-            PharmacyPrescriptionItem pharmItem = PharmacyPrescriptionItem.builder()
-                    .medicationName(item.getMedicationName())
-                    .type(item.getType())
-                    .dosage(item.getDosage())
-                    .frequency(item.getFrequency())
-                    .duration(item.getDuration())
-                    .instructions(item.getInstructions())
-                    .strength(item.getStrength())
-                    .timing(item.getTiming())
+        OutboxPrescriptionPayload payload = OutboxPrescriptionPayload.builder()
+                .patientName(patientName)
+                .doctorName(doctorName)
+                .clinicalPrescriptionId(saved.getId())
+                .pharmacyUserId(pharmacyUserId)
+                .items(outboxItems)
+                .build();
+        
+        try {
+            ClinicOutboxEvent event = ClinicOutboxEvent.builder()
+                    .aggregateType("PRESCRIPTION")
+                    .aggregateId(saved.getId().toString())
+                    .eventType("PRESCRIPTION_SENT")
+                    .payload(objectMapper.writeValueAsString(payload))
+                    .status("PENDING")
                     .build();
-            pharmRx.addItem(pharmItem);
-        });
-
-        pharmacyPrescriptionRepository.save(pharmRx);
+            outboxEventRepository.save(event);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize outbox event", e);
+        }
 
         List<String> medNames = prescription.getItems().stream()
                 .map(PrescriptionItem::getMedicationName)
@@ -332,6 +358,7 @@ public class PrescriptionService {
                 .prescriptionId(saved.getId())
                 .medicationNames(medNames)
                 .doctorId(doctorId)
+                .assignedPharmacyUserId(pharmacyUserId)
                 .build());
 
         return mapToResponse(saved);
@@ -426,12 +453,20 @@ public class PrescriptionService {
         prescription.setPharmacyStatus("VOIDED");
 
         // also void pharmacy side
-        pharmacyPrescriptionRepository.findAll().stream()
-                .filter(p -> id.equals(p.getClinicalPrescriptionId()))
-                .forEach(p -> {
-                    p.setStatus("CANCELLED");
-                    pharmacyPrescriptionRepository.save(p);
-                });
+        
+        try {
+            ClinicOutboxEvent event = ClinicOutboxEvent.builder()
+                    .aggregateType("PRESCRIPTION")
+                    .aggregateId(id.toString())
+                    .eventType("PRESCRIPTION_VOIDED")
+                    .payload("{}")
+                    .status("PENDING")
+                    .build();
+            outboxEventRepository.save(event);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize outbox event", e);
+        }
+
 
         Prescription saved = prescriptionRepository.save(prescription);
         return mapToResponse(saved);

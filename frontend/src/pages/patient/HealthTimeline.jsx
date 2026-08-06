@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { axiosPrivate as axios } from '../../api/axios';
 import { Activity, FileText, Stethoscope, Image as ImageIcon, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 

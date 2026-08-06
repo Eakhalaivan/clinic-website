@@ -1,262 +1,489 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { axiosPrivate } from '../../api/axios';
+import useAuthStore from '../../store/authStore';
 import {
-  CheckCircle2, Clock, XCircle, Play, LogIn, Users,
-  CalendarCheck, AlertCircle, ChevronRight, Loader2
+  Calendar as CalendarIcon, CheckCircle2, Clock, XCircle, Users,
+  AlertCircle, ChevronRight, ChevronLeft, Loader2,
+  Filter, Search, LayoutGrid, Eye, MoreVertical,
+  ArrowUpRight, ArrowDownRight, CalendarDays, FileText
 } from 'lucide-react';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
-const fmt = (iso) => {
+const formatTime = (iso) => {
   if (!iso) return '—';
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+const formatDate = (iso) => {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 const STATUS_META = {
-  BOOKED:     { label: 'Booked',      bg: 'bg-blue-50 dark:bg-blue-500/10', color: 'text-blue-700 dark:text-blue-400' },
-  CHECKED_IN: { label: 'Checked In',  bg: 'bg-orange-50 dark:bg-orange-500/10', color: 'text-orange-700 dark:text-orange-400' },
-  IN_PROGRESS:{ label: 'In Progress', bg: 'bg-yellow-50 dark:bg-yellow-500/10', color: 'text-yellow-700 dark:text-yellow-400' },
-  COMPLETED:  { label: 'Completed',   bg: 'bg-green-50 dark:bg-green-500/10', color: 'text-green-700 dark:text-green-400' },
-  CANCELLED:  { label: 'Cancelled',   bg: 'bg-slate-100 dark:bg-slate-700', color: 'text-slate-600 dark:text-slate-300' },
-  NO_SHOW:    { label: 'No Show',     bg: 'bg-red-50 dark:bg-red-500/10', color: 'text-red-700 dark:text-red-400' },
+  BOOKED:      { label: 'Confirmed',   bg: 'bg-emerald-50 text-emerald-600', dot: 'bg-emerald-500' },
+  CONFIRMED:   { label: 'Confirmed',   bg: 'bg-emerald-50 text-emerald-600', dot: 'bg-emerald-500' },
+  CHECKED_IN:  { label: 'In Progress', bg: 'bg-amber-50 text-amber-600', dot: 'bg-amber-500' },
+  IN_PROGRESS: { label: 'In Progress', bg: 'bg-amber-50 text-amber-600', dot: 'bg-amber-500' },
+  COMPLETED:   { label: 'Completed',   bg: 'bg-blue-50 text-blue-600', dot: 'bg-blue-500' },
+  CANCELLED:   { label: 'Cancelled',   bg: 'bg-red-50 text-red-600', dot: 'bg-red-500' },
+  NO_SHOW:     { label: 'No Show',     bg: 'bg-orange-50 text-orange-600', dot: 'bg-orange-500' },
+  SCHEDULED:   { label: 'Confirmed',   bg: 'bg-emerald-50 text-emerald-600', dot: 'bg-emerald-500' }
+};
+
+const TYPE_META = {
+  'Consultation': { bg: 'bg-purple-50 text-purple-600' },
+  'Follow-up':    { bg: 'bg-blue-50 text-blue-600' },
+  'Lab Review':   { bg: 'bg-amber-50 text-amber-600' }
 };
 
 const StatusBadge = ({ status }) => {
-  const meta = STATUS_META[status] || { label: status, bg: 'bg-slate-100 dark:bg-slate-700', color: 'text-slate-600 dark:text-slate-300' };
+  const meta = STATUS_META[status] || { label: status, bg: 'bg-slate-100 text-slate-600', dot: 'bg-slate-500' };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[0.72rem] font-bold tracking-wide ${meta.bg} ${meta.color}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${meta.bg}`}>
       {meta.label}
     </span>
   );
 };
 
-// ── confirm dialog ────────────────────────────────────────────────────────────
-const ConfirmDialog = ({ message, onConfirm, onCancel }) => (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[1000]">
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-7 max-w-[380px] w-[90%] shadow-2xl">
-      <div className="flex items-center gap-2.5 mb-3">
-        <AlertCircle size={20} className="text-orange-600 dark:text-orange-500" />
-        <h3 className="m-0 text-base font-bold text-slate-900 dark:text-white">Confirm Action</h3>
-      </div>
-      <p className="mt-0 mb-5 text-sm text-slate-600 dark:text-slate-300">{message}</p>
-      <div className="flex justify-end gap-2.5">
-        <button onClick={onCancel} className="px-4 py-1.5 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors cursor-pointer">
-          Cancel
-        </button>
-        <button onClick={onConfirm} className="px-4 py-1.5 rounded-md border-none bg-orange-600 hover:bg-orange-700 text-white font-semibold text-sm transition-colors cursor-pointer">
-          Confirm
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
 // ── main component ────────────────────────────────────────────────────────────
-const AppointmentListToday = () => {
+const DoctorAppointments = () => {
+  const { user } = useAuthStore();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [confirm, setConfirm] = useState(null); // { id, status, message, patientId }
+  const [activeTab, setActiveTab] = useState('All Appointments');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: appointments = [], isLoading, error } = useQuery({
-    queryKey: ['doctor-today-appointments'],
+  // Fetch all appointments for the doctor
+  const { data: allAppointments = [], isLoading, error } = useQuery({
+    queryKey: ['doctorAllAppointments', user?.id],
     queryFn: async () => {
-      const start = new Date(); start.setHours(0,0,0,0);
-      const end = new Date(); end.setHours(23,59,59,999);
-      return (await axiosPrivate.get(`/appointments/today?start=${start.toISOString()}&end=${end.toISOString()}`)).data;
+      const res = await axiosPrivate.get('/appointments/doctor/me');
+      return res.data;
     },
-    refetchInterval: 30_000,
+    enabled: !!user?.id,
+    refetchInterval: 30000,
   });
 
-  const updateStatus = useMutation({
-    mutationFn: async ({ id, status, patientId }) =>
-      axiosPrivate.patch(`/appointments/${id}/status?status=${status}`),
-    onSuccess: (data, variables) => {
-      // Invalidate this list, the dashboard counts, and the calendar
-      queryClient.invalidateQueries({ queryKey: ['doctor-today-appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
-      queryClient.invalidateQueries({ queryKey: ['doctor-appointments'] });
+  // Calculate Stats
+  const now = new Date();
+  const todayStr = now.toDateString();
+  
+  const stats = useMemo(() => {
+    let total = allAppointments.length;
+    let todayCount = 0;
+    let completed = 0;
+    let cancelled = 0;
+    let noShow = 0;
 
-      if (variables.status === 'COMPLETED' && variables.patientId) {
-        navigate(`/doctor/patients/${variables.patientId}`);
-      }
-    },
-  });
+    allAppointments.forEach(apt => {
+      if (new Date(apt.startTime).toDateString() === todayStr) todayCount++;
+      if (apt.status === 'COMPLETED') completed++;
+      if (apt.status === 'CANCELLED') cancelled++;
+      if (apt.status === 'NO_SHOW') noShow++;
+    });
 
-  const doUpdate = (id, status, message, patientId = null) => {
-    if (message) {
-      setConfirm({ id, status, message, patientId });
-    } else {
-      updateStatus.mutate({ id, status, patientId });
+    return { total, todayCount, completed, cancelled, noShow };
+  }, [allAppointments, todayStr]);
+
+  // Filter appointments for the table
+  const filteredAppointments = useMemo(() => {
+    let filtered = [...allAppointments];
+    
+    if (activeTab === 'Upcoming') {
+      filtered = filtered.filter(a => new Date(a.startTime) >= now && (a.status === 'SCHEDULED' || a.status === 'BOOKED' || a.status === 'CONFIRMED'));
+    } else if (activeTab === 'Completed') {
+      filtered = filtered.filter(a => a.status === 'COMPLETED');
+    } else if (activeTab === 'Cancelled') {
+      filtered = filtered.filter(a => a.status === 'CANCELLED');
+    } else if (activeTab === 'No Show') {
+      filtered = filtered.filter(a => a.status === 'NO_SHOW');
     }
-  };
 
-  // Sort chronologically by startTime
-  const sorted = [...appointments].sort(
-    (a, b) => new Date(a.startTime) - new Date(b.startTime)
-  );
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(a => {
+        const name = `${a.patientFirstName} ${a.patientLastName}`.toLowerCase();
+        return name.includes(q) || (a.reasonForVisit && a.reasonForVisit.toLowerCase().includes(q));
+      });
+    }
 
-  const counts = {
-    total: sorted.length,
-    checkedIn: sorted.filter(a => a.status === 'CHECKED_IN').length,
-    completed: sorted.filter(a => a.status === 'COMPLETED').length,
-  };
+    return filtered.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+  }, [allAppointments, activeTab, searchQuery, now]);
+
+  // Today's schedule for sidebar
+  const todaysSchedule = useMemo(() => {
+    return allAppointments
+      .filter(a => new Date(a.startTime).toDateString() === todayStr)
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+      .slice(0, 5);
+  }, [allAppointments, todayStr]);
+
+  const todayFormatted = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', weekday: 'long' });
 
   return (
-    <div className="p-6 max-w-[1100px] mx-auto">
-      {confirm && (
-        <ConfirmDialog
-          message={confirm.message}
-          onConfirm={() => {
-            updateStatus.mutate({ id: confirm.id, status: confirm.status, patientId: confirm.patientId });
-            setConfirm(null);
-          }}
-          onCancel={() => setConfirm(null)}
-        />
-      )}
-
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-5">
-        Today's Appointments
-      </h1>
-
-      {/* Summary Cards — computed from the same live data as the table */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
-        {[
-          { label: 'Total Today',  value: counts.total,     icon: CalendarCheck, bg: 'bg-blue-50 dark:bg-blue-500/10', color: 'text-blue-700 dark:text-blue-400' },
-          { label: 'Checked In',  value: counts.checkedIn,  icon: LogIn,         bg: 'bg-orange-50 dark:bg-orange-500/10', color: 'text-orange-700 dark:text-orange-400' },
-          { label: 'Completed',   value: counts.completed,  icon: CheckCircle2,  bg: 'bg-green-50 dark:bg-green-500/10', color: 'text-green-700 dark:text-green-400' },
-        ].map(({ label, value, icon: Icon, bg, color }) => (
-          <div key={label} className="bg-white dark:bg-[#1A263E] p-4 sm:px-5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-3.5 shadow-sm">
-            <div className={`p-2.5 rounded-lg ${bg}`}>
-              <Icon size={20} className={color} />
-            </div>
-            <div>
-              <p className="m-0 text-[0.78rem] text-slate-500 dark:text-slate-400 font-semibold">{label}</p>
-              <h3 className={`m-0 mt-0.5 text-3xl font-extrabold ${color}`}>{value}</h3>
-            </div>
-          </div>
-        ))}
+    <div className="p-6 max-w-[1400px] mx-auto bg-slate-50/50 min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Appointments</h1>
+          <p className="text-sm text-slate-500 font-medium">Manage and schedule patient appointments</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
+            <CalendarIcon size={16} className="text-indigo-600" />
+            {todayFormatted}
+            <ChevronRight size={16} className="text-slate-400" />
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
+            <Filter size={16} className="text-indigo-600" />
+            Filter
+            <ChevronRight size={16} className="text-slate-400 rotate-90" />
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-[#1A263E] rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-slate-400 flex justify-center items-center gap-2">
-            <Loader2 size={18} className="animate-spin" /> Loading appointments…
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        {/* Total Appointments */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-1">Total Appointments</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.total}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <ArrowUpRight size={14} />
+              <span>12% from yesterday</span>
+            </div>
           </div>
-        ) : error ? (
-          <div className="p-10 text-center text-red-600 dark:text-red-400">
-            Failed to load appointments. Please refresh.
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <CalendarDays size={24} />
           </div>
-        ) : sorted.length === 0 ? (
-          <div className="p-14 text-center flex flex-col items-center">
-            <CalendarCheck size={40} className="text-slate-300 dark:text-slate-600 mb-3" />
-            <p className="text-slate-400 dark:text-slate-500 font-medium m-0">No appointments scheduled for today</p>
+        </div>
+
+        {/* Today's Appointments */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-1">Today's Appointments</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.todayCount}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <ArrowUpRight size={14} />
+              <span>8% from yesterday</span>
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  {['#', 'Time', 'Patient', 'Reason', 'Status', 'Actions'].map(h => (
-                    <th key={h} className="py-3 px-4 text-[0.78rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                {sorted.map((a, i) => (
-                  <tr key={a.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3.5 px-4 text-[0.78rem] font-semibold text-slate-400">{i + 1}</td>
-                    <td className="py-3.5 px-4 text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                      {fmt(a.startTime)}
-                      {a.endTime && <span className="font-normal text-slate-400"> – {fmt(a.endTime)}</span>}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                          <Users size={14} className="text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                            {a.patientFirstName && a.patientLastName
-                              ? `${a.patientFirstName} ${a.patientLastName}`
-                              : a.patientFirstName || a.patientLastName || 'Unknown Patient'}
-                          </div>
-                          {a.reasonForVisit && (
-                            <div className="text-[0.72rem] text-slate-400 mt-px">
-                              {a.reasonForVisit.length > 40 ? a.reasonForVisit.slice(0, 40) + '…' : a.reasonForVisit}
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Users size={24} />
+          </div>
+        </div>
+
+        {/* Completed */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-1">Completed</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.completed}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <ArrowUpRight size={14} />
+              <span>10% from yesterday</span>
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <CheckCircle2 size={24} />
+          </div>
+        </div>
+
+        {/* Cancelled */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-1">Cancelled</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.cancelled}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-red-600">
+              <ArrowDownRight size={14} />
+              <span>2% from yesterday</span>
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+            <XCircle size={24} />
+          </div>
+        </div>
+
+        {/* No Show */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-1">No Show</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.noShow}</h3>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-red-600">
+              <ArrowDownRight size={14} />
+              <span>1% from yesterday</span>
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+            <FileText size={24} />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid: Left content 75%, Right sidebar 25% */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        {/* Left Content */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Tabs & Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-2">
+            <div className="flex items-center gap-6 overflow-x-auto">
+              {['All Appointments', 'Upcoming', 'Completed', 'Cancelled', 'No Show'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`text-sm font-semibold pb-3 border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === tab 
+                      ? 'border-indigo-600 text-indigo-600' 
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search appointments..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm w-64 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-sm"
+                />
+              </div>
+              <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
+                <LayoutGrid size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            {isLoading ? (
+              <div className="p-16 flex flex-col items-center justify-center text-slate-400">
+                <Loader2 size={32} className="animate-spin mb-4 text-indigo-600" />
+                <p>Loading appointments...</p>
+              </div>
+            ) : filteredAppointments.length === 0 ? (
+              <div className="p-16 flex flex-col items-center justify-center text-slate-400">
+                <CalendarIcon size={48} className="mb-4 text-slate-200" />
+                <p className="text-slate-600 font-medium">No appointments found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Time</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Patient</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Age / Gender</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Appointment Type</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Reason</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500">Status</th>
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {filteredAppointments.map((a) => {
+                      const statusInfo = STATUS_META[a.status] || { label: a.status, dot: 'bg-slate-400' };
+                      const type = a.appointmentType || 'Consultation';
+                      const typeMeta = TYPE_META[type] || { bg: 'bg-purple-50 text-purple-600' };
+                      
+                      return (
+                        <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-2 h-2 rounded-full ${statusInfo.dot}`}></div>
+                              <span className="text-sm font-bold text-slate-900">{formatTime(a.startTime)}</span>
                             </div>
-                          )}
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                                {a.patientProfilePictureUrl ? (
+                                  <img src={a.patientProfilePictureUrl} alt="Patient" className="w-full h-full object-cover" />
+                                ) : (
+                                  <Users size={16} className="text-slate-400" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-bold text-slate-900">
+                                  {a.patientFirstName} {a.patientLastName}
+                                </h4>
+                                <p className="text-[11px] text-slate-500 font-medium">#{a.patientId ? `PID${a.patientId.toString().substring(0,6)}` : 'N/A'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <p className="text-sm font-semibold text-slate-700">{a.patientAge || '—'} Years</p>
+                            <p className="text-[11px] text-slate-500 font-medium">{a.patientGender || '—'}</p>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold ${typeMeta.bg}`}>
+                              {type}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <p className="text-sm font-semibold text-slate-700 max-w-[150px] truncate">
+                              {a.reasonForVisit || 'Regular Checkup'}
+                            </p>
+                          </td>
+                          <td className="py-4 px-6">
+                            <StatusBadge status={a.status} />
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center justify-center gap-2">
+                              <button onClick={() => navigate(`/doctor/patients/${a.patientId}`)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100">
+                                <Eye size={16} />
+                              </button>
+                              <button className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-slate-100">
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="space-y-6">
+          {/* Calendar Widget (Mockup Visual) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-slate-900">Calendar</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-600">May 2024</span>
+                <div className="flex gap-1">
+                  <button className="p-1 rounded-md hover:bg-slate-100"><ChevronLeft size={14} /></button>
+                  <button className="p-1 rounded-md hover:bg-slate-100"><ChevronRight size={14} /></button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="text-[10px] font-bold text-slate-400">{day}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {[28,29,30,1,2,3,4, 5,6,7,8,9,10,11, 12,13,14,15,16,17,18, 19,20,21,22,23,24,25, 26,27,28,29,30,31,1].map((date, i) => {
+                const isCurrentMonth = i >= 3 && i <= 33;
+                const isToday = date === 21; // From mockup
+                return (
+                  <button 
+                    key={i} 
+                    className={`h-8 w-8 rounded-full text-xs font-semibold mx-auto flex items-center justify-center transition-colors
+                      ${isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 
+                        isCurrentMonth ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-300'}`}
+                  >
+                    {date}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Today's Schedule */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-bold text-slate-900">Today's Schedule</h3>
+              <button className="text-xs font-bold text-indigo-600 hover:text-indigo-700">View All</button>
+            </div>
+
+            <div className="space-y-0 relative before:absolute before:inset-0 before:ml-1.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+              {todaysSchedule.length === 0 ? (
+                <div className="text-center text-sm text-slate-500 py-4">No appointments today</div>
+              ) : (
+                todaysSchedule.map((a, i) => {
+                  const statusInfo = STATUS_META[a.status] || { dot: 'bg-slate-400', bg: 'bg-slate-50 text-slate-600' };
+                  return (
+                    <div key={i} className="relative flex items-start gap-4 mb-5 group">
+                      <div className="flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-full bg-white border-2 border-white shadow-sm mt-1 z-10">
+                        <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot}`}></div>
+                      </div>
+                      
+                      <div className="w-full flex justify-between items-start pt-0.5">
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">{formatTime(a.startTime)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-slate-900">{a.patientFirstName} {a.patientLastName}</p>
+                          <p className="text-[11px] text-slate-500 font-medium mb-1">{a.appointmentType || 'Consultation'}</p>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold inline-block ${statusInfo.bg}`}>
+                            {statusInfo.label}
+                          </span>
                         </div>
                       </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-[0.8rem] text-slate-500 dark:text-slate-400">Consultation</td>
-                    <td className="py-3.5 px-4"><StatusBadge status={a.status} /></td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex gap-1.5 flex-wrap">
-                        {/* BOOKED → Check In */}
-                        {a.status === 'BOOKED' && (
-                          <>
-                            <ActionBtn
-                              icon={LogIn} label="Check In" color="text-blue-700 dark:text-blue-400" bg="bg-blue-50 dark:bg-blue-500/10"
-                              loading={updateStatus.isPending}
-                              onClick={() => doUpdate(a.id, 'CHECKED_IN', null)}
-                            />
-                            <ActionBtn
-                              icon={XCircle} label="Cancel" color="text-slate-600 dark:text-slate-300" bg="bg-slate-100 dark:bg-slate-700"
-                              loading={updateStatus.isPending}
-                              onClick={() => doUpdate(a.id, 'CANCELLED', 'Cancel this appointment? This cannot be undone.')}
-                            />
-                          </>
-                        )}
-
-                        {/* CHECKED_IN → Start / Complete */}
-                        {a.status === 'CHECKED_IN' && (
-                          <ActionBtn
-                            icon={Play} label="Start" color="text-yellow-700 dark:text-yellow-400" bg="bg-yellow-50 dark:bg-yellow-500/10"
-                            loading={updateStatus.isPending}
-                            onClick={() => doUpdate(a.id, 'IN_PROGRESS', null, a.patientId)}
-                          />
-                        )}
-
-                        {/* IN_PROGRESS → Complete */}
-                        {a.status === 'IN_PROGRESS' && (
-                          <ActionBtn
-                            icon={CheckCircle2} label="Complete" color="text-green-700 dark:text-green-400" bg="bg-green-50 dark:bg-green-500/10"
-                            loading={updateStatus.isPending}
-                            onClick={() => doUpdate(a.id, 'COMPLETED', null, a.patientId)}
-                          />
-                        )}
-
-                        {/* COMPLETED / CANCELLED — no actions */}
-                        {(a.status === 'COMPLETED' || a.status === 'CANCELLED') && (
-                          <span className="text-slate-300 dark:text-slate-600 text-[0.78rem]">—</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Appointment Statistics */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-bold text-slate-900">Appointment Statistics</h3>
+              <button className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                This Month <ChevronRight size={14} className="rotate-90" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-purple-50/50 border border-purple-100 rounded-xl">
+                <CalendarDays size={18} className="text-purple-600 mb-2" />
+                <p className="text-[10px] font-bold text-purple-900/60 mb-0.5">Total Appointments</p>
+                <div className="flex items-end justify-between">
+                  <h4 className="text-xl font-bold text-purple-900">520</h4>
+                  <span className="flex items-center text-[10px] font-bold text-emerald-600"><ArrowUpRight size={12}/> 8%</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                <CheckCircle2 size={18} className="text-emerald-600 mb-2" />
+                <p className="text-[10px] font-bold text-emerald-900/60 mb-0.5">Completed</p>
+                <div className="flex items-end justify-between">
+                  <h4 className="text-xl font-bold text-emerald-900">402</h4>
+                  <span className="flex items-center text-[10px] font-bold text-emerald-600"><ArrowUpRight size={12}/> 10.3%</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-red-50/50 border border-red-100 rounded-xl">
+                <XCircle size={18} className="text-red-600 mb-2" />
+                <p className="text-[10px] font-bold text-red-900/60 mb-0.5">Cancelled</p>
+                <div className="flex items-end justify-between">
+                  <h4 className="text-xl font-bold text-red-900">48</h4>
+                  <span className="flex items-center text-[10px] font-bold text-red-600"><ArrowDownRight size={12}/> 3.2%</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-orange-50/50 border border-orange-100 rounded-xl">
+                <FileText size={18} className="text-orange-600 mb-2" />
+                <p className="text-[10px] font-bold text-orange-900/60 mb-0.5">No Show</p>
+                <div className="flex items-end justify-between">
+                  <h4 className="text-xl font-bold text-orange-900">28</h4>
+                  <span className="flex items-center text-[10px] font-bold text-orange-600"><ArrowDownRight size={12}/> 5.1%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-// ── small reusable action button ──────────────────────────────────────────────
-const ActionBtn = ({ icon: Icon, label, color, bg, onClick, loading }) => (
-  <button
-    onClick={onClick}
-    disabled={loading}
-    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-opacity border-none ${bg} ${color} ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
-  >
-    <Icon size={12} />
-    {label}
-  </button>
-);
-
-export default AppointmentListToday;
+export default DoctorAppointments;

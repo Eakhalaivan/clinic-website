@@ -79,7 +79,7 @@ const DoctorDashboard = () => {
   const closePanel = () => setSearchParams(new URLSearchParams());
   const closeTopPanel = () => {
     if (patientId) {
-      const newParams = new URLSearchParams(searchParams);
+      navigate(`/doctor/patients/${id}`); return;
       newParams.delete('patientId');
       setSearchParams(newParams);
     } else {
@@ -123,7 +123,9 @@ const DoctorDashboard = () => {
 
   // Subscribe to real-time appointment updates
   useEffect(() => {
-      const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/sse/appointments`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+      const token = localStorage.getItem('access_token');
+      const evtSource = new EventSource(`${baseUrl.replace('/api', '')}/api/sse/appointments?token=${token}`);
       
       evtSource.addEventListener('appointment-booked', (event) => {
           try {
@@ -168,7 +170,7 @@ const DoctorDashboard = () => {
   }, [user?.id, queryClient]);
 
   const handlePatientClick = (id) => {
-    const newParams = new URLSearchParams(searchParams);
+    navigate(`/doctor/patients/${id}`); return;
     newParams.set('panel', 'patients');
     newParams.set('patientId', id);
     setSearchParams(newParams);
@@ -305,21 +307,21 @@ const DoctorDashboard = () => {
             <span className="text-[11px] font-semibold text-orange-700">New Prescription</span>
           </div>
 
-          <div onClick={() => setSearchParams({ panel: 'patients' })} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
+          <div onClick={() => navigate('/doctor/lab-reports')} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
             <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
               <FlaskConical className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold text-blue-700">Lab Request</span>
           </div>
 
-          <div onClick={() => setSearchParams({ panel: 'patients' })} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
+          <div onClick={() => navigate('/doctor/lab-reports/upload')} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
             <div className="p-1.5 bg-purple-50 text-purple-600 rounded-lg">
               <UploadCloud className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold text-purple-700">Upload Report</span>
           </div>
 
-          <div onClick={() => setSearchParams({ panel: 'patients' })} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
+          <div onClick={() => navigate('/doctor/medical-certificate')} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
             <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
               <FileText className="w-4 h-4" />
             </div>
@@ -348,7 +350,7 @@ const DoctorDashboard = () => {
             <LayoutGrid className="w-4 h-4" />
             Dashboard
           </button>
-          <button onClick={() => setSearchParams({ panel: 'queue' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+          <button onClick={() => navigate('/doctor/appointments/today')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
             <Clock className="w-4 h-4" />
             Appointments
           </button>
@@ -360,7 +362,7 @@ const DoctorDashboard = () => {
             <CalendarIcon className="w-4 h-4" />
             Calendar
           </button>
-          <button onClick={() => navigate('/doctor/prescription-templates')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+          <button onClick={() => navigate('/doctor/prescriptions')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
             <FileText className="w-4 h-4" />
             Prescriptions
           </button>
@@ -368,9 +370,13 @@ const DoctorDashboard = () => {
             <Heart className="w-4 h-4" />
             Follow-ups
           </button>
-          <button onClick={() => setSearchParams({ panel: 'patients' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+          <button onClick={() => navigate('/doctor/lab-reports')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
             <FlaskConical className="w-4 h-4" />
             Lab Reports
+          </button>
+          <button onClick={() => navigate('/doctor/medical-certificate')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+            <FileText className="w-4 h-4" />
+            Medical Certificate
           </button>
           <button onClick={() => navigate('/doctor/schedule-settings')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition ml-auto">
             <SettingsIcon className="w-4 h-4" />

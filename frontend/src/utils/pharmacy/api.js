@@ -4,7 +4,9 @@ import toast from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 
 // Ensure baseURL always ends with '/api/pharmacy' to match the Spring Boot backend
-let base = import.meta.env.VITE_API_URL || '/api/pharmacy';
+let base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+if (base.endsWith('/api')) base = base.substring(0, base.length - 4);
+base = base + '/api/pharmacy';
 
 // For local development with Vite proxy, strip out absolute URL to prevent cross-origin cookie rejection
 if (base.startsWith('http://localhost') || base.startsWith('http://127.0.0.1')) {

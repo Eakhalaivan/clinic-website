@@ -1,12 +1,12 @@
 package com.healthcare.clinic.inventory.controller;
 
-import com.healthcare.clinic.inventory.pharmacy.repository.*;
-import com.healthcare.clinic.inventory.sales.repository.*;
-import com.healthcare.clinic.inventory.repository.ActivityLogRepository;
-import com.healthcare.clinic.inventory.repository.PharmacyUserRepository;
-import com.healthcare.clinic.inventory.pharmacy.enums.PrescriptionStatus;
-import com.healthcare.clinic.inventory.pharmacy.enums.PaymentStatus;
-import com.healthcare.clinic.inventory.pharmacy.enums.ReturnStatus;
+import com.healthcare.clinic.pharmacy.repository.*;
+import com.healthcare.clinic.pharmacy.repository.*;
+import com.healthcare.clinic.pharmacy.repository.ActivityLogRepository;
+import com.healthcare.clinic.pharmacy.repository.PharmacyUserRepository;
+import com.healthcare.clinic.pharmacy.enums.PrescriptionStatus;
+import com.healthcare.clinic.pharmacy.enums.PaymentStatus;
+import com.healthcare.clinic.pharmacy.enums.ReturnStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 

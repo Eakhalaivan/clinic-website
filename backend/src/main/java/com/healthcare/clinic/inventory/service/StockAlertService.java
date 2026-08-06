@@ -1,13 +1,13 @@
 package com.healthcare.clinic.inventory.service;
 
-import com.healthcare.clinic.inventory.entity.Medicine;
-import com.healthcare.clinic.inventory.entity.MedicineStock;
-import com.healthcare.clinic.inventory.entity.StockAlert;
-import com.healthcare.clinic.inventory.entity.PharmacyUser;
-import com.healthcare.clinic.inventory.pharmacy.repository.MedicineRepository;
-import com.healthcare.clinic.inventory.pharmacy.repository.MedicineStockRepository;
-import com.healthcare.clinic.inventory.repository.StockAlertRepository;
-import com.healthcare.clinic.inventory.repository.PharmacyUserRepository;
+import com.healthcare.clinic.pharmacy.entity.Medicine;
+import com.healthcare.clinic.pharmacy.entity.MedicineStock;
+import com.healthcare.clinic.pharmacy.entity.StockAlert;
+import com.healthcare.clinic.pharmacy.entity.PharmacyUser;
+import com.healthcare.clinic.pharmacy.repository.MedicineRepository;
+import com.healthcare.clinic.pharmacy.repository.MedicineStockRepository;
+import com.healthcare.clinic.pharmacy.repository.StockAlertRepository;
+import com.healthcare.clinic.pharmacy.repository.PharmacyUserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

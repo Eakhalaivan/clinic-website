@@ -59,6 +59,9 @@ public class Prescription {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "assigned_pharmacy_user_id")
+    private Long assignedPharmacyUserId;
+
     @Column(name = "voided_at")
     private LocalDateTime voidedAt;
 

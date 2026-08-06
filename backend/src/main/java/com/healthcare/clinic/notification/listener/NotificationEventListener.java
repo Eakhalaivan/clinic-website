@@ -5,6 +5,7 @@ import com.healthcare.clinic.notification.event.AppointmentCancelledEvent;
 import com.healthcare.clinic.notification.event.InvoiceCreatedEvent;
 import com.healthcare.clinic.notification.event.LabResultReleasedEvent;
 import com.healthcare.clinic.notification.event.QueueTokenCalledEvent;
+import com.healthcare.clinic.clinicaldecision.event.PrescriptionCreatedEvent;
 import com.healthcare.clinic.notification.service.EmailNotificationService;
 import com.healthcare.clinic.notification.service.InAppNotificationService;
 import com.healthcare.clinic.notification.service.TwilioNotificationService;
@@ -138,5 +139,25 @@ public class NotificationEventListener {
                 "Queue Token Called",
                 "Token #" + event.getTokenNumber() + " called at " + event.getBranchName(),
                 "QUEUE", null);
+    }
+
+    // ─── Prescription Created ─────────────────────────────────────────────────
+
+    @Async
+    @EventListener
+    public void onPrescriptionCreated(PrescriptionCreatedEvent event) {
+        log.info("Handling PrescriptionCreatedEvent for prescription {}", event.getPrescriptionId());
+        
+        if (event.getAssignedPharmacyUserId() != null) {
+            inApp.sendToUser(event.getAssignedPharmacyUserId(),
+                    "New Assigned Prescription",
+                    "A new prescription has been assigned to you by Doctor.",
+                    "PRESCRIPTION", event.getPrescriptionId());
+        } else {
+            inApp.sendToRole("ROLE_PHARMACIST",
+                    "New Pending Prescription",
+                    "A new unassigned prescription is pending review.",
+                    "PRESCRIPTION", event.getPrescriptionId());
+        }
     }
 }

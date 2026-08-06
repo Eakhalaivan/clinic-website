@@ -7,8 +7,9 @@ export default function RoleRoute({ portalSlug, allowedRoles, children }) {
     const { token, roles = [] } = useAuthStore();
     const location = useLocation();
 
-    // Treat expired tokens as unauthenticated — redirect to login
-    if (!isTokenValid(token)) {
+    // Let Axios interceptors handle expired tokens and refresh them.
+    // Only redirect if there is absolutely no token (user intentionally logged out or cleared storage).
+    if (!token) {
         return <Navigate to={`/${portalSlug || 'patient'}/login`} state={{ from: location }} replace />;
     }
 

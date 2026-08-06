@@ -16,4 +16,5 @@ public class PrescriptionCreatedEvent {
     private Long prescriptionId;
     private List<String> medicationNames;
     private Long doctorId;
+    private Long assignedPharmacyUserId;
 }

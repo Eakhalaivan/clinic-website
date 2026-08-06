@@ -3,8 +3,15 @@ package com.healthcare.clinic;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootApplication
+@SpringBootApplication(excludeName = {
+    "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
+    "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration",
+    "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration",
+    "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration"
+})
 @EnableAsync
 public class ClinicApplication {
 
@@ -12,4 +19,8 @@ public class ClinicApplication {
 		SpringApplication.run(ClinicApplication.class, args);
 	}
 
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
+	}
 }

@@ -63,6 +63,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return headerAuth.substring(7);
         }
 
+        // Support for SSE/WebSockets which cannot send custom headers
+        String paramAuth = request.getParameter("token");
+        if (StringUtils.hasText(paramAuth)) {
+            return paramAuth;
+        }
+
         return null;
     }
 }
