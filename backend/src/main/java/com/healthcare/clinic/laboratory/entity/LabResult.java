@@ -49,4 +49,18 @@ public class LabResult {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verified_by")
     private User verifiedBy;
+
+    @Column(name = "report_file_url", length = 255)
+    private String reportFileUrl;
+
+    @Column(name = "is_draft")
+    @Builder.Default
+    private Boolean isDraft = false;
+
+    @Column(name = "is_critical")
+    @Builder.Default
+    private Boolean isCritical = false;
+
+    @Column(name = "pathologist_comments", columnDefinition = "TEXT")
+    private String pathologistComments;
 }

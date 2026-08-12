@@ -70,4 +70,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<AppointmentResponseDto> findAllAppointmentsToday(
            @Param("startOfDay") ZonedDateTime startOfDay,
            @Param("endOfDay") ZonedDateTime endOfDay);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.userId = :patientUserId AND a.doctor.id = :doctorId AND a.status != 'CANCELLED' AND a.slot.startTime >= :startOfDay AND a.slot.startTime < :endOfDay")
+    long countByPatientAndDoctorAndDate(@Param("patientUserId") Long patientUserId, @Param("doctorId") Long doctorId, @Param("startOfDay") ZonedDateTime startOfDay, @Param("endOfDay") ZonedDateTime endOfDay);
 }

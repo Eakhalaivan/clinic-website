@@ -5,6 +5,7 @@ import com.healthcare.clinic.branch.entity.Branch;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -41,4 +42,16 @@ public class QueueToken {
     @Column(length = 50)
     @Builder.Default
     private String status = "WAITING"; // WAITING, CALLED, SERVED, SKIPPED
+    
+    @Column(name = "generated_date", nullable = false)
+    @Builder.Default
+    private LocalDate generatedDate = LocalDate.now();
+
+    @Column(name = "priority_level")
+    @Builder.Default
+    private Integer priorityLevel = 0;
+
+    @Column(name = "current_department")
+    @Builder.Default
+    private String currentDepartment = "GENERAL";
 }

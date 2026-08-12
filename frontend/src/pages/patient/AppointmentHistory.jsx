@@ -1,7 +1,8 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, XCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 
 const AppointmentHistory = () => {
@@ -12,6 +13,28 @@ const AppointmentHistory = () => {
     queryFn: async () => (await axiosPrivate.get(`/appointments/patient/${user?.id}`)).data,
     enabled: !!user?.id,
   });
+
+  const queryClient = useQueryClient();
+
+  const cancelMutation = useMutation({
+    mutationFn: async (id) => {
+      await axiosPrivate.patch(`/appointments/${id}/cancel?reason=Patient requested cancellation`);
+    },
+    onSuccess: () => {
+      toast.success('Appointment cancelled successfully');
+      queryClient.invalidateQueries(['patientAppointments', user?.id]);
+      queryClient.invalidateQueries(['patient-360']);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to cancel appointment');
+    }
+  });
+
+  const handleCancel = (id) => {
+    if (window.confirm('Are you sure you want to cancel this appointment?')) {
+      cancelMutation.mutate(id);
+    }
+  };
 
   const statusColor = (status) => {
     if (status === 'COMPLETED') return { bg: 'var(--color-success-bg)', color: 'var(--color-success)' };
@@ -50,12 +73,32 @@ const AppointmentHistory = () => {
                   {a.time || new Date(a.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
-              <span
-                className="self-start sm:self-center text-xs font-bold px-2.5 py-1 rounded-md whitespace-nowrap"
-                style={{ background: bg, color }}
-              >
-                {a.status}
-              </span>
+              <div className="flex flex-col sm:items-end gap-2">
+                <span
+                  className="self-start sm:self-end text-xs font-bold px-2.5 py-1 rounded-md whitespace-nowrap"
+                  style={{ background: bg, color }}
+                >
+                  {a.status}
+                </span>
+                {a.status === 'SCHEDULED' && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleCancel(a.id)}
+                      disabled={cancelMutation.isPending}
+                      className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition-colors disabled:opacity-50"
+                    >
+                      <XCircle size={14} /> Cancel
+                    </button>
+                    {/* Reschedule could redirect to BookAppointment with pre-selected doctor */}
+                    <button
+                      onClick={() => window.location.href = `/patient/book-appointment/${a.doctorId}`}
+                      className="flex items-center gap-1 text-xs font-bold text-[#0369a1] bg-[#e0f2fe] hover:bg-[#bae6fd] px-2 py-1 rounded transition-colors"
+                    >
+                      <RefreshCw size={14} /> Reschedule
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

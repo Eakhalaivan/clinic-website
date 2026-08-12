@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import lombok.Data;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -67,4 +70,25 @@ public class RadiologyController {
             @AuthenticationPrincipal User radiologist) {
         return ResponseEntity.ok(radiologyService.saveReport(requestId, report, radiologist));
     }
+
+    @PostMapping("/patient/requests/{id}/book")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ImagingRequest> bookPatientRequest(
+            @PathVariable Long id,
+            @RequestBody RadScheduleRequest request,
+            @AuthenticationPrincipal User user) {
+        try {
+            return ResponseEntity.ok(radiologyService.bookPatientRequest(id, request.getScheduledAt(), user));
+        } catch (IllegalArgumentException ex) {
+            if (ex.getMessage().equals("Forbidden")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+}
+
+@Data
+class RadScheduleRequest {
+    private ZonedDateTime scheduledAt;
 }

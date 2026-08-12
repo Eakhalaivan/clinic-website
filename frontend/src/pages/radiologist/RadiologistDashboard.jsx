@@ -3,17 +3,19 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { ConfigDrivenDashboard } from '../../components/dashboard/ConfigDrivenDashboard';
 import { dashboardConfig } from '../../config/dashboardConfig';
+import RadiologyQuickActions from '../../components/radiology/RadiologyQuickActions';
+import RadiologyRequestList from '../../components/radiology/RadiologyRequestList';
 
 const RadiologistDashboard = () => {
   const [filterStatus, setFilterStatus] = useState('ALL');
 
   const { data: requests = [], isLoading } = useQuery({
-    queryKey: ['radiology-requests', filterStatus],
+    queryKey: ['radiology-requests-dashboard'],
     queryFn: async () => {
-      const url = filterStatus === 'ALL' ? '/radiology/requests' : `/radiology/requests?status=${filterStatus}`;
-      const res = await axiosPrivate.get(url);
+      const res = await axiosPrivate.get('/radiology/requests');
       return res.data;
     },
+    refetchInterval: 30000
   });
 
   const { data: procedures = [] } = useQuery({
@@ -38,6 +40,19 @@ const RadiologistDashboard = () => {
       data={data}
       activeTab={filterStatus}
       onTabChange={setFilterStatus}
+      customWidgets={
+        <div className="mt-8">
+          <RadiologyQuickActions setFilter={setFilterStatus} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[700px] overflow-hidden">
+            <div className="lg:col-span-2 h-full overflow-y-auto pr-2">
+              <RadiologyRequestList filter={filterStatus} />
+            </div>
+            <div className="h-full overflow-y-auto">
+               <TechnicianWorklist requests={requests} />
+            </div>
+          </div>
+        </div>
+      }
     />
   );
 };

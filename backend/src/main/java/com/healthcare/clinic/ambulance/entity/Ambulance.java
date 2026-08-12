@@ -23,11 +23,28 @@ public class Ambulance {
     @Column(length = 100)
     private String model;
 
-    @Column(name = "driver_name", nullable = false, length = 100)
-    private String driverName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id")
+    private AmbulanceDriver driver;
 
-    @Column(name = "driver_phone", nullable = false, length = 30)
-    private String driverPhone;
+    @Column(name = "branch_id")
+    private Long branchId;
+
+    @Column(name = "ambulance_type", length = 50)
+    private String ambulanceType; // BLS, ALS, ICU
+
+    @Column(name = "equipment", columnDefinition = "TEXT")
+    private String equipment;
+
+    @Column(name = "capacity")
+    private Integer capacity;
+
+    @Column(name = "fleet_registration_number", length = 50)
+    private String fleetRegistrationNumber;
+
+    @Column(name = "maintenance_status", length = 50)
+    @Builder.Default
+    private String maintenanceStatus = "OK";
 
     @Column(name = "current_latitude", precision = 10, scale = 8)
     private BigDecimal currentLatitude;

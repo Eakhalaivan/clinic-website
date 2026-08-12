@@ -7,9 +7,9 @@ spring:
     name: clinic-app
   datasource:
     clinic:
-      jdbc-url: ${DB_URL:jdbc:postgresql://pg-2ec02a9b-eakhalaivanp-46d0.i.aivencloud.com:15783/defaultdb?sslmode=require}
-      username: ${DB_USER:avnadmin}
-      password: ${DB_PASSWORD:}
+      jdbc-url: ${DB_URL}
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       driver-class-name: org.postgresql.Driver
       hikari:
         connection-timeout: 10000
@@ -17,15 +17,18 @@ spring:
         minimum-idle: 2
         initialization-fail-timeout: 1
     pharmacy:
-      jdbc-url: ${PHARMACY_DB_URL:jdbc:mysql://gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/pms?useSSL=true&enabledTLSProtocols=TLSv1.2,TLSv1.3&sslMode=REQUIRED}
-      username: ${PHARMACY_DB_USER:3ZMzEHamXVuJdSt.root}
-      password: ${PHARMACY_DB_PASSWORD:o2ldKmVs3hjxipyi}
+      jdbc-url: ${PHARMACY_DB_URL}
+      username: ${PHARMACY_DB_USER}
+      password: ${PHARMACY_DB_PASSWORD}
       driver-class-name: com.mysql.cj.jdbc.Driver
       hikari:
         connection-timeout: 10000
         maximum-pool-size: 5
         minimum-idle: 2
         initialization-fail-timeout: 1
+  jpa:
+    hibernate:
+      ddl-auto: validate
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:587}
@@ -52,11 +55,11 @@ management:
         include: health, info
 
 twilio:
-  account-sid: ${TWILIO_ACCOUNT_SID:dummy}
-  auth-token: ${TWILIO_AUTH_TOKEN:dummy}
-  from-number: ${TWILIO_FROM_NUMBER:dummy}
+  account-sid: ${TWILIO_ACCOUNT_SID}
+  auth-token: ${TWILIO_AUTH_TOKEN}
+  from-number: ${TWILIO_FROM_NUMBER}
 
 stripe:
-  secret-key: ${STRIPE_SECRET_KEY:dummy_secret_key}
-  webhook-secret: ${STRIPE_WEBHOOK_SECRET:dummy_webhook_secret}
-  publishable-key: ${STRIPE_PUBLISHABLE_KEY:dummy_publishable_key}
+  secret-key: ${STRIPE_SECRET_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY}

@@ -3,10 +3,12 @@ package com.healthcare.clinic.ambulance.controller;
 import com.healthcare.clinic.ambulance.entity.Ambulance;
 import com.healthcare.clinic.ambulance.entity.EmergencyRequest;
 import com.healthcare.clinic.ambulance.service.AmbulanceService;
+import com.healthcare.clinic.ambulance.service.AmbulanceTrackingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,6 +20,13 @@ import java.util.List;
 public class AmbulanceController {
 
     private final AmbulanceService ambulanceService;
+    private final AmbulanceTrackingService trackingService;
+
+    // SSE Tracking endpoint
+    @GetMapping(value = "/tracking/live", produces = "text/event-stream")
+    public SseEmitter streamLiveTracking() {
+        return trackingService.subscribe();
+    }
 
     // Fleet endpoints
     @GetMapping("/fleet")

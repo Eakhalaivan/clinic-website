@@ -1,6 +1,7 @@
 package com.healthcare.clinic.laboratory.entity;
 
 import com.healthcare.clinic.doctor.entity.DoctorProfile;
+import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,10 +40,57 @@ public class LabTestRequest {
     @Builder.Default
     private ZonedDateTime requestedAt = ZonedDateTime.now();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rejection_reason")
+    private RejectionReason rejectionReason;
+
+    @Column(name = "rejection_notes")
+    private String rejectionNotes;
+
+    @Column(name = "rejected_at")
+    private ZonedDateTime rejectedAt;
+    
+    @Column(name = "released_at")
+    private ZonedDateTime releasedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "accepted_by_id")
+    private User acceptedBy;
+
     @Column(name = "sample_collected_at")
     private ZonedDateTime sampleCollectedAt;
+
+    @Column(name = "scheduled_at")
+    private ZonedDateTime scheduledAt;
 
     @Column(length = 50)
     @Builder.Default
     private String priority = "ROUTINE";
+
+    @Column(name = "accepted_at")
+    private ZonedDateTime acceptedAt;
+
+    @Column(name = "sample_barcode_id", unique = true, length = 50)
+    private String sampleBarcodeId;
+
+    @Column(name = "lab_request_number", unique = true, length = 50)
+    private String labRequestNumber;
+
+    @OneToOne(mappedBy = "request", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LabSampleCollection sampleCollection;
+
+    @OneToOne(mappedBy = "request", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LabProcessingDetails processingDetails;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "encounter_id")
+    private com.healthcare.clinic.medicalrecord.entity.MedicalRecord encounter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private com.healthcare.clinic.branch.entity.Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private com.healthcare.clinic.billing.entity.Invoice invoice;
 }

@@ -8,6 +8,6 @@ public class QueueTokenCalledEvent {
     private Long branchId;
     private String branchName;
     private int tokenNumber;
-    private Long patientId;
+    private Long patientUserId;
     private String patientEmail; // optional — only if linked to a walk-in with email
 }

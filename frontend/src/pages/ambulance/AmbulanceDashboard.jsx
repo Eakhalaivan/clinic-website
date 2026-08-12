@@ -1,57 +1,57 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { axiosPrivate } from '../../api/axios';
-import { AlertTriangle } from 'lucide-react';
-import { ConfigDrivenDashboard } from '../../components/dashboard/ConfigDrivenDashboard';
-import { dashboardConfig } from '../../config/dashboardConfig';
-import { AmbulanceNewRequestWidget } from '../../components/dashboard/widgets/AmbulanceWidgets';
+import DispatcherConsole from './DispatcherConsole';
+import FleetManagement from './FleetManagement';
+import CrewView from './CrewView';
+import TripHistory from './TripHistory';
+import { AlertCircle, Truck, Navigation, Activity, ClipboardList } from 'lucide-react';
 
 const AmbulanceDashboard = () => {
-  const [activeTab, setActiveTab] = useState('requests');
-  const [showNewRequest, setShowNewRequest] = useState(false);
-
-  const { data: fleet = [], isLoading: loadingFleet } = useQuery({ queryKey: ['ambulance-fleet'], queryFn: async () => (await axiosPrivate.get('/ambulance/fleet')).data, refetchInterval: 15000 });
-  const { data: requests = [], isLoading: loadingRequests } = useQuery({ queryKey: ['ambulance-requests'], queryFn: async () => (await axiosPrivate.get('/ambulance/requests')).data, refetchInterval: 10000 });
-
-  const availableAmbulances = fleet.filter(a => a.status === 'AVAILABLE');
-  const activeCount = requests.filter(r => ['REQUESTED', 'DISPATCHED', 'EN_ROUTE'].includes(r.status)).length;
-
-  const data = {
-    activeTab,
-    requests,
-    fleet,
-    loadingRequests,
-    loadingFleet,
-    activeCount,
-    availableCount: availableAmbulances.length,
-    fleetCount: fleet.length,
-    requestsCount: requests.length,
-    customQuickActions: [
-      {
-        label: 'New Emergency',
-        icon: AlertTriangle,
-        action: () => setShowNewRequest(true),
-        color: 'text-rose-600',
-        bg: 'bg-rose-50'
-      }
-    ]
-  };
+  const [activeTab, setActiveTab] = useState('dispatcher');
 
   return (
-    <>
-      <ConfigDrivenDashboard 
-        config={dashboardConfig.ROLE_AMBULANCE}
-        data={data}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-      {showNewRequest && (
-        <AmbulanceNewRequestWidget
-          showNewRequest={showNewRequest}
-          setShowNewRequest={setShowNewRequest}
-        />
-      )}
-    </>
+    <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-900 m-0">Ambulance Command Center</h2>
+        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm flex items-center shadow">
+          <AlertCircle size={16} className="mr-2" />
+          Live Emergency Network Active
+        </div>
+      </div>
+
+      <div className="flex space-x-2 mb-6 border-b border-slate-200 pb-2">
+        <button
+          onClick={() => setActiveTab('dispatcher')}
+          className={`flex items-center px-4 py-2 rounded-t-lg transition-colors ${activeTab === 'dispatcher' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+        >
+          <Navigation size={18} className="mr-2" /> Dispatcher Console
+        </button>
+        <button
+          onClick={() => setActiveTab('fleet')}
+          className={`flex items-center px-4 py-2 rounded-t-lg transition-colors ${activeTab === 'fleet' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+        >
+          <Truck size={18} className="mr-2" /> Fleet Management
+        </button>
+        <button
+          onClick={() => setActiveTab('crew')}
+          className={`flex items-center px-4 py-2 rounded-t-lg transition-colors ${activeTab === 'crew' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+        >
+          <Activity size={18} className="mr-2" /> Crew Terminal
+        </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          className={`flex items-center px-4 py-2 rounded-t-lg transition-colors ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+        >
+          <ClipboardList size={18} className="mr-2" /> Trip History & Billing
+        </button>
+      </div>
+
+      <div>
+        {activeTab === 'dispatcher' && <DispatcherConsole />}
+        {activeTab === 'fleet' && <FleetManagement />}
+        {activeTab === 'crew' && <CrewView />}
+        {activeTab === 'history' && <TripHistory />}
+      </div>
+    </div>
   );
 };
 

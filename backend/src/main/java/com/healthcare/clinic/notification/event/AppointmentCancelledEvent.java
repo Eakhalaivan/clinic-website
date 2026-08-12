@@ -6,8 +6,8 @@ import java.time.ZonedDateTime;
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class AppointmentCancelledEvent {
     private Long appointmentId;
-    private Long patientId;
-    private Long doctorId;
+    private Long patientUserId;
+    private Long doctorUserId;
     private ZonedDateTime startTime;
     private String doctorName;
     private String patientEmail;

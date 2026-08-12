@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.controller;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 import jakarta.validation.Valid;
 
 import com.healthcare.clinic.pharmacy.entity.Supplier;

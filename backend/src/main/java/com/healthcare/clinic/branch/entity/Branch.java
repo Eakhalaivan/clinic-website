@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.healthcare.clinic.tenant.entity.Tenant;
 
 @Entity
 @Table(name = "branches")
@@ -23,6 +24,11 @@ public class Branch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Tenant tenant;
 
     @jakarta.validation.constraints.NotBlank
     @Column(nullable = false, length = 100)

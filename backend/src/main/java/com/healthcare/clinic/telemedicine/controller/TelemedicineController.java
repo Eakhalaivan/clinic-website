@@ -1,0 +1,20 @@
+package com.healthcare.clinic.telemedicine.controller;
+
+import com.healthcare.clinic.telemedicine.entity.TeleconsultSession;
+import com.healthcare.clinic.telemedicine.service.VideoProviderService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/telemedicine")
+@RequiredArgsConstructor
+public class TelemedicineController {
+
+    private final VideoProviderService videoProviderService;
+
+    @PostMapping("/rooms")
+    public ResponseEntity<TeleconsultSession> createRoom(@RequestParam Long appointmentId, @RequestParam Long tenantId) {
+        return ResponseEntity.ok(videoProviderService.createRoom(appointmentId, tenantId));
+    }
+}

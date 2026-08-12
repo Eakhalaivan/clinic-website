@@ -1,0 +1,14 @@
+CREATE TABLE teleconsultation_sessions (
+    id BIGSERIAL PRIMARY KEY,
+    encounter_id BIGINT NOT NULL,
+    patient_id BIGINT NOT NULL,
+    doctor_id BIGINT NOT NULL,
+    room_url VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'SCHEDULED', -- SCHEDULED, WAITING, IN_PROGRESS, COMPLETED, CANCELLED
+    started_at TIMESTAMP WITH TIME ZONE,
+    ended_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_tele_encounter FOREIGN KEY (encounter_id) REFERENCES clinical_encounters(id)
+);

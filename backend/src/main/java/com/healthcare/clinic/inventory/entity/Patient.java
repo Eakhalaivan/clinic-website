@@ -11,6 +11,8 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 
+@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = Long.class))
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Entity
 @Table(name = "pharmacy_patients")
 @SQLDelete(sql = "UPDATE patients SET is_deleted = true WHERE id=?")

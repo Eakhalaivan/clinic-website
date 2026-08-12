@@ -10,4 +10,7 @@ import java.util.List;
 public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     List<Campaign> findAllByOrderByCreatedAtDesc();
     List<Campaign> findByStatus(String status);
+    List<Campaign> findByBranchIdAndStatus(Long branchId, String status);
+    long countByStatus(String status);
+    long countByBranchIdAndStatus(Long branchId, String status);
 }

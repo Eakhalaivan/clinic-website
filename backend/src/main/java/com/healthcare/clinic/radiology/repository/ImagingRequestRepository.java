@@ -11,4 +11,5 @@ public interface ImagingRequestRepository extends JpaRepository<ImagingRequest, 
     List<ImagingRequest> findByStatus(String status);
     List<ImagingRequest> findByPatientId(Long patientId);
     List<ImagingRequest> findAllByOrderByRequestedAtDesc();
+    boolean existsByPatientIdAndProcedureIdAndRequestedAtGreaterThanEqual(Long patientId, Long procedureId, java.time.ZonedDateTime requestedAt);
 }

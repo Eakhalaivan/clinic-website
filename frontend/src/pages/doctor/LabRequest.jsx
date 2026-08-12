@@ -11,6 +11,17 @@ const LabRequest = () => {
   const [selectedTests, setSelectedTests] = useState([]);
   const [clinicalNotes, setClinicalNotes] = useState('');
   const [priority, setPriority] = useState('ROUTINE');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  // Search patients if no patientId in URL
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ['patients-search', searchQuery],
+    queryFn: async () => (await axiosPrivate.get(`/patients/search?query=${searchQuery}`)).data,
+    enabled: !patientId && searchQuery.length >= 2,
+  });
+
+  const effectivePatientId = patientId || selectedPatient?.id;
 
   // Fetch test catalog
   const { data: testCatalog = [], isLoading } = useQuery({
@@ -29,7 +40,7 @@ const LabRequest = () => {
   const submitOrder = useMutation({
     mutationFn: async () => {
       return axiosPrivate.post(`/lab/requests`, {
-        patientId,
+        patientId: effectivePatientId,
         testIds: selectedTests.map(t => t.id),
         clinicalNotes,
         priority
@@ -37,7 +48,11 @@ const LabRequest = () => {
     },
     onSuccess: () => {
       alert('Lab order placed successfully!');
-      navigate(`/doctor/patients/${patientId}/notes`);
+      if (patientId) {
+        navigate(`/doctor/patients/${patientId}/notes`);
+      } else {
+        navigate(-1);
+      }
     }
   });
 
@@ -49,6 +64,47 @@ const LabRequest = () => {
         </button>
         <h1 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--color-text)', margin: 0 }}>Order Laboratory Tests</h1>
       </div>
+
+      {!patientId && (
+        <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', padding: '20px', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '14px' }}>
+            Select Patient
+          </h2>
+          {selectedPatient ? (
+            <div className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+              <div>
+                <div className="font-semibold text-indigo-900">{selectedPatient.firstName} {selectedPatient.lastName}</div>
+                <div className="text-xs text-indigo-700">Patient ID: {selectedPatient.patientId}</div>
+              </div>
+              <button onClick={() => setSelectedPatient(null)} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Change</button>
+            </div>
+          ) : (
+            <div>
+              <input
+                type="text"
+                placeholder="Search patient by name or ID (min 2 chars)..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '10px' }}
+              />
+              {searchResults.length > 0 && (
+                <div className="border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+                  {searchResults.map(p => (
+                    <div 
+                      key={p.id} 
+                      onClick={() => { setSelectedPatient(p); setSearchQuery(''); }}
+                      className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
+                    >
+                      <span className="font-medium text-gray-900">{p.firstName} {p.lastName}</span>
+                      <span className="text-xs text-gray-500">{p.patientId}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col sm:grid gap-5" style={{ gridTemplateColumns: '1fr 300px' }}>
         {/* Test catalog grid */}
@@ -135,11 +191,11 @@ const LabRequest = () => {
 
           <button
             onClick={() => submitOrder.mutate()}
-            disabled={selectedTests.length === 0 || submitOrder.isPending}
+            disabled={selectedTests.length === 0 || !effectivePatientId || submitOrder.isPending}
             style={{
-              width: '100%', padding: '10px', background: selectedTests.length === 0 ? 'var(--color-text-muted)' : '#0e7490',
+              width: '100%', padding: '10px', background: (selectedTests.length === 0 || !effectivePatientId) ? 'var(--color-text-muted)' : '#0e7490',
               color: 'var(--color-surface)', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem',
-              cursor: selectedTests.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+              cursor: (selectedTests.length === 0 || !effectivePatientId) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
             }}
           >
             <Send size={15} /> Submit Lab Order

@@ -12,6 +12,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -28,6 +30,9 @@ import java.util.HashMap;
         transactionManagerRef = "clinicTransactionManager"
 )
 public class ClinicDatabaseConfig {
+
+    @Autowired
+    private Environment env;
 
     @Primary
     @Bean(name = "clinicDataSource")
@@ -67,14 +72,23 @@ public class ClinicDatabaseConfig {
                 "com.healthcare.clinic.notification",
                 "com.healthcare.clinic.clinicaldecision",
                 "com.healthcare.clinic.backoffice",
-                "com.healthcare.clinic.inventory" 
+                "com.healthcare.clinic.inventory",
+                "com.healthcare.clinic.tenant",
+                "com.healthcare.clinic.subscription",
+                "com.healthcare.clinic.ai",
+                "com.healthcare.clinic.fhir"
         );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        String dialect = env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQLDialect");
+        String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto", "validate");
+        if (dialect.contains("H2")) {
+            ddlAuto = "update";
+        }
+        properties.put("hibernate.dialect", dialect);
+        properties.put("hibernate.hbm2ddl.auto", ddlAuto);
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         em.setJpaPropertyMap(properties);
 

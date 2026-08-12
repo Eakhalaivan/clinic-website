@@ -33,5 +33,18 @@ public class Attendance {
 
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private String status = "PRESENT"; // PRESENT, ABSENT, HALF_DAY, ON_LEAVE
+    private String status = "PRESENT"; // PRESENT, ABSENT, HALF_DAY, ON_LEAVE, LATE, OVERTIME
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    private ShiftTemplate shift;
+
+    @Column(name = "regularization_reason", length = 200)
+    private String regularizationReason;
+
+    @Column(name = "regularization_status", length = 30)
+    private String regularizationStatus; // PENDING, APPROVED, REJECTED
+    
+    @Column(name = "approved_by")
+    private Long approvedBy;
 }

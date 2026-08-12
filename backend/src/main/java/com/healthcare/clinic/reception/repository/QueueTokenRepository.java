@@ -19,4 +19,8 @@ public interface QueueTokenRepository extends JpaRepository<QueueToken, Long> {
     List<QueueToken> findByBranchIdAndStatusOrderByTokenNumberAsc(Long branchId, String status);
     
     List<QueueToken> findByAppointmentId(Long appointmentId);
+    
+    List<QueueToken> findByBranchIdAndGeneratedAtAfterOrderByPriorityLevelDescTokenNumberAsc(Long branchId, ZonedDateTime generatedAt);
+
+    long countByBranchIdAndStatus(Long branchId, String status);
 }

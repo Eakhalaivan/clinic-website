@@ -22,15 +22,10 @@
 /* Quick Actions Bar */
 .patient-quick-actions {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
   flex-shrink: 0;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.patient-quick-actions::-webkit-scrollbar {
-  display: none;
+  padding-bottom: 4px;
 }
 
 /* Nav Tabs */

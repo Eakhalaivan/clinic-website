@@ -13,7 +13,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.internet.MimeMessage;
 
 @Service

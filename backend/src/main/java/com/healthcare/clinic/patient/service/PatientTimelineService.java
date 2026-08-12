@@ -9,6 +9,8 @@ import com.healthcare.clinic.medicalrecord.repository.ClinicalNoteRepository;
 import com.healthcare.clinic.patient.dto.TimelineEventDTO;
 import com.healthcare.clinic.radiology.entity.RadiologyReport;
 import com.healthcare.clinic.radiology.repository.RadiologyReportRepository;
+import com.healthcare.clinic.laboratory.entity.LabTestRequest;
+import com.healthcare.clinic.laboratory.repository.LabTestRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class PatientTimelineService {
     private final PrescriptionRepository prescriptionRepository;
     private final ClinicalNoteRepository clinicalNoteRepository;
     private final InvoiceRepository invoiceRepository;
+    private final LabTestRequestRepository labTestRequestRepository;
 
     public List<TimelineEventDTO> getTimelineForPatient(Long patientId) {
         List<TimelineEventDTO> timeline = new ArrayList<>();
@@ -32,6 +35,11 @@ public class PatientTimelineService {
         // 1. Radiology Reports
         List<RadiologyReport> reports = radiologyReportRepository.findByRequestPatientId(patientId);
         for (RadiologyReport report : reports) {
+            // Only show finalized (released) reports in the patient timeline
+            if (!"FINALIZED".equals(report.getStatus())) {
+                continue;
+            }
+            
             String title = report.getRequest() != null && report.getRequest().getProcedure() != null 
                     ? report.getRequest().getProcedure().getName() + " Scan"
                     : "Radiology Report";
@@ -86,6 +94,21 @@ public class PatientTimelineService {
                     .status(invoice.getStatus().name())
                     .eventDate(invoice.getCreatedAt().atZone(ZoneId.systemDefault()))
                     .referenceId(invoice.getId())
+                    .build());
+        }
+
+        // 5. Laboratory Requests
+        List<LabTestRequest> labRequests = labTestRequestRepository.findByPatientIdOrderByRequestedAtDesc(patientId);
+        for (LabTestRequest lab : labRequests) {
+            String title = lab.getTestCatalog() != null ? lab.getTestCatalog().getTestName() + " (Lab Test)" : "Lab Test";
+            timeline.add(TimelineEventDTO.builder()
+                    .id("LAB-" + lab.getId())
+                    .type("LABORATORY")
+                    .title(title)
+                    .description("Status: " + lab.getStatus())
+                    .status(lab.getStatus())
+                    .eventDate(lab.getRequestedAt())
+                    .referenceId(lab.getId())
                     .build());
         }
 

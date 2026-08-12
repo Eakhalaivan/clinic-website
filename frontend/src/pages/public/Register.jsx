@@ -133,7 +133,7 @@ const Register = () => {
                     {/* Fake Cards */}
                     <div className="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0 overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?name=Dr+Sarah&background=e0e7ff&color=4f46e5" alt="Avatar" className="w-full h-full" />
+                            <img loading="lazy" src="https://ui-avatars.com/api/?name=Dr+Sarah&background=e0e7ff&color=4f46e5" alt="Avatar" className="w-full h-full" />
                         </div>
                         <div>
                             <p className="text-xs font-bold">Dr. Sarah Johnson</p>

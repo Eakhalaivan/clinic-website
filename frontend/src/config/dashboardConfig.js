@@ -1,7 +1,7 @@
 import { 
   Calendar as CalendarIcon, Clock, Activity, FileText, Pill, Users,
   UploadCloud, Video, Plus, Search, CheckCircle2, DollarSign, Building, Truck,
-  Settings, Bot, HeartPulse, UserPlus, CreditCard
+  Settings, Bot, HeartPulse, UserPlus, CreditCard, UserCheck, Ticket, Shield
 } from 'lucide-react';
 
 export const WIDGETS = {
@@ -84,7 +84,14 @@ WIDGETS.RECEPTION_WAITING_LIST = 'RECEPTION_WAITING_LIST';
 
 // Add Reception to config
 dashboardConfig.ROLE_RECEPTION = {
-  quickActions: [],
+  quickActions: [
+    { label: 'Register Patient', icon: UserPlus, color: 'text-indigo-500', bg: 'bg-indigo-500/10', actionPath: '/reception/register' },
+    { label: 'Walk-In Check-In', icon: UserCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10', actionPath: '/reception/walk-in' },
+    { label: 'Queue Management', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10', actionPath: '/reception/queue' },
+    { label: 'Token Generation', icon: Ticket, color: 'text-orange-500', bg: 'bg-orange-500/10', actionPath: '/reception/tokens' },
+    { label: 'Billing & Payments', icon: CreditCard, color: 'text-green-500', bg: 'bg-green-500/10', actionPath: '/reception/billing' },
+    { label: 'Insurance Verify', icon: Shield, color: 'text-purple-500', bg: 'bg-purple-500/10', actionPath: '/reception/insurance' }
+  ],
   tabs: ['Dashboard', 'Registrations', 'Queue', 'Billing'],
   layout: {
     // Reception uses a slightly different grid layout but still defined in config

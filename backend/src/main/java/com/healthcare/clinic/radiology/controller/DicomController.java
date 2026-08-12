@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.healthcare.clinic.identity.entity.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Map;
 
@@ -16,9 +19,30 @@ public class DicomController {
     private final DicomService dicomService;
 
     @GetMapping("/study/{studyId}")
-    @PreAuthorize("hasAnyRole('RADIOLOGIST', 'DOCTOR', 'ADMIN')")
-    public ResponseEntity<Map<String, Object>> getStudyMetadata(@PathVariable String studyId) {
-        Map<String, Object> metadata = dicomService.getStudyMetadata(studyId);
+    @PreAuthorize("hasAnyRole('RADIOLOGIST', 'DOCTOR', 'SUPER_ADMIN', 'PATIENT')")
+    public ResponseEntity<Map<String, Object>> getStudyMetadata(
+            @PathVariable String studyId,
+            @AuthenticationPrincipal User user,
+            HttpServletRequest request) {
+        Map<String, Object> metadata = dicomService.getStudyMetadata(studyId, user, request.getRemoteAddr());
         return ResponseEntity.ok(metadata);
+    }
+
+    @GetMapping("/study/request/{requestId}")
+    @PreAuthorize("hasAnyRole('RADIOLOGIST', 'DOCTOR', 'SUPER_ADMIN', 'PATIENT')")
+    public ResponseEntity<Map<String, Object>> getStudyMetadataByRequestId(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal User user,
+            HttpServletRequest request) {
+        Map<String, Object> metadata = dicomService.getStudyMetadataByRequestId(requestId, user, request.getRemoteAddr());
+        return ResponseEntity.ok(metadata);
+    }
+    @PostMapping("/study/mock")
+    @PreAuthorize("hasAnyRole('RADIOLOGIST', 'SUPER_ADMIN')")
+    public ResponseEntity<?> createMockStudy(
+            @RequestParam Long requestId, 
+            @RequestParam String modality,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(dicomService.saveStudyMock(requestId, modality, user));
     }
 }

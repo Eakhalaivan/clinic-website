@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.controller;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import com.healthcare.clinic.pharmacy.entity.MedicineBatch;
 import com.healthcare.clinic.pharmacy.repository.MedicineBatchRepository;

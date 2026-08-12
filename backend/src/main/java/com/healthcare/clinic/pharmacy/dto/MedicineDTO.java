@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.dto;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

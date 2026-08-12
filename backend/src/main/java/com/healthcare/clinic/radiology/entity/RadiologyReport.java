@@ -41,7 +41,7 @@ public class RadiologyReport {
 
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private String status = "DRAFT"; // DRAFT, FINALIZED
+    private String status = "DRAFT"; // DRAFT, FINALIZED, VERIFIED
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -49,4 +49,23 @@ public class RadiologyReport {
 
     @Column(name = "finalized_at")
     private ZonedDateTime finalizedAt;
+
+    @Column(name = "verified_at")
+    private ZonedDateTime verifiedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "verified_by")
+    private User verifiedBy;
+
+    @Column(name = "is_addendum", nullable = false)
+    @Builder.Default
+    private Boolean isAddendum = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_report_id")
+    private RadiologyReport parentReport;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "structured_data")
+    private java.util.Map<String, Object> structuredData;
 }

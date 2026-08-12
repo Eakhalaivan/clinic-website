@@ -2,9 +2,14 @@ package com.healthcare.clinic.marketing.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "coupons")
@@ -52,4 +57,47 @@ public class Coupon {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    // Extended fields for Phase 16
+    @Column(name = "campaign_id")
+    private Long campaignId;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "eligible_service_ids")
+    private List<Long> eligibleServiceIds;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "branch_ids")
+    private List<Long> branchIds;
+
+    @Column(name = "segment_id")
+    private Long segmentId;
+
+    @Column(name = "per_patient_limit", nullable = false)
+    @Builder.Default
+    private Integer perPatientLimit = 1;
+
+    @Column(name = "is_stackable", nullable = false)
+    @Builder.Default
+    private Boolean isStackable = false;
+
+    @Column(name = "approved_by")
+    private Long approvedBy;
+
+    @Column(name = "approved_at")
+    private ZonedDateTime approvedAt;
+
+    @Column(length = 100)
+    private String purpose;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "created_at")
+    @Builder.Default
+    private ZonedDateTime createdAt = ZonedDateTime.now();
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private ZonedDateTime updatedAt;
 }

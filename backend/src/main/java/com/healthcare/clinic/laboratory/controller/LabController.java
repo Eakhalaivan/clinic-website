@@ -8,18 +8,20 @@ import com.healthcare.clinic.laboratory.entity.LabTestRequest;
 import com.healthcare.clinic.laboratory.repository.LabResultRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestCatalogRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestRequestRepository;
+import com.healthcare.clinic.laboratory.service.LabResultService;
 import com.healthcare.clinic.notification.event.LabResultReleasedEvent;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
 import com.healthcare.clinic.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -35,6 +37,9 @@ public class LabController {
     private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
     private final PatientProfileRepository patientProfileRepository;
+    private final com.healthcare.clinic.laboratory.service.LabResultService resultService;
+    private final com.healthcare.clinic.laboratory.service.LabReportVerificationService verificationService;
+    private final com.healthcare.clinic.laboratory.service.LabReportPdfGenerator pdfGenerator;
 
     // ─── Patient: own lab reports ─────────────────────────────────────────────
 
@@ -123,17 +128,64 @@ public class LabController {
         return ResponseEntity.ok(saved);
     }
 
-    @PostMapping("/requests/{requestId}/result")
+    @PostMapping(value = "/requests/{requestId}/result", consumes = {"multipart/form-data", "application/json"})
     @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN')")
-    public ResponseEntity<LabResult> addResult(@PathVariable Long requestId, @RequestBody LabResult result, @AuthenticationPrincipal User labTech) {
-        LabTestRequest request = requestRepository.findById(requestId).orElseThrow();
-        result.setRequest(request);
-        result.setLabTech(labTech);
-        result.setEnteredAt(ZonedDateTime.now());
+    public ResponseEntity<LabResult> addResult(
+            @PathVariable Long requestId,
+            @RequestPart("result") LabResult result,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @AuthenticationPrincipal User labTech) {
         
-        request.setStatus("RESULT_ENTERED");
-        requestRepository.save(request);
+        LabResult savedResult = resultService.addResult(requestId, result, labTech);
         
-        return ResponseEntity.ok(resultRepository.save(result));
+        // Handle file upload if present
+        if (file != null && !file.isEmpty()) {
+            // Placeholder for file storage logic
+        }
+        
+        return ResponseEntity.ok(savedResult);
+    }
+
+    @PostMapping("/requests/{requestId}/verify")
+    @PreAuthorize("hasRole('PATHOLOGIST') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<LabResult> verifyReport(
+            @PathVariable Long requestId,
+            @RequestBody java.util.Map<String, String> payload,
+            @AuthenticationPrincipal User pathologist) {
+        
+        String comments = payload.get("comments");
+        LabResult verifiedResult = verificationService.verifyReport(requestId, pathologist, comments);
+        return ResponseEntity.ok(verifiedResult);
+    }
+
+    @GetMapping("/requests/{requestId}/report/pdf")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('DOCTOR') or hasRole('LAB_TECH') or hasRole('PATHOLOGIST') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<byte[]> downloadLabReportPdf(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal User user) {
+            
+        LabTestRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Lab request not found"));
+                
+        LabResult result = resultRepository.findByRequestId(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Lab result not found for this request"));
+                
+        // Check authorization
+        boolean isPatient = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_PATIENT"));
+        if (isPatient) {
+            if (!request.getPatient().getUserId().equals(user.getId())) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+        }
+        
+        byte[] pdfBytes = pdfGenerator.generateLabReport(request, result);
+        
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("filename", "LabReport_" + requestId + ".pdf");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 }

@@ -138,7 +138,6 @@ export const NAV_BY_ROLE = {
     { label: 'Medicine Returns', path: '/pharmacy/medicine-returns', icon: RotateCcw, description: 'View Medicine Returns' },
     { label: 'Direct Medicine Returns', path: '/pharmacy/direct-medicine-returns', icon: RotateCcw, description: 'View Direct Medicine Returns' },
     { label: 'Medicine Credit Bills', path: '/pharmacy/medicine-credit-bills', icon: Receipt, description: 'View Medicine Credit Bills' },
-    { label: 'Medicine Credit Returns', path: '/pharmacy/medicine-credit-returns', icon: RotateCcw, description: 'View Medicine Credit Returns' },
     { label: 'Return Worklists', path: '/pharmacy/return-worklists', icon: ClipboardList, description: 'Manage return worklists' },
     { label: 'Dispense Worklists', path: '/pharmacy/dispense-worklists', icon: ClipboardList, description: 'View Dispense Worklists' },
     { label: 'Pending Prescriptions', path: '/pharmacy/pending-prescriptions', icon: ClipboardList, description: 'View Pending Prescriptions' },

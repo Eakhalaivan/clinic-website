@@ -39,9 +39,18 @@ public class InsuranceClaim {
     @Column(name = "approved_amount", precision = 12, scale = 2)
     private BigDecimal approvedAmount;
 
+    @Column(name = "deductible_amount", precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal deductibleAmount = BigDecimal.ZERO;
+
+    @Column(name = "copay_amount", precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal copayAmount = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
-    private String status = "SUBMITTED";
+    private ClaimStatus status = ClaimStatus.DRAFT;
 
     @CreationTimestamp
     @Column(name = "submitted_at", nullable = false, updatable = false)

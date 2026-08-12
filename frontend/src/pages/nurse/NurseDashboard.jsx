@@ -6,14 +6,14 @@ import { dashboardConfig } from '../../config/dashboardConfig';
 import useAuthStore from '../../store/authStore';
 
 const NurseDashboard = () => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
+      if (!token) return;
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-      const token = localStorage.getItem('access_token');
       const evtSource = new EventSource(`${baseUrl.replace('/api', '')}/api/sse/appointments?token=${token}`);
       
       const invalidate = () => {

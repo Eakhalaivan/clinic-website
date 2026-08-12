@@ -153,7 +153,7 @@ export default function TopNav({ onMenuClick }) {
 
       {/* Alerts Drawer */}
       {isAlertsOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/20">
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/20" role="dialog" aria-modal="true">
           <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div>

@@ -1,0 +1,4 @@
+ALTER TABLE queue_tokens ADD COLUMN generated_date DATE;
+UPDATE queue_tokens SET generated_date = DATE(generated_at);
+ALTER TABLE queue_tokens ALTER COLUMN generated_date SET NOT NULL;
+ALTER TABLE queue_tokens ADD CONSTRAINT uq_queue_token_branch_day UNIQUE (branch_id, token_number, generated_date);

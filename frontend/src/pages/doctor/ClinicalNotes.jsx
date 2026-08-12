@@ -58,6 +58,10 @@ const ClinicalNotes = () => {
             style={{ background: '#0e7490', color: 'var(--color-surface)', border: 'none', padding: '7px 14px', borderRadius: '7px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <FlaskConical size={13} /> Order Tests
           </button>
+          <button onClick={() => navigate(`/doctor/patients/${patientId}/radiology-request`)}
+            style={{ background: '#6366f1', color: 'var(--color-surface)', border: 'none', padding: '7px 14px', borderRadius: '7px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <HeartPulse size={13} /> Order Imaging
+          </button>
         </div>
       </div>
 

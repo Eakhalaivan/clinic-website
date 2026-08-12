@@ -13,7 +13,7 @@ ALTER TABLE prescription_items ADD COLUMN timing VARCHAR(50);
 
 -- Vitals table
 CREATE TABLE IF NOT EXISTS vitals (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     patient_id BIGINT NOT NULL,
     doctor_id BIGINT,
     height_cm INT,

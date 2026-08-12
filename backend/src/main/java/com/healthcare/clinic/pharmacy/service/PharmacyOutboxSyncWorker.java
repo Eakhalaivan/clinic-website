@@ -1,7 +1,7 @@
 package com.healthcare.clinic.pharmacy.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.healthcare.clinic.doctor.service.ClinicPrescriptionSyncService;
+import com.healthcare.clinic.integration.ClinicIntegrationClient;
 import com.healthcare.clinic.pharmacy.dto.OutboxStatusUpdatePayload;
 import com.healthcare.clinic.pharmacy.entity.PharmacyOutboxEvent;
 import com.healthcare.clinic.pharmacy.repository.PharmacyOutboxEventRepository;
@@ -21,17 +21,18 @@ import java.util.List;
 public class PharmacyOutboxSyncWorker {
 
     private final PharmacyOutboxEventRepository pharmacyOutboxEventRepository;
-    private final ClinicPrescriptionSyncService clinicPrescriptionSyncService;
+    private final ClinicIntegrationClient clinicIntegrationClient;
     private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelay = 5000)
+    @org.springframework.transaction.annotation.Transactional(transactionManager = "pharmacyTransactionManager")
     public void processOutbox() {
         List<PharmacyOutboxEvent> pendingEvents = pharmacyOutboxEventRepository.findByStatus("PENDING");
         for (PharmacyOutboxEvent event : pendingEvents) {
             try {
                 if ("PHARMACY_PRESCRIPTION".equals(event.getAggregateType()) && "STATUS_UPDATE".equals(event.getEventType())) {
                     OutboxStatusUpdatePayload payload = objectMapper.readValue(event.getPayload(), OutboxStatusUpdatePayload.class);
-                    clinicPrescriptionSyncService.syncClinicalStatus(
+                    clinicIntegrationClient.syncClinicalStatus(
                             payload.getClinicalPrescriptionId(),
                             payload.getStatus(),
                             payload.getPharmacistUsername(),

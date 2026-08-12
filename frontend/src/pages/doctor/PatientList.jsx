@@ -153,7 +153,7 @@ const PatientList = ({ onPatientClick }) => {
                     >
                       <td className="py-4 px-6 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <img 
+                          <img loading="lazy" 
                             src={`https://i.pravatar.cc/150?u=${p.patientId || idx}`} 
                             alt={p.name}
                             className="w-8 h-8 rounded-full bg-slate-200 object-cover"

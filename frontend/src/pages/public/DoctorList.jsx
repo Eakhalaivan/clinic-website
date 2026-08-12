@@ -115,7 +115,7 @@ const DoctorList = () => {
                 >
                   <div className="w-24 h-24 rounded-full bg-indigo-50 flex items-center justify-center mb-6 group-hover:bg-indigo-100 transition-colors">
                     {doctor.profileImageUrl ? (
-                      <img src={doctor.profileImageUrl} alt={`Dr. ${doctor.lastName}`} className="w-full h-full object-cover rounded-full" />
+                      <img loading="lazy" src={doctor.profileImageUrl} alt={`Dr. ${doctor.lastName}`} className="w-full h-full object-cover rounded-full" />
                     ) : (
                       <span className="text-2xl font-bold text-indigo-700">{initials}</span>
                     )}

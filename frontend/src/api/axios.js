@@ -1,5 +1,6 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
+import toast from 'react-hot-toast';
 
 // Resolve API base URL:
 //   1. window.__ENV__ — injected at container start by docker-entrypoint.sh (Render / Docker deployment)
@@ -13,12 +14,14 @@ const BASE_URL =
 
 export const axiosPrivate = axios.create({
     baseURL: BASE_URL,
+    timeout: 15000,
     headers: { 'Content-Type': 'application/json' },
     withCredentials: true
 });
 
 export const axiosPublic = axios.create({
     baseURL: BASE_URL,
+    timeout: 15000,
     headers: { 'Content-Type': 'application/json' },
 });
 
@@ -91,6 +94,11 @@ axiosPrivate.interceptors.response.use(
             } finally {
                 isRefreshing = false;
             }
+        }
+
+        // Show toast for timeouts or network errors
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.code === 'ERR_NETWORK') {
+            toast.error('Network Error: The request took too long or the server is unreachable.');
         }
 
         return Promise.reject(error);

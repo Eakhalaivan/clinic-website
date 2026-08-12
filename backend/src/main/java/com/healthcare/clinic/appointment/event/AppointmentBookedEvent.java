@@ -13,8 +13,8 @@ import java.time.ZonedDateTime;
 @Builder
 public class AppointmentBookedEvent {
     private Long appointmentId;
-    private Long patientId;
-    private Long doctorId;
+    private Long patientUserId;
+    private Long doctorUserId;
     private ZonedDateTime startTime;
     private ZonedDateTime endTime;
     private String doctorName;

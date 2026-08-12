@@ -100,7 +100,17 @@ public class PortalAuthController {
 
         logLoginHistory(authenticatedUser, request, true);
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
+        org.springframework.http.ResponseCookie refreshCookie = org.springframework.http.ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(new JwtResponse(jwt));
     }
 
     @PostMapping("/{portal}/login/mfa")
@@ -129,7 +139,17 @@ public class PortalAuthController {
         String jwt = jwtUtils.generateJwtToken(authentication);
         String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
+        org.springframework.http.ResponseCookie refreshCookie = org.springframework.http.ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(new JwtResponse(jwt));
     }
 
     @PostMapping("/register")
@@ -223,12 +243,10 @@ class SignupRequest {
 @Data
 class JwtResponse {
     private String token;
-    private String refreshToken;
     private String type = "Bearer";
 
-    public JwtResponse(String accessToken, String refreshToken) {
+    public JwtResponse(String accessToken) {
         this.token = accessToken;
-        this.refreshToken = refreshToken;
     }
 }
 

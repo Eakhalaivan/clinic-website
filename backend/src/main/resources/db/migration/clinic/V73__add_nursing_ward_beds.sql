@@ -1,0 +1,53 @@
+CREATE TABLE wards (
+    id BIGSERIAL PRIMARY KEY,
+    branch_id BIGINT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    ward_type VARCHAR(50) NOT NULL, -- ICU, GENERAL, MATERNITY, PEDIATRIC, SURGICAL
+    capacity INT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE beds (
+    id BIGSERIAL PRIMARY KEY,
+    ward_id BIGINT NOT NULL,
+    bed_number VARCHAR(20) NOT NULL,
+    status VARCHAR(50) DEFAULT 'AVAILABLE', -- AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE, BLOCKED
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bed_ward FOREIGN KEY (ward_id) REFERENCES wards(id),
+    CONSTRAINT uk_ward_bed UNIQUE (ward_id, bed_number)
+);
+
+CREATE TABLE bed_assignments (
+    id BIGSERIAL PRIMARY KEY,
+    bed_id BIGINT NOT NULL,
+    patient_id BIGINT NOT NULL,
+    encounter_id BIGINT NOT NULL,
+    assigned_by BIGINT NOT NULL, -- User ID
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    discharged_at TIMESTAMP WITH TIME ZONE,
+    status VARCHAR(50) DEFAULT 'ACTIVE', -- ACTIVE, TRANSFERRED, DISCHARGED
+    notes TEXT,
+    CONSTRAINT fk_assignment_bed FOREIGN KEY (bed_id) REFERENCES beds(id)
+);
+
+CREATE TABLE ward_transfers (
+    id BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT NOT NULL,
+    encounter_id BIGINT NOT NULL,
+    source_bed_id BIGINT,
+    destination_bed_id BIGINT,
+    requested_by BIGINT NOT NULL,
+    requested_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    approved_by BIGINT,
+    approved_at TIMESTAMP WITH TIME ZONE,
+    status VARCHAR(50) DEFAULT 'REQUESTED', -- REQUESTED, APPROVED, IN_TRANSIT, COMPLETED, CANCELLED
+    priority VARCHAR(20) DEFAULT 'ROUTINE', -- ROUTINE, URGENT
+    reason TEXT,
+    transfer_notes TEXT,
+    CONSTRAINT fk_transfer_src_bed FOREIGN KEY (source_bed_id) REFERENCES beds(id),
+    CONSTRAINT fk_transfer_dest_bed FOREIGN KEY (destination_bed_id) REFERENCES beds(id)
+);

@@ -42,10 +42,10 @@ public class DataSeeder implements CommandLineRunner {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorWorkingHoursRepository doctorWorkingHoursRepository;
 
-    @Value("${SEED_ADMIN_PASSWORD:AdminPass123!}")
+    @Value("${SEED_ADMIN_PASSWORD:CHANGE_ME_ADMIN}")
     private String seedAdminPassword;
 
-    @Value("${SEED_DOCTOR_PASSWORD:DoctorPass123!}")
+    @Value("${SEED_DOCTOR_PASSWORD:CHANGE_ME_DOCTOR}")
     private String seedDoctorPassword;
 
     @Override
@@ -57,7 +57,7 @@ public class DataSeeder implements CommandLineRunner {
         String[] allRoleNames = {
             "ROLE_ADMIN", "ROLE_SUPER_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_BRANCH_ADMIN",
             "ROLE_DOCTOR", "ROLE_PATIENT", "ROLE_PHARMACIST", "ROLE_NURSE",
-            "ROLE_LAB", "ROLE_LAB_TECH",
+            "ROLE_LAB", "ROLE_LAB_TECH", "ROLE_PATHOLOGIST", "ROLE_LAB_SENIOR",
             "ROLE_RADIOLOGIST", "ROLE_RECEPTION", "ROLE_FINANCE", "ROLE_ACCOUNTANT",
             "ROLE_INVENTORY_MANAGER", "ROLE_MARKETING", "ROLE_STORE_MANAGER", "ROLE_SUPPORT",
             "ROLE_CUSTOMER_SUPPORT", "ROLE_VENDOR", "ROLE_INSURANCE", "ROLE_AMBULANCE", "ROLE_HR"
@@ -137,7 +137,7 @@ public class DataSeeder implements CommandLineRunner {
         User nurse = userRepository.findByEmail("nurse@clinic.com").orElseGet(() -> 
             User.builder().email("nurse@clinic.com").firstName("Jane").lastName("Smith").build()
         );
-        nurse.setPasswordHash(passwordEncoder.encode("NursePass123!"));
+        nurse.setPasswordHash(passwordEncoder.encode(System.getenv().getOrDefault("SEED_NURSE_PASSWORD", "CHANGE_ME_NURSE")));
         nurse.setFailedLoginAttempts(0);
         nurse.setLockedUntil(null);
         nurse.setEnabled(true);
@@ -167,7 +167,7 @@ public class DataSeeder implements CommandLineRunner {
             case "ROLE_NURSE" -> "nurse";
             case "ROLE_RECEPTION" -> "reception";
             case "ROLE_PHARMACIST" -> "pharmacist";
-            case "ROLE_LAB_TECH", "ROLE_LAB" -> "lab";
+            case "ROLE_LAB_TECH", "ROLE_LAB", "ROLE_PATHOLOGIST", "ROLE_LAB_SENIOR" -> "lab";
             case "ROLE_RADIOLOGIST" -> "radiologist";
             case "ROLE_ACCOUNTANT" -> "accountant";
             case "ROLE_FINANCE" -> "finance";

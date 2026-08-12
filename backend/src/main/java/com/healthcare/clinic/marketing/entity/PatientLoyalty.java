@@ -29,6 +29,21 @@ public class PatientLoyalty {
     @Builder.Default
     private String tier = "BRONZE"; // BRONZE, SILVER, GOLD, PLATINUM
 
+    // Phase 16 extended fields
+    @Column(name = "lifetime_earned", nullable = false)
+    @Builder.Default
+    private Integer lifetimeEarned = 0;
+
+    @Column(name = "lifetime_redeemed", nullable = false)
+    @Builder.Default
+    private Integer lifetimeRedeemed = 0;
+
+    @Column(name = "last_earned_at")
+    private ZonedDateTime lastEarnedAt;
+
+    @Column(name = "last_redeemed_at")
+    private ZonedDateTime lastRedeemedAt;
+
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;

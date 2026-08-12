@@ -29,8 +29,12 @@ const NotificationBell = () => {
   const { data: countData } = useQuery({
     queryKey: ['notificationCount'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/notifications/unread-count');
-      return res.data;
+      try {
+        const res = await axiosPrivate.get('/notifications/unread-count');
+        return res.data;
+      } catch (err) {
+        return 0; // Fallback to 0 unread on 401/404
+      }
     },
     refetchInterval: 30000,
   });

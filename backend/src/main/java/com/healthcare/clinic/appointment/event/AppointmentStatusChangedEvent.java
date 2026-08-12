@@ -14,6 +14,6 @@ public class AppointmentStatusChangedEvent {
     private Long appointmentId;
     private AppointmentStatus oldStatus;
     private AppointmentStatus newStatus;
-    private Long doctorId;
+    private Long doctorUserId;
     private Long branchId;
 }

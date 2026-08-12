@@ -20,18 +20,23 @@ export default function Drawer({
   className = ''
 }) {
   useEffect(() => {
+    let previousFocus = null;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
     if (isOpen) {
+      previousFocus = document.activeElement;
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => {
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
     };
   }, [isOpen, onClose]);
 
@@ -45,7 +50,7 @@ export default function Drawer({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

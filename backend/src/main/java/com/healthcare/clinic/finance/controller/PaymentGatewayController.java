@@ -16,7 +16,7 @@ public class PaymentGatewayController {
     private final StripePaymentService stripePaymentService;
 
     @PostMapping("/checkout/{invoiceId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'FINANCE', 'RECEPTIONIST')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'FINANCE', 'RECEPTIONIST', 'PATIENT')")
     public ResponseEntity<Map<String, String>> createCheckoutSession(
             @PathVariable Long invoiceId) {
         

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, X, UserRound, CalendarDays, FileText } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { axiosPrivate } from '../api/axios';
+import { useQuery } from '@tanstack/react-query';
+import useDebounce from '../hooks/pharmacy/useDebounce';
 
 /**
  * GlobalSearchBar — stub component.
@@ -18,32 +20,26 @@ const GlobalSearchBar = () => {
   const navigate = useNavigate();
   const { roles } = useAuthStore();
 
-  // Fetch real patient search results
+  const debouncedQuery = useDebounce(query, 300);
+
+  const { data: searchData = [] } = useQuery({
+    queryKey: ['global-search', debouncedQuery],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/patients/search', { params: { query: debouncedQuery } });
+      return res.data.map(p => ({
+        type: 'Patient',
+        label: `${p.fullName} (${p.uhid || 'No UHID'})`,
+        path: '/patient/dashboard',
+        icon: <UserRound size={14} />
+      }));
+    },
+    enabled: debouncedQuery.length >= 2,
+    staleTime: 60000,
+  });
+
   useEffect(() => {
-    if (!query.trim() || query.length < 2) {
-      setResults([]);
-      return;
-    }
-    const fetchResults = async () => {
-      try {
-        const res = await axiosPrivate.get('/patients/search', { params: { query } });
-        // Map backend patient results to the dropdown format
-        const mapped = res.data.map(p => ({
-          type: 'Patient',
-          label: `${p.fullName} (${p.uhid || 'No UHID'})`,
-          path: '/patient/dashboard', // In a real scenario this might go to a specific patient profile page
-          icon: <UserRound size={14} />
-        }));
-        setResults(mapped);
-      } catch (err) {
-        logger.error('Search failed', err);
-        setResults([]);
-      }
-    };
-    
-    const timeout = setTimeout(fetchResults, 300);
-    return () => clearTimeout(timeout);
-  }, [query]);
+    setResults(searchData);
+  }, [searchData]);
 
   const clear = () => { setQuery(''); setResults([]); setOpen(false); };
 

@@ -1,6 +1,5 @@
 package com.healthcare.clinic.pharmacy.entity;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

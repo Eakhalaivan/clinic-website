@@ -62,6 +62,19 @@ public class Prescription {
     @Column(name = "assigned_pharmacy_user_id")
     private Long assignedPharmacyUserId;
 
+    @Column(name = "encounter_id")
+    private Long encounterId;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private String status = "Draft"; // Draft, Signed, Void, Cancelled
+
+    @Column(name = "signed_at")
+    private LocalDateTime signedAt;
+
+    @Column(name = "signature_hash")
+    private String signatureHash;
+
     @Column(name = "voided_at")
     private LocalDateTime voidedAt;
 

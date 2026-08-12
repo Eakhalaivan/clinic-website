@@ -13,7 +13,7 @@ export default function Orders() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('/api/patient/orders');
+        const response = await axios.get('/patient/orders');
         setOrders(response.data);
       } catch (err) {
         console.error('Error fetching orders:', err);

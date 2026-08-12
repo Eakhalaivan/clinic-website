@@ -315,7 +315,7 @@ export default function AdminDashboard() {
     queryKey: ['dashboard-kpis', activeRole],
     queryFn: () => api.get('/pharmacy/dashboard').then(r => r.data?.data ?? {}),
     staleTime: 2000,
-    refetchInterval: 5000,
+    refetchInterval: 60000,
     enabled: !!activeRole
   });
 
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
     queryKey: ['dashboard-chart', activeRole],
     queryFn: () => api.get('/pharmacy/dashboard/chart-data?days=7').then(r => r.data?.data ?? []),
     staleTime: 5000,
-    refetchInterval: 15000,
+    refetchInterval: 60000,
     enabled: !!activeRole
   });
 
@@ -331,7 +331,7 @@ export default function AdminDashboard() {
     queryKey: ['dashboard-alerts', activeRole],
     queryFn: () => api.get('/pharmacy/dashboard/alerts').then(r => r.data?.data ?? []),
     staleTime: 2000,
-    refetchInterval: 5000,
+    refetchInterval: 60000,
     enabled: !!activeRole
   });
 
@@ -339,7 +339,7 @@ export default function AdminDashboard() {
     queryKey: ['dashboard-revenue', activeRole],
     queryFn: () => api.get('/pharmacy/dashboard/revenue-strip').then(r => r.data?.data ?? {}),
     staleTime: 5000,
-    refetchInterval: 10000,
+    refetchInterval: 60000,
     enabled: !!activeRole
   });
 

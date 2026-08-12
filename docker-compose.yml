@@ -12,18 +12,18 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/clinic?sslmode=disable
       DB_USER: postgres
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       PHARMACY_DB_URL: jdbc:mysql://mysql:3306/pharmacy?useSSL=false&allowPublicKeyRetrieval=true
       PHARMACY_DB_USER: root
-      PHARMACY_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      JWT_SECRET: ${JWT_SECRET:-secret}
+      PHARMACY_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
       SMTP_HOST: ${SMTP_HOST:-localhost}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-admin}
-      SEED_DOCTOR_PASSWORD: ${SEED_DOCTOR_PASSWORD:-doctor}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+      SEED_DOCTOR_PASSWORD: ${SEED_DOCTOR_PASSWORD}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -38,7 +38,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: clinic
     ports:
       - "5432:5432"
@@ -52,7 +52,7 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: pharmacy
     ports:
       - "3306:3306"

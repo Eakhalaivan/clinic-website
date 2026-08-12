@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/insurance")
@@ -24,12 +25,14 @@ public class InsurancePortalController {
         return ResponseEntity.ok(insuranceService.getAllClaims());
     }
 
-    @PatchMapping("/claims/{id}/adjudicate")
+    @PostMapping("/claims/{id}/adjudicate")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSURANCE_MANAGER')")
     public ResponseEntity<InsuranceClaim> adjudicateClaim(
             @PathVariable Long id,
-            @RequestParam String status,
-            @RequestParam(required = false) BigDecimal approvedAmount,
-            @RequestParam(required = false) String notes) {
+            @RequestBody Map<String, Object> request) {
+        com.healthcare.clinic.finance.entity.ClaimStatus status = com.healthcare.clinic.finance.entity.ClaimStatus.valueOf((String) request.get("status"));
+        BigDecimal approvedAmount = request.containsKey("approvedAmount") ? new BigDecimal(request.get("approvedAmount").toString()) : null;
+        String notes = (String) request.get("notes");
         return ResponseEntity.ok(insuranceService.adjudicateClaim(id, status, approvedAmount, notes));
     }
 

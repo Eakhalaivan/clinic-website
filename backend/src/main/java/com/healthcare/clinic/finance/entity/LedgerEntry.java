@@ -24,30 +24,27 @@ public class LedgerEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "branch_id")
-    private Long branchId;
-
-    @Column(name = "entry_date", nullable = false)
-    private LocalDate entryDate;
-
-    @Column(name = "entry_type", nullable = false, length = 20)
-    private String entryType;
-
-    @Column(name = "category", nullable = false, length = 80)
-    private String category;
-
-    @Column(name = "amount", nullable = false, precision = 14, scale = 2)
-    private BigDecimal amount;
-
-    @Column(name = "reference_id", length = 100)
-    private String referenceId;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "journal_entry_id", nullable = false)
+    private JournalEntry journalEntry;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recorded_by")
-    private User recordedBy;
+    @JoinColumn(name = "account_id", nullable = false)
+    private ChartOfAccount account;
+
+    @Column(name = "debit_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal debitAmount = BigDecimal.ZERO;
+
+    @Column(name = "credit_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal creditAmount = BigDecimal.ZERO;
+
+    @Column(name = "description", length = 255)
+    private String description;
+
+    @Column(name = "branch_id")
+    private Long branchId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

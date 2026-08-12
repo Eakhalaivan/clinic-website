@@ -307,7 +307,7 @@ const DoctorAppointments = () => {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
                                 {a.patientProfilePictureUrl ? (
-                                  <img src={a.patientProfilePictureUrl} alt="Patient" className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={a.patientProfilePictureUrl} alt="Patient" className="w-full h-full object-cover" />
                                 ) : (
                                   <Users size={16} className="text-slate-400" />
                                 )}

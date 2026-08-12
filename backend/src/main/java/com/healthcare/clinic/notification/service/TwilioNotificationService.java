@@ -1,10 +1,5 @@
 package com.healthcare.clinic.notification.service;
 
-import com.healthcare.clinic.appointment.event.AppointmentBookedEvent;
-import com.healthcare.clinic.notification.event.AppointmentCancelledEvent;
-import com.healthcare.clinic.notification.event.InvoiceCreatedEvent;
-import com.healthcare.clinic.notification.event.LabResultReleasedEvent;
-import com.healthcare.clinic.notification.event.QueueTokenCalledEvent;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;

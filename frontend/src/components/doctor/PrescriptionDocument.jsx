@@ -38,7 +38,7 @@ const PrescriptionDocument = ({ data }) => {
         <div className="flex gap-4">
           {/* Logo Placeholder - gracefully falls back to text if no image is present */}
           <div className="w-20 h-20 bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-center text-indigo-300 print-bg-gray print-text-black">
-            {/* When logo is available: <img src={clinicLogoUrl} alt="Clinic Logo" className="object-contain" /> */}
+            {/* When logo is available: <img loading="lazy" src={clinicLogoUrl} alt="Clinic Logo" className="object-contain" /> */}
             <Activity className="w-10 h-10" />
           </div>
           <div>

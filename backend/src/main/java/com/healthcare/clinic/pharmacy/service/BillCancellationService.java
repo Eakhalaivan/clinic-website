@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.service;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import com.healthcare.clinic.pharmacy.exception.ResourceNotFoundException;
 import com.healthcare.clinic.pharmacy.model.BillCancellationRequest;

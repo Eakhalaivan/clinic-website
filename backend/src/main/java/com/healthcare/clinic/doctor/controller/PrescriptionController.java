@@ -30,7 +30,21 @@ public class PrescriptionController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<PrescriptionResponse> getPrescription(@PathVariable Long id) {
-        return ResponseEntity.ok(prescriptionService.getPrescriptionById(id));
+        PrescriptionResponse response = prescriptionService.getPrescriptionById(id);
+        
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean hasPrivilegedRole = auth != null && auth.getAuthorities().stream().anyMatch(a ->
+            a.getAuthority().equals("ROLE_DOCTOR") || a.getAuthority().equals("ROLE_ADMIN") ||
+            a.getAuthority().equals("ROLE_SUPER_ADMIN") || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
+            
+        if (!hasPrivilegedRole) {
+            Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+            if (currentUserId == null || !currentUserId.equals(response.getPatientId())) {
+                throw new org.springframework.security.access.AccessDeniedException("You do not have permission to access this prescription");
+            }
+        }
+        
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -84,9 +98,29 @@ public class PrescriptionController {
         return ResponseEntity.ok(prescriptionService.voidPrescription(id, reason));
     }
 
+    @PostMapping("/{id}/sign")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    public ResponseEntity<PrescriptionResponse> signPrescription(@PathVariable Long id) {
+        return ResponseEntity.ok(prescriptionService.signPrescription(id));
+    }
+
     @GetMapping("/{id}/pdf")
     @PreAuthorize("hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<byte[]> downloadPrescriptionPdf(@PathVariable Long id) {
+        PrescriptionResponse response = prescriptionService.getPrescriptionById(id);
+        
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean hasPrivilegedRole = auth != null && auth.getAuthorities().stream().anyMatch(a ->
+            a.getAuthority().equals("ROLE_DOCTOR") || a.getAuthority().equals("ROLE_ADMIN") ||
+            a.getAuthority().equals("ROLE_SUPER_ADMIN") || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
+            
+        if (!hasPrivilegedRole) {
+            Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+            if (currentUserId == null || !currentUserId.equals(response.getPatientId())) {
+                throw new org.springframework.security.access.AccessDeniedException("You do not have permission to access this prescription");
+            }
+        }
+        
         byte[] pdf = prescriptionService.generatePdf(id);
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);

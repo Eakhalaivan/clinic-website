@@ -49,11 +49,8 @@ const NurseAssignedPatients = () => {
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-                <button onClick={() => navigate(`/nurse/vitals?patientId=${p.patientId}`)} style={{ background: '#0f766e', color: 'var(--color-surface)', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <HeartPulse size={14} /> Record Vitals
-                </button>
-                <button onClick={() => navigate(`/nurse/notes?patientId=${p.patientId}`)} style={{ background: 'var(--color-surface-alt)', color: 'var(--color-text)', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <FileText size={14} /> Notes
+                <button onClick={() => navigate(`/nurse/workspace/${p.patientId}`)} style={{ background: '#0f766e', color: 'var(--color-surface)', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <HeartPulse size={14} /> Workspace
                 </button>
               </div>
             </div>

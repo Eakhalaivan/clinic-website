@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -61,12 +60,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
-        }
-
-        // Support for SSE/WebSockets which cannot send custom headers
-        String paramAuth = request.getParameter("token");
-        if (StringUtils.hasText(paramAuth)) {
-            return paramAuth;
         }
 
         return null;

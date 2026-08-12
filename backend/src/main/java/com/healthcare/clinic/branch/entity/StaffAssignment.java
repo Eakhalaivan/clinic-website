@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.ZonedDateTime;
+import com.healthcare.clinic.identity.entity.Role;
 
 @Entity
 @Table(name = "staff_assignments")
@@ -29,8 +30,10 @@ public class StaffAssignment {
     @Column(nullable = false)
     private Long userId; // References identity-service
 
-    @Column(nullable = false, length = 50)
-    private String role; // DOCTOR, RECEPTIONIST, ADMIN
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    @JsonIgnore
+    private Role role;
 
     @Builder.Default
     private Boolean isPrimary = true;

@@ -102,7 +102,7 @@ const PrescriptionTemplates = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <img src="https://i.pravatar.cc/150?img=11" alt="Dr. John Doe" className="w-9 h-9 rounded-full object-cover" />
+            <img loading="lazy" src="https://i.pravatar.cc/150?img=11" alt="Dr. John Doe" className="w-9 h-9 rounded-full object-cover" />
             <div className="hidden sm:block">
               <div className="text-sm font-bold text-slate-900 leading-tight">Dr. John Doe</div>
               <div className="text-xs text-slate-500">Cardiologist</div>
@@ -288,7 +288,7 @@ const PrescriptionTemplates = () => {
                         className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200 transition-colors"
                       >
                         <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 overflow-hidden">
-                           <img src={`https://ui-avatars.com/api/?name=${p.firstName}+${p.lastName}&background=cbd5e1&color=334155`} alt="avatar" className="w-full h-full object-cover" />
+                           <img loading="lazy" src={`https://ui-avatars.com/api/?name=${p.firstName}+${p.lastName}&background=cbd5e1&color=334155`} alt="avatar" className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <div className="text-sm font-bold text-slate-900">{p.firstName} {p.lastName}</div>

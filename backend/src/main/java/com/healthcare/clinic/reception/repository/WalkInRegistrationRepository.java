@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface WalkInRegistrationRepository extends JpaRepository<WalkInRegistration, Long> {
     List<WalkInRegistration> findByBranchIdAndStatus(Long branchId, String status);
+    List<WalkInRegistration> findByBranchId(Long branchId);
 }

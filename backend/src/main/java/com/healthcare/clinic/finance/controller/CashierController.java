@@ -1,0 +1,41 @@
+package com.healthcare.clinic.finance.controller;
+
+import com.healthcare.clinic.finance.entity.CashierSession;
+import com.healthcare.clinic.finance.service.CashierService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/v1/finance/cashier")
+@RequiredArgsConstructor
+public class CashierController {
+
+    private final CashierService cashierService;
+
+    @PostMapping("/session/open")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RECEPTIONIST')")
+    public ResponseEntity<CashierSession> openSession(@RequestBody Map<String, Object> request) {
+        Long branchId = Long.valueOf(request.get("branchId").toString());
+        Long cashierId = Long.valueOf(request.get("cashierId").toString());
+        BigDecimal openingFloat = new BigDecimal(request.get("openingFloat").toString());
+
+        CashierSession session = cashierService.openSession(branchId, cashierId, openingFloat);
+        return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("/session/{sessionId}/close")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RECEPTIONIST')")
+    public ResponseEntity<CashierSession> closeSession(
+            @PathVariable Long sessionId,
+            @RequestBody Map<String, Object> request) {
+        
+        BigDecimal closingFloat = new BigDecimal(request.get("closingFloat").toString());
+        CashierSession session = cashierService.closeSession(sessionId, closingFloat);
+        return ResponseEntity.ok(session);
+    }
+}

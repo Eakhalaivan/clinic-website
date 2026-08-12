@@ -33,6 +33,8 @@ public class BillingController {
     @PutMapping("/{id}/pay")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<InvoiceResponse> payInvoice(@PathVariable Long id) {
+        InvoiceResponse response = billingService.getInvoice(id);
+        assertCanAccessInvoice(response.getPatientId());
         return ResponseEntity.ok(billingService.payInvoice(id));
     }
 
@@ -46,9 +48,11 @@ public class BillingController {
 
     @GetMapping("/invoices/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ACCOUNTANT') or hasAuthority('ROLE_SUPER_ADMIN') " +
-                  "or (hasAuthority('ROLE_PATIENT') and @securityUtils.isSameUser(#id))")
+                  "or hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable Long id) {
-        return ResponseEntity.ok(billingService.getInvoice(id));
+        InvoiceResponse response = billingService.getInvoice(id);
+        assertCanAccessInvoice(response.getPatientId());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/invoices/status/{status}")
@@ -83,10 +87,29 @@ public class BillingController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ACCOUNTANT') " +
                   "or hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_SUPER_ADMIN')")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable Long id) {
+        InvoiceResponse response = billingService.getInvoice(id);
+        assertCanAccessInvoice(response.getPatientId());
+        
         byte[] pdf = billingService.generatePdf(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "invoice-" + id + ".pdf");
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+    }
+
+    private void assertCanAccessInvoice(Long patientId) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean hasPrivilegedRole = auth.getAuthorities().stream().anyMatch(a -> 
+            a.getAuthority().equals("ROLE_ADMIN") || 
+            a.getAuthority().equals("ROLE_ACCOUNTANT") ||
+            a.getAuthority().equals("ROLE_SUPER_ADMIN")
+        );
+        if (hasPrivilegedRole) {
+            return;
+        }
+        Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+        if (currentUserId == null || !currentUserId.equals(patientId)) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to access this invoice");
+        }
     }
 }

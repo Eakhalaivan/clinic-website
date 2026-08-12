@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.service;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import com.healthcare.clinic.pharmacy.entity.PharmacyClearance;
 import com.healthcare.clinic.pharmacy.repository.PharmacyClearanceRepository;
@@ -21,12 +19,12 @@ public class PharmacyClearanceService {
     private final PharmacyClearanceRepository pharmacyClearanceRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = "pharmacyTransactionManager")
     public List<PharmacyClearance> getAllClearances() {
         return pharmacyClearanceRepository.findAll();
     }
 
-    @Transactional(readOnly = true, transactionManager = "transactionManager")
+    @Transactional(readOnly = true, transactionManager = "clinicTransactionManager")
     public User fetchUserByEmail(String userEmail) {
         return userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -38,7 +36,7 @@ public class PharmacyClearanceService {
         return updateClearanceRecord(id, user);
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PharmacyClearance updateClearanceRecord(Long id, User user) {
         PharmacyClearance clearance = pharmacyClearanceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Clearance record not found"));

@@ -11,6 +11,8 @@ import { toast } from 'react-hot-toast';
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
+import api from '../../utils/pharmacy/api';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function DispenseWorklists() {
   const queryClient = useQueryClient();
@@ -25,6 +27,22 @@ export default function DispenseWorklists() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [idempotencyKey, setIdempotencyKey] = useState('');
+  const [partialDispense, setPartialDispense] = useState(false);
+
+  const dispenseMutation = useMutation({
+    mutationFn: (data) => api.post(`/pharmacy/prescriptions/${selectedPrescription.id}/dispense`, data, {
+      headers: { 'Idempotency-Key': idempotencyKey }
+    }),
+    onSuccess: () => {
+      toast.success('Medicines dispensed successfully!');
+      setIsModalOpen(false);
+      queryClient.invalidateQueries(['dispense-worklists']);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to dispense medicines');
+    }
+  });
 
   const columns = [
     { header: 'S.No', render: (_, i) => i + 1 },
@@ -46,7 +64,12 @@ export default function DispenseWorklists() {
         </button>
         <button 
           title="Dispense" 
-          onClick={() => { setSelectedPrescription(row); setIsModalOpen(true); }}
+          onClick={() => { 
+            setSelectedPrescription(row); 
+            setIdempotencyKey(uuidv4());
+            setPartialDispense(false);
+            setIsModalOpen(true); 
+          }}
           className="p-1.5 text-success hover:bg-green-50 rounded-lg transition-colors"
         >
           <Pill className="w-4 h-4" />
@@ -97,11 +120,13 @@ export default function DispenseWorklists() {
         footer={
           <div className="flex w-full gap-3">
              <button onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all font-display">Cancel</button>
-             <button onClick={() => { 
-                toast.success('Medicines dispensed successfully!'); 
-                setIsModalOpen(false); 
-                queryClient.invalidateQueries(['dispense-worklists']);
-             }} className="flex-1 px-6 py-2.5 bg-success text-white rounded-xl text-sm font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all font-display">Confirm Dispense</button>
+             <button 
+               onClick={() => dispenseMutation.mutate({ items: [], partialDispense })} 
+               disabled={dispenseMutation.isLoading}
+               className="flex-1 px-6 py-2.5 bg-success text-white rounded-xl text-sm font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all font-display disabled:opacity-50"
+             >
+               {dispenseMutation.isLoading ? 'Dispensing...' : 'Confirm Dispense'}
+             </button>
           </div>
         }
       >
@@ -117,6 +142,17 @@ export default function DispenseWorklists() {
                   <Badge variant="danger">{selectedPrescription.status}</Badge>
                   <p className="text-xs font-bold text-slate-400 mt-2">Pr-ID: {selectedPrescription.id}</p>
                </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <input 
+                type="checkbox" 
+                id="partialDispense" 
+                checked={partialDispense} 
+                onChange={(e) => setPartialDispense(e.target.checked)} 
+                className="rounded border-gray-300 text-success focus:ring-success"
+              />
+              <label htmlFor="partialDispense" className="text-sm font-medium text-gray-700">Allow Partial Dispense</label>
             </div>
 
             <div className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm">

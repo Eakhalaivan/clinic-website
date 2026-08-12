@@ -35,9 +35,15 @@ export default function MedicineMaster() {
   const [productTypeFilter, setProductTypeFilter] = useState('ALL');
   const [dateRange, setDateRange] = useState({ from: null, to: null });
 
-  const { items: allMedicines = [], isLoading: loading, page, goToPage, size } = usePageData(
+  const { items: allMedicines = [], isLoading: loading, page, goToPage, size, totalPages, totalElements } = usePageData(
     'medicines',
-    '/pharmacy/medicines'
+    '/pharmacy/medicines',
+    {
+      search: debouncedSearch,
+      drugClass: drugClassFilter,
+      schedule: scheduleFilter,
+      productType: productTypeFilter
+    }
   );
 
   const handleDateChange = (type, date) => {
@@ -56,44 +62,7 @@ export default function MedicineMaster() {
     });
   };
 
-  const filteredMedicines = React.useMemo(() => {
-    return allMedicines.filter(m => {
-      const matchesSearch = !debouncedSearch || 
-        (m.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-        (m.genericName || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (m.medicineCode || '').toLowerCase().includes(debouncedSearch.toLowerCase());
-      
-      const classMatch = drugClassFilter === 'ALL' || m.drugClass === drugClassFilter;
-      const scheduleMatch = scheduleFilter === 'ALL' || m.schedule === scheduleFilter;
-      const typeMatch = productTypeFilter === 'ALL' || m.productType === productTypeFilter;
-      
-      // Date Range Filter
-      let dateMatch = true;
-      if (dateRange.from || dateRange.to) {
-        const itemDate = new Date(m.createdAt || new Date());
-        itemDate.setHours(0, 0, 0, 0);
-
-        if (dateRange.from) {
-          const fromDate = new Date(dateRange.from);
-          fromDate.setHours(0, 0, 0, 0);
-          if (itemDate < fromDate) dateMatch = false;
-        }
-        if (dateRange.to) {
-          const toDate = new Date(dateRange.to);
-          toDate.setHours(0, 0, 0, 0);
-          if (itemDate > toDate) dateMatch = false;
-        }
-      }
-
-      return matchesSearch && classMatch && scheduleMatch && typeMatch && dateMatch;
-    });
-  }, [allMedicines, debouncedSearch, drugClassFilter, scheduleFilter, productTypeFilter, dateRange]);
-
-  const totalElements = filteredMedicines.length;
-  const medicines = React.useMemo(() => {
-    const start = page * size;
-    return filteredMedicines.slice(start, start + size);
-  }, [filteredMedicines, page, size]);
+  const medicines = allMedicines;
 
   useEffect(() => {
     goToPage(0);

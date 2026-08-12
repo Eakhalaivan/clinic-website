@@ -8,6 +8,7 @@ import com.healthcare.clinic.doctor.entity.Prescription;
 import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.identity.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.healthcare.clinic.laboratory.repository.LabTestCatalogRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestRequestRepository;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -65,6 +67,12 @@ class PrescriptionServiceTest {
 
     @Mock
     private com.healthcare.clinic.branch.repository.BranchRepository branchRepository;
+
+    @Mock
+    private com.healthcare.clinic.doctor.repository.ClinicOutboxEventRepository outboxEventRepository;
+
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
     private PrescriptionService prescriptionService;
@@ -177,16 +185,14 @@ class PrescriptionServiceTest {
         prescriptionService.sendPrescription(100L, null);
 
         // Assert
-        ArgumentCaptor<com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord> pharmacyRxCaptor = 
-                ArgumentCaptor.forClass(com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord.class);
+        ArgumentCaptor<com.healthcare.clinic.doctor.entity.ClinicOutboxEvent> outboxCaptor = 
+                ArgumentCaptor.forClass(com.healthcare.clinic.doctor.entity.ClinicOutboxEvent.class);
         
-        verify(pharmacyPrescriptionRepository, times(1)).save(pharmacyRxCaptor.capture());
+        verify(outboxEventRepository, times(1)).save(outboxCaptor.capture());
         
-        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord savedPharmacyRx = pharmacyRxCaptor.getValue();
-        assertEquals("PENDING", savedPharmacyRx.getStatus());
-        assertEquals("UNVERIFIED", savedPharmacyRx.getVerificationStatus());
-        assertEquals(100L, savedPharmacyRx.getClinicalPrescriptionId());
-        assertEquals("John Doe", savedPharmacyRx.getPatientName());
-        assertEquals("Dr. Smith", savedPharmacyRx.getDoctorName());
+        com.healthcare.clinic.doctor.entity.ClinicOutboxEvent savedEvent = outboxCaptor.getValue();
+        assertEquals("PRESCRIPTION_SENT", savedEvent.getEventType());
+        assertTrue(savedEvent.getPayload().contains("John Doe"));
+        assertTrue(savedEvent.getPayload().contains("Dr. Smith"));
     }
 }

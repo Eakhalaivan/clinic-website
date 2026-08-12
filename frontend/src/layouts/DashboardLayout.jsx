@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Outlet, useLocation, Navigate, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../api/axios';
 import { 
   LogOut, ChevronDown, Search, Bell, Moon, MessageSquare, 
-  Stethoscope, ShieldPlus, Plus, Zap, Activity
+  Stethoscope, ShieldPlus, Plus, Zap, Activity, ArrowLeft
 } from 'lucide-react';
 import { getPortalConfig } from '../config/portalConfig';
 import useAuthStore, { isTokenValid } from '../store/authStore';
@@ -14,8 +14,10 @@ import ErrorBoundary from '../components/ui/ErrorBoundary';
 
 const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { token, user, roles = [], logout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!isTokenValid(token)) return <Navigate to={`/${portalSlug || 'patient'}/login`} replace />;
   const userRoles = roles || [];
@@ -34,8 +36,12 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const { data: unreadCountData } = useQuery({
     queryKey: ['unreadNotifications', user?.id],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/notifications/unread-count');
-      return res.data;
+      try {
+        const res = await axiosPrivate.get('/notifications/unread-count');
+        return res.data;
+      } catch (err) {
+        return { count: 0 };
+      }
     },
     enabled: !!user?.id,
     refetchInterval: 30000 // Poll every 30s
@@ -53,17 +59,28 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
         <div className="px-6 py-3 flex items-center justify-between">
           {/* Logo and Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-xs">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-indigo-900 leading-none">AURELIAN HEALTH</h1>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
-                {portalSlug ? `${portalSlug.charAt(0).toUpperCase() + portalSlug.slice(1)} Portal` : 'Portal'}
-              </p>
-            </div>
+            {location.pathname !== `/${portalSlug}/dashboard` && location.pathname !== `/${portalSlug}/dashboard/` && (
+              <button 
+                onClick={() => navigate(-1)}
+                className="p-2 mr-1 hover:bg-slate-100 rounded-full text-slate-600 transition flex items-center justify-center cursor-pointer"
+                title="Go Back"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
+            <Link to={`/${portalSlug}/dashboard`} className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-indigo-900 leading-none cursor-pointer hover:text-indigo-700 transition">AURELIAN HEALTH</h1>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
+                  {portalSlug ? `${portalSlug.charAt(0).toUpperCase() + portalSlug.slice(1)} Portal` : 'Portal'}
+                </p>
+              </div>
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -108,7 +125,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
                       <button onClick={() => { setIsQuickActionOpen(false); window.location.pathname = '/patient/book'; }} className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2.5">
                         <span className="p-1 rounded bg-indigo-50 text-indigo-600"><Stethoscope size={13} /></span> Book Appointment
                       </button>
-                      <button onClick={() => { setIsQuickActionOpen(false); window.location.pathname = '/patient/prescriptions'; }} className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2.5">
+                      <button onClick={() => { setIsQuickActionOpen(false); window.location.pathname = '/patient/order-medicine'; }} className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2.5">
                         <span className="p-1 rounded bg-orange-50 text-orange-600"><ShieldPlus size={13} /></span> Order Medicine
                       </button>
                       <button onClick={() => { setIsQuickActionOpen(false); window.location.pathname = '/patient/lab-reports'; }} className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2.5">
@@ -139,12 +156,34 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
             </div>
 
             <div className="flex items-center gap-4 text-slate-500">
-              <div className="relative cursor-pointer" onClick={() => window.location.hash = '?panel=notifications'}>
-                <Bell size={22} className="text-slate-600 hover:text-slate-800 transition" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">
-                  {unreadCount > 0 ? unreadCount : 3}
-                </span>
+              
+              <div className="relative" onMouseLeave={() => setIsNotificationsOpen(false)}>
+                <div className="cursor-pointer relative" onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
+                  <Bell size={22} className="text-slate-600 hover:text-slate-800 transition" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                      <span className="font-bold text-slate-800 text-sm">Notifications</span>
+                      <span className="text-xs text-indigo-600 font-semibold cursor-pointer hover:underline" onClick={() => window.location.pathname = '/patient/timeline'}>View All</span>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {unreadCount === 0 ? (
+                         <div className="p-4 text-center text-sm text-slate-500">No new notifications.</div>
+                      ) : (
+                         <div className="p-4 text-center text-sm text-slate-500">You have {unreadCount} unread notifications. Check your timeline.</div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+
               <div className="relative cursor-pointer" onClick={() => window.location.hash = '?panel=messages'}>
                 <MessageSquare size={22} className="text-slate-600 hover:text-slate-800 transition" />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">
@@ -155,7 +194,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
             </div>
 
             <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-              <img 
+              <img loading="lazy" 
                 alt="User Profile" 
                 className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-xs" 
                 src={portalSlug === 'patient' 
@@ -186,10 +225,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
         </div>
       </header>
 
-      {/* Horizontal Nav Bar */}
-      {dashboardTiles.length > 0 && (
-        <DashboardGrid tiles={dashboardTiles} />
-      )}
+      {/* Horizontal Nav Bar Removed as requested */}
       
       {/* Main Content Area
           - Dashboard routes: overflow-hidden → tiles fill the viewport, no scrollbars.

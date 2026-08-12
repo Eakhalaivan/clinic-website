@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import javax.sql.DataSource;
 
 @Configuration
+@ConditionalOnProperty(prefix = "spring.flyway", name = "enabled", matchIfMissing = true)
 public class FlywayConfig {
 
     @Bean
@@ -16,9 +18,11 @@ public class FlywayConfig {
         Flyway flyway = Flyway.configure()
                 .dataSource(clinicDataSource)
                 .locations("classpath:db/migration/clinic")
-                .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
+                .baselineOnMigrate(true)
+                .baselineVersion("55")
+                .ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
                 .load();
-        // flyway.migrate();
+        flyway.migrate();
         return flyway;
     }
 
@@ -28,9 +32,11 @@ public class FlywayConfig {
         Flyway flyway = Flyway.configure()
                 .dataSource(pharmacyDataSource)
                 .locations("classpath:db/migration/pharmacy")
-                .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
+                .baselineOnMigrate(true)
+                .baselineVersion("0")
+                .ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
                 .load();
-        // flyway.migrate();
+        flyway.migrate();
         return flyway;
     }
 }

@@ -6,51 +6,14 @@ import {
   Calendar, Clock, FileText, Pill, Users, Video, UploadCloud, Download, 
   Heart, Shield, Settings as SettingsIcon, LayoutGrid, Search, ChevronRight, 
   ChevronLeft, Check, CheckCircle2, Activity, Bot, Plus, ArrowUpRight, Zap,
-  Loader2, Moon, Compass, Sparkles, Smile, Droplets, Footprints
+  Loader2, Moon, Compass, Sparkles, Smile, Droplets, Footprints,
+  CreditCard, ShoppingCart, Scan, FlaskConical, Stethoscope, Home
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Pill as Rx } from 'lucide-react';
 import './PatientDashboard.css';
 
-const TIMELINE_EVENTS = [
-  {
-    time: '08:00 AM',
-    title: 'Blood Pressure Stabilized',
-    subtitle: 'Average: 120/80 mmHg',
-    badge: 'Daily Goal Achieved',
-    badgeStyle: 'bg-green-100/60 text-green-700',
-    cardStyle: 'bg-green-50/80 border-l-4 border-green-500 text-green-900',
-    subStyle: 'text-green-700',
-    width: 'w-3/4'
-  },
-  {
-    time: '10:30 AM',
-    title: 'Annual Cardiac Screening',
-    subtitle: 'Dr. Michael Lee • Cardiology Unit 4',
-    tags: ['In-person', 'Confirmed'],
-    cardStyle: 'bg-orange-50/80 border-l-4 border-orange-400 text-orange-900',
-    subStyle: 'text-orange-700',
-    width: 'w-2/3 ml-12'
-  },
-  {
-    time: '01:00 PM',
-    title: 'Physical Therapy Session',
-    subtitle: 'Lower Back Recovery • Day 12',
-    author: 'COACH EMILY DAVIS',
-    cardStyle: 'bg-blue-50/80 border-l-4 border-blue-500 text-blue-900',
-    subStyle: 'text-blue-700',
-    width: 'w-1/2 ml-auto'
-  },
-  {
-    time: '03:30 PM',
-    title: 'Mental Wellness Check',
-    subtitle: 'Guided Meditation • Focus: Stress Relief',
-    badge: 'Personal Milestone',
-    badgeStyle: 'bg-purple-100/60 text-purple-700',
-    cardStyle: 'bg-purple-50/80 border-l-4 border-purple-500 text-purple-900',
-    subStyle: 'text-purple-700',
-    width: 'w-2/3 ml-4'
-  }
-];
+const TIMELINE_EVENTS = [];
 
 const PatientDashboard = () => {
   const { user } = useAuthStore();
@@ -153,120 +116,21 @@ const PatientDashboard = () => {
 
         {/* BEGIN: QuickActionsBar */}
         <section className="patient-quick-actions">
-          <button 
-            onClick={() => navigate('/patient/book')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-blue-50 text-blue-600 rounded-md mb-1">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Book<br/>Appointment</span>
-          </button>
+          
 
-          <button 
-            onClick={() => navigate('/patient/profile')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-green-50 text-green-600 rounded-md mb-1">
-              <Users className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Add<br/>Family Member</span>
-          </button>
+          
 
-          <button 
-            onClick={() => navigate('/patient/prescriptions')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-orange-50 text-orange-600 rounded-md mb-1">
-              <Pill className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Order<br/>Medicine</span>
-          </button>
+          
 
-          <button 
-            onClick={() => navigate('/patient/book')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-blue-50 text-blue-600 rounded-md mb-1">
-              <Video className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Request<br/>Home Visit</span>
-          </button>
+          
 
-          <button 
-            onClick={() => navigate('/patient/records')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-purple-50 text-purple-600 rounded-md mb-1">
-              <UploadCloud className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Upload<br/>Vitals</span>
-          </button>
+          
 
-          <button 
-            onClick={() => navigate('/patient/records')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-orange-50 text-orange-600 rounded-md mb-1">
-              <Download className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Download<br/>Records</span>
-          </button>
-
-          <button 
-            onClick={() => navigate('/patient/book')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-green-50 text-green-600 rounded-md mb-1">
-              <Video className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Tele<br/>Consult</span>
-          </button>
-
-          <button 
-            onClick={() => navigate('/patient/appointments')}
-            className="bg-white border border-slate-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[104px] h-[72px] shadow-2xs hover:shadow-xs transition"
-          >
-            <div className="p-1 bg-purple-50 text-purple-600 rounded-md mb-1">
-              <Clock className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold text-center text-slate-800 leading-tight">Health<br/>History</span>
-          </button>
+          
         </section>
         {/* END: QuickActionsBar */}
 
-        {/* BEGIN: NavigationTabs */}
-        <nav className="patient-nav-tabs shadow-2xs">
-          <button onClick={() => { setActiveTab('Dashboard'); navigate('/patient/dashboard'); }} className={`nav-tab ${activeTab === 'Dashboard' ? 'active' : ''}`}>
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
-          </button>
-          <button onClick={() => { setActiveTab('Appointments'); navigate('/patient/appointments'); }} className={`nav-tab ${activeTab === 'Appointments' ? 'active' : ''}`}>
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Appointments</span>
-          </button>
-          <button onClick={() => { setActiveTab('Prescriptions'); navigate('/patient/prescriptions'); }} className={`nav-tab ${activeTab === 'Prescriptions' ? 'active' : ''}`}>
-            <Pill className="w-3.5 h-3.5" />
-            <span>Prescriptions</span>
-          </button>
-          <button onClick={() => { setActiveTab('Lab Results'); navigate('/patient/lab-reports'); }} className={`nav-tab ${activeTab === 'Lab Results' ? 'active' : ''}`}>
-            <FileText className="w-3.5 h-3.5" />
-            <span>Lab Results</span>
-          </button>
-          <button onClick={() => { setActiveTab('Health Insights'); navigate('/patient/records'); }} className={`nav-tab ${activeTab === 'Health Insights' ? 'active' : ''}`}>
-            <Heart className="w-3.5 h-3.5" />
-            <span>Health Insights</span>
-          </button>
-          <button onClick={() => { setActiveTab('Insurance'); navigate('/patient/insurance'); }} className={`nav-tab ${activeTab === 'Insurance' ? 'active' : ''}`}>
-            <Shield className="w-3.5 h-3.5" />
-            <span>Insurance</span>
-          </button>
-          <button onClick={() => { setActiveTab('Settings'); navigate('/patient/profile'); }} className="nav-tab ml-auto">
-            <SettingsIcon className="w-3.5 h-3.5" />
-            <span>Settings</span>
-          </button>
-        </nav>
-        {/* END: NavigationTabs */}
+
 
         {/* BEGIN: MainContent Grid (Top 3 columns) */}
         <div className="patient-main-grid">
@@ -277,7 +141,7 @@ const PatientDashboard = () => {
             <section className="bg-white rounded-2xl shadow-2xs border border-slate-100 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-bold text-slate-800">Upcoming Consultations</h2>
-                <button onClick={() => navigate('/patient/appointments')} className="brand-purple text-[10px] font-bold uppercase tracking-wider hover:underline">
+                <button onClick={() => navigate('/patient/appointments')} className="text-blue-600 text-[10px] font-bold uppercase tracking-wider hover:underline">
                   View All
                 </button>
               </div>
@@ -317,7 +181,7 @@ const PatientDashboard = () => {
             <section className="bg-white rounded-2xl shadow-2xs border border-slate-100 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xs font-bold text-slate-800">My Medications</h2>
-                <button onClick={() => navigate('/patient/prescriptions')} className="brand-purple text-[10px] font-bold uppercase tracking-wider hover:underline">
+                <button onClick={() => navigate('/patient/prescriptions')} className="text-blue-600 text-[10px] font-bold uppercase tracking-wider hover:underline">
                   Prescription History
                 </button>
               </div>
@@ -427,97 +291,102 @@ const PatientDashboard = () => {
           </div>
           {/* END: CenterColumn */}
 
-          {/* BEGIN: RightColumn (Health Score & Lab Results) */}
-          <div className="col-right">
-            {/* Health Score Metrics Card */}
-            <section className="bg-white rounded-2xl shadow-2xs border border-slate-100 p-4">
+          {/* BEGIN: RightColumn */}
+          <div className="col-right flex flex-col h-full">
+            <div className="mt-auto">
+            {/* Recent Prescriptions Card (New Design) */}
+            <section className="bg-white rounded-[16px] shadow-sm p-4 mt-0">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-slate-800">Health Score Metrics</h2>
-                <button onClick={() => navigate('/patient/records')} className="brand-purple text-[10px] font-bold uppercase tracking-wider hover:underline">
-                  Analysis
+                <h2 className="text-[13px] font-extrabold text-slate-900 font-serif">Recent Prescriptions</h2>
+                <button onClick={() => navigate('/patient/prescriptions')} className="text-indigo-600 text-[10px] font-bold uppercase tracking-widest hover:underline">
+                  VIEW ALL
                 </button>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full border-4 border-green-500 flex items-center justify-center shrink-0">
-                    <span className="text-xs font-black text-slate-800">88</span>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold text-slate-800 leading-tight">Overall Wellness</p>
-                    <p className="text-[10px] text-green-600 font-bold mt-0.5">↑ 4% from last month</p>
-                  </div>
-                </div>
-                <div className="space-y-2.5">
-                  <div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-600 mb-1">
-                      <span className="uppercase">Heart Rate</span>
-                      <span>72 BPM</span>
+                {/* Item 1 */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-50 cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/patient/prescriptions')}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-50/60 flex items-center justify-center shrink-0">
+                      <Rx className="w-4 h-4 text-indigo-800" />
                     </div>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 w-[72%] rounded-full"></div>
+                    <div>
+                      <h3 className="font-bold text-slate-800 text-[12px] leading-tight">Lipitor<br/>(Atorvastatin)</h3>
+                      <p className="text-slate-500 text-[10px] font-medium mt-0.5">10mg Tablet</p>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-600 mb-1">
-                      <span className="uppercase">Sleep Quality</span>
-                      <span>7.5 Hrs</span>
-                    </div>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-500 w-[85%] rounded-full"></div>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-500 text-right">May 21,<br/>2026</span>
+                    <ChevronRight className="w-3 h-3 text-slate-300" />
                   </div>
                 </div>
-                <button 
-                  onClick={() => navigate('/patient/records')}
-                  className="w-full mt-2 py-2 bg-slate-50 rounded-lg brand-purple text-xs font-bold hover:bg-slate-100 transition"
-                >
-                  Detailed Metrics Report
-                </button>
+                {/* Item 2 */}
+                <div className="flex items-center justify-between pt-1 cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/patient/prescriptions')}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-50/60 flex items-center justify-center shrink-0">
+                      <Rx className="w-4 h-4 text-indigo-800" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-800 text-[12px]">Amlodipine</h3>
+                      <p className="text-slate-500 text-[10px] font-medium mt-0.5">5mg Tablet</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-500">May 10, 2026</span>
+                    <ChevronRight className="w-3 h-3 text-slate-300" />
+                  </div>
+                </div>
               </div>
             </section>
+            {/* Quick Link Buttons (New Design) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+              
+              <button onClick={() => navigate('/patient/assistant')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <Bot size={18} className="text-indigo-600" />
+                <span className="font-semibold text-slate-700 text-sm">AI Assistant</span>
+              </button>
 
-            {/* Recent Lab Results Card */}
-            <section className="bg-white rounded-2xl shadow-2xs border border-slate-100 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-slate-800">Recent Lab Results</h2>
-                <button onClick={() => navigate('/patient/lab-reports')} className="brand-purple text-[10px] font-bold uppercase tracking-wider hover:underline">
-                  All Tests
-                </button>
-              </div>
-              <div className="space-y-2.5">
-                {recentLabResults.map((result) => (
-                  <div 
-                    key={result.id} 
-                    onClick={() => navigate('/patient/lab-reports')}
-                    className="flex items-start gap-2.5 p-2 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition cursor-pointer"
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${result.iconBg}`}>
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <p className="text-xs font-bold text-slate-800 truncate">{result.testName}</p>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase shrink-0">{result.date}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 truncate mt-0.5">{result.details}</p>
-                      <p className={`text-[9px] font-bold uppercase mt-1 ${result.statusStyle}`}>{result.statusLabel}</p>
-                    </div>
-                  </div>
-                ))}
-                <button 
-                  onClick={() => navigate('/patient/lab-reports')}
-                  className="w-full mt-2 py-2 bg-slate-50 rounded-lg brand-purple text-xs font-bold hover:bg-slate-100 transition"
-                >
-                  View Lab Archive
-                </button>
-              </div>
-            </section>
+              <button onClick={() => navigate('/patient/documents')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <FileIcon size={18} className="text-blue-600" />
+                <span className="font-semibold text-slate-700 text-sm">Documents</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/timeline')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <Activity size={18} className="text-orange-500" />
+                <span className="font-semibold text-slate-700 text-sm">Timeline</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/lab-reports')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <FlaskConical size={18} className="text-purple-500" />
+                <span className="font-semibold text-slate-700 text-sm">Labs</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/home-visits')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <Home size={18} className="text-teal-500" />
+                <span className="font-semibold text-slate-700 text-sm">Home Visit</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/teleconsultations')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <Video size={18} className="text-indigo-500" />
+                <span className="font-semibold text-slate-700 text-sm">Video Call</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/dependents')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <Users size={18} className="text-blue-500" />
+                <span className="font-semibold text-slate-700 text-sm">Family</span>
+              </button>
+
+              <button onClick={() => navigate('/patient/settings')} className="bg-white rounded-[14px] shadow-sm p-3 flex items-center justify-center gap-2 hover:shadow-md transition">
+                <SettingsIcon size={18} className="text-slate-500" />
+                <span className="font-semibold text-slate-700 text-sm">Settings</span>
+              </button>
+            </div>
+            
+            </div>
           </div>
           {/* END: RightColumn */}
 
         </div>
         {/* END: MainContent Grid */}
-
       </main>
     </div>
   );
