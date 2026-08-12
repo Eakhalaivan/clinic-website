@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Plus, RefreshCw, CheckCircle, Clock, XCircle, Save } from 'lucide-react';
+import { ShieldCheck, Plus, RefreshCw, CheckCircle, Clock, XCircle, Save, FileText, IndianRupee, Hourglass, Inbox } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -136,47 +136,75 @@ export default function InsuranceClaims() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Insurance & TPA Claims</h2>
-          <p className="text-sm text-slate-400">File patient insurance claims, track third party administrator approvals, and reconcile payments.</p>
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 relative">
+            <FileText className="w-7 h-7 text-blue-600" />
+            <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+              <ShieldCheck className="w-3 h-3" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Insurance & TPA Claims</h2>
+            <p className="text-sm text-slate-500 font-medium">File patient insurance claims, track third party administrator approvals, and reconcile payments.</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowClaimForm(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-            <Plus className="w-3.5 h-3.5" /> File Insurance Claim
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowClaimForm(true)} className="px-5 py-2.5 bg-[#0044cc] hover:bg-blue-800 text-white text-sm font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm">
+            <Plus className="w-4 h-4" /> File Insurance Claim
           </button>
           <button onClick={() => {
             queryClient.invalidateQueries(['insurance-claims']);
             queryClient.invalidateQueries(['insurance-providers']);
-          }} disabled={loading} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+          }} disabled={loading} className="p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white shadow-sm">
             <RefreshCw className={`w-4 h-4 text-slate-600 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* KPI Summary Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Claims</span>
-          <span className="text-2xl font-black text-slate-800 mt-1">{claims.length}</span>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 rounded-2xl bg-[#eff6ff] flex items-center justify-center shrink-0">
+            <FileText className="w-7 h-7 text-[#2563EB]" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Claims</span>
+            <span className="text-2xl font-black text-slate-800 mt-0.5">{claims.length}</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Claimed Amount</span>
-          <span className="text-2xl font-black text-blue-600 mt-1">₹{claims.reduce((sum, c) => sum + (c.claimedAmount || 0), 0).toFixed(2)}</span>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+            <IndianRupee className="w-7 h-7 text-blue-600" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Claimed Amount</span>
+            <span className="text-2xl font-black text-blue-600 mt-0.5">₹{claims.reduce((sum, c) => sum + (c.claimedAmount || 0), 0).toFixed(2)}</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Approved Amount</span>
-          <span className="text-2xl font-black text-emerald-600 mt-1">₹{claims.filter(c => c.status === 'APPROVED').reduce((sum, c) => sum + (c.claimedAmount || 0), 0).toFixed(2)}</span>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-7 h-7 text-emerald-600" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Approved Amount</span>
+            <span className="text-2xl font-black text-emerald-600 mt-0.5">₹{claims.filter(c => c.status === 'APPROVED').reduce((sum, c) => sum + (c.claimedAmount || 0), 0).toFixed(2)}</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pending Count</span>
-          <span className="text-2xl font-black text-amber-600 mt-1">{claims.filter(c => c.status === 'SUBMITTED' || c.status === 'PENDING').length}</span>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
+            <Hourglass className="w-7 h-7 text-orange-500" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pending Count</span>
+            <span className="text-2xl font-black text-orange-500 mt-0.5">{claims.filter(c => c.status === 'SUBMITTED' || c.status === 'PENDING').length}</span>
+          </div>
         </div>
       </div>
 
       {/* Claims Grid Ledger */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-700">Insurance Claims Ledger</h3>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100">
+          <h3 className="text-[17px] font-bold text-[#111827]">Insurance Claims Ledger</h3>
         </div>
         <div className="overflow-auto">
           <table className="w-full text-xs">
@@ -235,7 +263,12 @@ export default function InsuranceClaims() {
               ))}
               {claims.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="text-center py-12 text-slate-400">No insurance claims filed yet.</td>
+                  <td colSpan="8">
+                    <div className="flex flex-col items-center justify-center py-20">
+                      <Inbox className="w-12 h-12 text-slate-300 mb-4" />
+                      <p className="text-slate-500 font-medium">No insurance claims filed yet.</p>
+                    </div>
+                  </td>
                 </tr>
               )}
             </tbody>

@@ -22,4 +22,10 @@ public interface PharmacyUserRepository extends JpaRepository<PharmacyUser, Long
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("UPDATE PharmacyUser u SET u.lastLogin = :lastLogin WHERE u.id = :id")
     void updateLastLogin(@org.springframework.data.repository.query.Param("id") Long id, @org.springframework.data.repository.query.Param("lastLogin") java.time.LocalDateTime lastLogin);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"roles"})
+    Optional<PharmacyUser> findById(Long id);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"roles"})
+    java.util.List<PharmacyUser> findAll();
 }

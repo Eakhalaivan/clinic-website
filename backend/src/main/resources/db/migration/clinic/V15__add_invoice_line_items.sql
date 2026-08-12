@@ -1,12 +1,11 @@
 -- Extend invoices table with line-item billing fields
-ALTER TABLE invoices
-    ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(50) UNIQUE,
-    ADD COLUMN IF NOT EXISTS tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    ADD COLUMN IF NOT EXISTS total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    ADD COLUMN IF NOT EXISTS payment_method VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
+ALTER TABLE invoices ADD COLUMN invoice_number VARCHAR(50) UNIQUE;
+ALTER TABLE invoices ADD COLUMN tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN payment_method VARCHAR(30);
+ALTER TABLE invoices ADD COLUMN paid_at TIMESTAMP;
+ALTER TABLE invoices ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
 
 -- Generate invoice numbers for any existing rows
 UPDATE invoices SET invoice_number = CONCAT('INV-', LPAD(id::TEXT, 5, '0')) WHERE invoice_number IS NULL;

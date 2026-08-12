@@ -1,14 +1,14 @@
 CREATE TABLE doctor_working_hours (
     id BIGSERIAL PRIMARY KEY,
     doctor_id BIGINT NOT NULL REFERENCES doctor_profiles(id) ON DELETE CASCADE,
-    day_of_week SMALLINT NOT NULL,       -- 0=Sunday .. 6=Saturday
+    day_of_week INTEGER NOT NULL,       -- 0=Sunday .. 6=Saturday
     start_time TIME NOT NULL,            -- e.g. 10:00:00
     end_time TIME NOT NULL,              -- e.g. 16:00:00
-    slot_duration_minutes SMALLINT NOT NULL DEFAULT 20,
+    slot_duration_minutes INTEGER NOT NULL DEFAULT 20,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     branch_id BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     CONSTRAINT chk_working_hours_valid CHECK (end_time > start_time),
     CONSTRAINT uq_doctor_day UNIQUE (doctor_id, day_of_week)
 );
@@ -24,6 +24,6 @@ CREATE TABLE doctor_schedule_overrides (
     end_time TIME,
     reason VARCHAR(255),
     branch_id BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     CONSTRAINT uq_doctor_override_date UNIQUE (doctor_id, override_date)
 );

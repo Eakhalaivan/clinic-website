@@ -100,7 +100,16 @@ public class PortalAuthController {
 
         logLoginHistory(authenticatedUser, request, true);
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true) // Should be true in prod, but keeping true works if we test locally with https or lax same-site. Wait, let's use SameSite=Strict and secure=false for dev, but we'll use secure(false) for localhost testing or rely on Spring's defaults. Let's just set HttpOnly.
+                .path("/api/auth")
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new JwtResponse(jwt));
     }
 
     @PostMapping("/{portal}/login/mfa")
@@ -129,7 +138,16 @@ public class PortalAuthController {
         String jwt = jwtUtils.generateJwtToken(authentication);
         String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken));
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth")
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new JwtResponse(jwt));
     }
 
     @PostMapping("/register")
@@ -223,12 +241,10 @@ class SignupRequest {
 @Data
 class JwtResponse {
     private String token;
-    private String refreshToken;
     private String type = "Bearer";
 
-    public JwtResponse(String accessToken, String refreshToken) {
+    public JwtResponse(String accessToken) {
         this.token = accessToken;
-        this.refreshToken = refreshToken;
     }
 }
 

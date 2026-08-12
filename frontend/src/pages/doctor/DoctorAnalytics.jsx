@@ -24,9 +24,19 @@ const DoctorAnalytics = () => {
         <div style={{ background: 'var(--color-surface)', padding: '20px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
           <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Patient Satisfaction Rating</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-            <Star size={24} color="#eab308" fill="#eab308" />
-            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)' }}>{patientSatisfactionRating}</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>({reviewCount} reviews)</span>
+            {reviewCount > 0 ? (
+              <>
+                <Star size={24} color="#eab308" fill="#eab308" />
+                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)' }}>{patientSatisfactionRating}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>({reviewCount} reviews)</span>
+              </>
+            ) : (
+              <>
+                <Star size={24} color="var(--color-text-muted)" />
+                <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text-muted)' }}>N/A</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>(0 reviews)</span>
+              </>
+            )}
           </div>
         </div>
         <div style={{ background: 'var(--color-surface)', padding: '20px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>

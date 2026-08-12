@@ -7,6 +7,14 @@ import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.medicalrecord.entity.ClinicalNote;
 import com.healthcare.clinic.medicalrecord.repository.ClinicalNoteRepository;
 import com.healthcare.clinic.patient.dto.TimelineEventDTO;
+import com.healthcare.clinic.emr.entity.Diagnosis;
+import com.healthcare.clinic.emr.entity.Immunization;
+import com.healthcare.clinic.emr.entity.ProcedureRecord;
+import com.healthcare.clinic.emr.entity.ClinicalReferral;
+import com.healthcare.clinic.emr.repository.DiagnosisRepository;
+import com.healthcare.clinic.emr.repository.ImmunizationRepository;
+import com.healthcare.clinic.emr.repository.ProcedureRecordRepository;
+import com.healthcare.clinic.emr.repository.ClinicalReferralRepository;
 import com.healthcare.clinic.radiology.entity.RadiologyReport;
 import com.healthcare.clinic.radiology.repository.RadiologyReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +33,12 @@ public class PatientTimelineService {
     private final PrescriptionRepository prescriptionRepository;
     private final ClinicalNoteRepository clinicalNoteRepository;
     private final InvoiceRepository invoiceRepository;
+    
+    // EMR Repositories
+    private final DiagnosisRepository diagnosisRepository;
+    private final ProcedureRecordRepository procedureRecordRepository;
+    private final ImmunizationRepository immunizationRepository;
+    private final ClinicalReferralRepository clinicalReferralRepository;
 
     public List<TimelineEventDTO> getTimelineForPatient(Long patientId) {
         List<TimelineEventDTO> timeline = new ArrayList<>();
@@ -86,6 +100,62 @@ public class PatientTimelineService {
                     .status(invoice.getStatus().name())
                     .eventDate(invoice.getCreatedAt().atZone(ZoneId.systemDefault()))
                     .referenceId(invoice.getId())
+                    .build());
+        }
+        
+        // 5. Diagnoses
+        List<Diagnosis> diagnoses = diagnosisRepository.findByPatientId(patientId);
+        for (Diagnosis diag : diagnoses) {
+            timeline.add(TimelineEventDTO.builder()
+                    .id("DIAG-" + diag.getId())
+                    .type("DIAGNOSIS")
+                    .title("Diagnosis: " + diag.getDiagnosisName())
+                    .description("ICD-10: " + (diag.getIcd10Code() != null ? diag.getIcd10Code() : "N/A"))
+                    .status(diag.getStatus())
+                    .eventDate(diag.getDiagnosisDate().atStartOfDay(ZoneId.systemDefault()))
+                    .referenceId(diag.getId())
+                    .build());
+        }
+
+        // 6. Procedures
+        List<ProcedureRecord> procedures = procedureRecordRepository.findByPatientId(patientId);
+        for (ProcedureRecord proc : procedures) {
+            timeline.add(TimelineEventDTO.builder()
+                    .id("PROC-" + proc.getId())
+                    .type("PROCEDURE")
+                    .title("Procedure: " + proc.getProcedureName())
+                    .description(proc.getNotes() != null ? proc.getNotes() : "Completed")
+                    .status("COMPLETED")
+                    .eventDate(proc.getPerformedDate().atStartOfDay(ZoneId.systemDefault()))
+                    .referenceId(proc.getId())
+                    .build());
+        }
+
+        // 7. Immunizations
+        List<Immunization> immunizations = immunizationRepository.findByPatientId(patientId);
+        for (Immunization imm : immunizations) {
+            timeline.add(TimelineEventDTO.builder()
+                    .id("IMM-" + imm.getId())
+                    .type("IMMUNIZATION")
+                    .title("Vaccination: " + imm.getVaccineName())
+                    .description("Dose #" + imm.getDoseNumber())
+                    .status("ADMINISTERED")
+                    .eventDate(imm.getAdministeredDate().atStartOfDay(ZoneId.systemDefault()))
+                    .referenceId(imm.getId())
+                    .build());
+        }
+
+        // 8. Referrals
+        List<ClinicalReferral> referrals = clinicalReferralRepository.findByPatientId(patientId);
+        for (ClinicalReferral ref : referrals) {
+            timeline.add(TimelineEventDTO.builder()
+                    .id("REF-" + ref.getId())
+                    .type("REFERRAL")
+                    .title("Referral: " + (ref.getReferredToSpecialty() != null ? ref.getReferredToSpecialty() : "Specialist"))
+                    .description(ref.getReferralReason())
+                    .status(ref.getStatus())
+                    .eventDate(ref.getCreatedAt())
+                    .referenceId(ref.getId())
                     .build());
         }
 

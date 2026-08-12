@@ -14,7 +14,7 @@ import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
 
 export default function DispenseWorklists() {
   const queryClient = useQueryClient();
-  const { items: filteredPrescriptions = [], isLoading: loading } = usePageData('dispense-worklists', '/pharmacy/prescriptions/dispense-worklists');
+  const { items: filteredPrescriptions = [], isLoading: loading } = usePageData('dispense-worklists', '/pharmacy/prescriptions/pending');
 
   // Local filter states
   const [searchTerm, setSearchTerm] = useState('');

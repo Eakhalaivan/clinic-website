@@ -20,7 +20,7 @@ import java.util.Optional;
 @Repository("pharmacyMedicineStockRepository")
 public interface MedicineStockRepository extends JpaRepository<MedicineStock, Long> {
 
-    @Query(value = "SELECT * FROM medicine_stocks WHERE id = :id AND is_deleted = false FOR UPDATE", nativeQuery = true)
+    @Query(value = "SELECT * FROM pharmacy_medicine_stocks WHERE id = :id AND is_deleted = false FOR UPDATE", nativeQuery = true)
     Optional<MedicineStock> findByIdWithLock(@Param("id") Long id);
 
     @Query("SELECT s.medicine.id, SUM(s.quantityAvailable) FROM MedicineStock s GROUP BY s.medicine.id")
@@ -73,8 +73,8 @@ public interface MedicineStockRepository extends JpaRepository<MedicineStock, Lo
 
     @Query(value = """
       SELECT COUNT(*) FROM (
-        SELECT m.id FROM medicine_stocks ms 
-        JOIN medicines m ON ms.medicine_id = m.id
+        SELECT m.id FROM pharmacy_medicine_stocks ms 
+        JOIN pharmacy_medicines m ON ms.medicine_id = m.id
         WHERE ms.is_deleted = false
         GROUP BY m.id, m.reorder_level 
         HAVING SUM(ms.quantity_available) <= m.reorder_level

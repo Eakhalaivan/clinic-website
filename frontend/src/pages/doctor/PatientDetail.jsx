@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { ArrowLeft, Calendar, FileText, Activity, Phone, Mail, Droplet, MapPin, User, ChevronRight } from 'lucide-react';
+import ChartBanner from './emr/ChartBanner';
+import EMRChart from './emr/EMRChart';
+import CarePlan from './emr/CarePlan';
 
 const PatientDetail = ({ patientIdOverride }) => {
   const { patientId: paramPatientId } = useParams();
@@ -28,7 +31,7 @@ const PatientDetail = ({ patientIdOverride }) => {
     return `PAT-${String(id).padStart(5, '0')}`;
   };
 
-  const tabs = ['Overview', 'Appointments', 'Prescriptions', 'Lab Reports', 'Medical History', 'Documents', 'Billing & Payments'];
+  const tabs = ['Overview', 'Appointments', 'Prescriptions', 'Lab Reports', 'Medical History', 'Care Plans', 'Documents', 'Billing & Payments'];
 
   return (
     <div className="p-6 bg-[#F8FAFC] min-h-full font-sans">
@@ -49,6 +52,8 @@ const PatientDetail = ({ patientIdOverride }) => {
             <ArrowLeft size={16} strokeWidth={2.5} /> Back to Patients
           </button>
         </div>
+        
+        <ChartBanner patientId={patientId} />
 
         {/* Main Grid */}
         <div className="flex flex-col lg:flex-row gap-6">
@@ -406,7 +411,20 @@ const PatientDetail = ({ patientIdOverride }) => {
                 </>
               )}
 
-              {activeTab !== 'Overview' && (
+              {activeTab === 'Medical History' && (
+                <div className="p-2">
+                  <h3 className="text-[15px] font-bold text-slate-800 mb-6">Complete Medical History</h3>
+                  <EMRChart patientId={patientId} />
+                </div>
+              )}
+
+              {activeTab === 'Care Plans' && (
+                <div className="p-2">
+                  <CarePlan patientId={patientId} />
+                </div>
+              )}
+
+              {activeTab !== 'Overview' && activeTab !== 'Medical History' && activeTab !== 'Care Plans' && (
                 <div className="py-20 text-center flex flex-col items-center">
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                     <Calendar className="text-slate-300" size={24} />

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useShallow } from 'zustand/react/shallow';
-import { Plus, Search, Eye, RotateCcw, IndianRupee } from 'lucide-react';
-import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
+import { Plus, Search, Eye, RotateCcw, IndianRupee, FileText, ArrowRight } from 'lucide-react';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -89,20 +88,54 @@ export default function PharmacyAdvances() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pharmacy Advances</h2>
-        <p className="text-sm text-gray-500 font-medium">Manage and track patient advance payments for future bills</p>
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 relative">
+          <FileText className="w-6 h-6 text-blue-600" />
+          <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">
+            <ArrowRight className="w-2.5 h-2.5" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pharmacy Advances</h2>
+          <p className="text-sm text-gray-500 font-medium">Manage and track patient advance payments for future bills</p>
+        </div>
       </div>
 
-      <ModuleFilterBar searchPlaceholder="Search..." 
-        onSearch={setSearchTerm}
-        searchValue={searchTerm}
-        dateRange={dateRange}
-        onDateChange={(type, val) => setDateRange(prev => ({ ...prev, [type]: val }))}
-        actions={[
-          { label: 'New Advance', icon: Plus, variant: 'primary', onClick: () => setIsModalOpen(true) }
-        ]}
-      />
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+              value={dateRange.from || ''}
+              onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+            />
+            <span className="text-sm font-bold text-slate-400">to</span>
+            <input
+              type="date"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+              value={dateRange.to || ''}
+              onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+            />
+          </div>
+          <div className="relative min-w-[200px]">
+            <Search className="absolute left-4 top-2.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2563eb] text-slate-600"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-5 py-2.5 bg-[#0044cc] text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-800 transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" /> New Advance
+        </button>
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
@@ -127,6 +160,16 @@ export default function PharmacyAdvances() {
               })()} 
               hover 
               striped 
+              emptyStateTitle="No records found"
+              emptyStateDesc="Try adjusting your filters or search term"
+              emptyStateIcon={
+                <div className="relative">
+                  <FileText className="w-6 h-6 text-[#2563EB]" />
+                  <div className="absolute -bottom-1 -right-1 bg-[#2563EB] text-white w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">
+                    <Search className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+              }
             />
             <Pagination totalRecords={advancesList.filter(row => {
                   const s = debouncedSearch.toLowerCase();
@@ -152,7 +195,7 @@ export default function PharmacyAdvances() {
         footer={
           <div className="flex w-full gap-3">
              <button onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all font-display">Cancel</button>
-             <button onClick={saveAdvance} className="flex-1 px-8 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-2 font-display">
+             <button onClick={saveAdvance} className="flex-1 px-8 py-2.5 bg-[#2563EB] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200/50 hover:bg-blue-700 transition-all flex items-center justify-center gap-2 font-display">
                 <IndianRupee className="w-4 h-4"/> Save Advance
              </button>
           </div>

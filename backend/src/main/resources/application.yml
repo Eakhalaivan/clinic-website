@@ -5,11 +5,14 @@ server:
 spring:
   application:
     name: clinic-app
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   datasource:
     clinic:
-      jdbc-url: ${DB_URL:jdbc:postgresql://pg-2ec02a9b-eakhalaivanp-46d0.i.aivencloud.com:15783/defaultdb?sslmode=require}
-      username: ${DB_USER:avnadmin}
-      password: ${DB_PASSWORD:}
+      jdbc-url: ${DB_URL:CHANGE_ME}
+      username: ${DB_USER:CHANGE_ME}
+      password: ${DB_PASSWORD:CHANGE_ME}
       driver-class-name: org.postgresql.Driver
       hikari:
         connection-timeout: 10000
@@ -17,9 +20,9 @@ spring:
         minimum-idle: 2
         initialization-fail-timeout: 1
     pharmacy:
-      jdbc-url: ${PHARMACY_DB_URL:jdbc:mysql://gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/pms?useSSL=true&enabledTLSProtocols=TLSv1.2,TLSv1.3&sslMode=REQUIRED}
-      username: ${PHARMACY_DB_USER:3ZMzEHamXVuJdSt.root}
-      password: ${PHARMACY_DB_PASSWORD:o2ldKmVs3hjxipyi}
+      jdbc-url: ${PHARMACY_DB_URL:CHANGE_ME}
+      username: ${PHARMACY_DB_USER:CHANGE_ME}
+      password: ${PHARMACY_DB_PASSWORD:CHANGE_ME}
       driver-class-name: com.mysql.cj.jdbc.Driver
       hikari:
         connection-timeout: 10000
@@ -36,8 +39,8 @@ spring:
       mail.smtp.starttls.enable: true
 
 jwt:
-  secret: ${JWT_SECRET:?JWT_SECRET environment variable must be set}
-  access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes (dev default; override via JWT_EXPIRATION_MS env var in production)
+  secret: ${JWT_SECRET:default_secret_key_that_is_long_enough_for_hs256_algorithm_12345}
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes
 
 cors:
   # In production (Render), override via the ALLOWED_ORIGINS environment variable.

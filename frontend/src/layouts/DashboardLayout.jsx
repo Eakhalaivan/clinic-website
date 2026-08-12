@@ -53,9 +53,20 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
         <div className="px-6 py-3 flex items-center justify-between">
           {/* Logo and Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-xs">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3730a3 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.45)',
+              flexShrink: 0,
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(255,255,255,0.15)" />
+                <path d="M13.5 8h-3v3.5H7v3h3.5V18h3v-3.5H17v-3h-3.5V8z" fill="white" />
               </svg>
             </div>
             <div>
@@ -65,6 +76,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
               </p>
             </div>
           </div>
+
 
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl mx-12 hidden md:block">

@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("pharmacyReportService")
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, transactionManager = "pharmacyTransactionManager")
 public class ReportService {
 
     private final PharmacyBillRepository billRepository;

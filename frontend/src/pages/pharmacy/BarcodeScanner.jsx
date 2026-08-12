@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, ScanBarcode, Send, RefreshCw, AlertCircle, Play, Square } from 'lucide-react';
+import { Camera, ScanBarcode, Send, RefreshCw, AlertCircle, Play, Square, QrCode, ShoppingCart, Truck, Package, Barcode, Scan, ClipboardList, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -90,79 +90,94 @@ export default function BarcodeScanner() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">Barcode & QR Scanner</h2>
-        <p className="text-sm text-slate-400">Supports hardware USB scanner attachment (plug-and-play listener) or camera capture decoding.</p>
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
+          <QrCode className="w-7 h-7 text-blue-500" />
+        </div>
+        <div>
+          <h2 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">Barcode & QR Scanner</h2>
+          <p className="text-sm text-slate-500 font-medium">Supports hardware USB scanner attachment (plug-and-play listener) or camera capture decoding.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Scanning Panel */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl border border-slate-100 p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-700">Select Operating Module</h3>
-            <div className="grid grid-cols-3 gap-2">
-              {['SALES', 'GRN_ENTRY', 'INVENTORY'].map(mod => (
-                <button
-                  key={mod}
-                  onClick={() => setScanModule(mod)}
-                  className={`py-2 text-xs font-bold rounded-lg border transition-colors ${
-                    scanModule === mod
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
-                  }`}
-                >
-                  {mod.replace('_', ' ')}
-                </button>
-              ))}
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-6 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900">Select Operating Module</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'SALES', label: 'SALES', icon: ShoppingCart },
+                { id: 'GRN_ENTRY', label: 'GRN ENTRY', icon: Truck },
+                { id: 'INVENTORY', label: 'INVENTORY', icon: Package }
+              ].map(mod => {
+                const Icon = mod.icon;
+                return (
+                  <button
+                    key={mod.id}
+                    onClick={() => setScanModule(mod.id)}
+                    className={`py-3 text-sm font-bold rounded-full border transition-all flex items-center justify-center gap-2 ${
+                      scanModule === mod.id
+                        ? 'bg-[#1d4ed8] border-[#1d4ed8] text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" /> {mod.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Simulated/Manual Input */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Barcode / QR Value Input</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Scan with hardware scanner or enter manually..."
-                  value={barcodeValue}
-                  onChange={e => setBarcodeValue(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleScanSubmit()}
-                  className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
-                />
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Barcode / QR Value Input</label>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Scan with hardware scanner or enter manually..."
+                    value={barcodeValue}
+                    onChange={e => setBarcodeValue(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleScanSubmit()}
+                    className="w-full pl-11 pr-4 py-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1d4ed8]/20 focus:border-[#1d4ed8] bg-white transition-colors"
+                  />
+                  <Barcode className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                </div>
                 <button
                   onClick={() => handleScanSubmit()}
                   disabled={scanMutation.isPending || !barcodeValue}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                  className="px-6 py-3 bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-sm font-bold rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50 shadow-sm shrink-0"
                 >
-                  <Send className="w-3.5 h-3.5" /> Submit
+                  <Send className="w-4 h-4" /> Submit
                 </button>
               </div>
             </div>
           </div>
 
           {/* Camera Scanning view */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5 space-y-4 flex flex-col items-center">
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-6 flex flex-col items-center shadow-sm">
             <div className="w-full flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-700">Camera Scanner Feed</h3>
-              <div className="flex gap-2">
+              <h3 className="text-base font-bold text-slate-900">Camera Scanner Feed</h3>
+              <div className="flex gap-3">
                 {isScanning ? (
                   <button
                     onClick={stopCamera}
-                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 font-bold rounded-lg text-[10px] transition-colors flex items-center gap-1"
+                    className="px-4 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold rounded-xl text-sm transition-colors flex items-center gap-2"
                   >
-                    <Square className="w-3 h-3" /> Stop Camera
+                    <Square className="w-4 h-4" /> Stop Camera
                   </button>
                 ) : (
                   <button
                     onClick={startCamera}
-                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold rounded-lg text-[10px] transition-colors flex items-center gap-1"
+                    className="px-4 py-2 bg-white border border-[#2563eb]/30 text-[#2563eb] hover:bg-[#2563eb]/5 font-semibold rounded-xl text-sm transition-colors flex items-center gap-2"
                   >
-                    <Camera className="w-3 h-3" /> Start Camera
+                    <Camera className="w-4 h-4" /> Start Camera
                   </button>
                 )}
                 {isScanning && (
                   <button
                     onClick={simulateCameraScan}
-                    className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 font-bold rounded-lg text-[10px]"
+                    className="px-4 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-semibold rounded-xl text-sm transition-colors"
                   >
                     Simulate Detection
                   </button>
@@ -171,37 +186,56 @@ export default function BarcodeScanner() {
             </div>
 
             {isScanning ? (
-              <div className="relative w-full max-w-md aspect-video bg-black rounded-lg overflow-hidden border border-slate-200">
+              <div className="relative w-full max-w-2xl aspect-video bg-black rounded-2xl overflow-hidden border border-slate-200">
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-0.5 bg-red-500 animate-pulse" />
+                <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 h-1 bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
               </div>
             ) : (
-              <div className="w-full max-w-md aspect-video bg-slate-50 border border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center text-center p-4">
-                <ScanBarcode className="w-10 h-10 text-slate-300 mb-2 animate-bounce" />
-                <p className="text-xs font-bold text-slate-400">Camera feed offline. Click Start Camera to initialize.</p>
+              <div className="w-full max-w-2xl aspect-video bg-slate-50 border border-dashed border-[#BFDBFE] rounded-2xl flex flex-col items-center justify-center text-center p-8">
+                <Scan className="w-16 h-16 text-slate-400 mb-4" strokeWidth={1.5} />
+                <p className="text-base font-bold text-slate-700 mb-1">Camera feed offline.</p>
+                <p className="text-sm text-slate-500">Click Start Camera to initialize.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Right Sidebar: Scan ledger history */}
-        <div className="bg-white border border-slate-100 rounded-xl overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-700">Scan Session History</h3>
+        <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-sm">
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-base font-bold text-slate-900">Scan Session History</h3>
+            <button className="p-1.5 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+              <RefreshCw className="w-4 h-4" />
+            </button>
           </div>
-          <div className="divide-y divide-slate-50 overflow-auto max-h-[500px]">
+          <div className="divide-y divide-slate-50 overflow-auto max-h-[800px] flex-1 flex flex-col">
             {scans.map((scan, idx) => (
-              <div key={idx} className="p-4 text-xs space-y-1 bg-slate-50/10">
+              <div key={idx} className="p-5 text-sm space-y-1.5 hover:bg-slate-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-700">Module: {scan.scanModule || scanModule}</span>
-                  <span className="font-mono text-slate-400 text-[10px]">{scan.scannedAt || 'Just Now'}</span>
+                  <span className="font-bold text-slate-800">Module: {scan.scanModule || scanModule}</span>
+                  <span className="font-mono text-slate-400 text-xs">{scan.scannedAt || 'Just Now'}</span>
                 </div>
-                <div className="text-slate-600">Code: <span className="font-mono font-bold text-slate-800">{scan.barcodeValue || scan.code}</span></div>
-                <div className="text-[10px] text-slate-400">Medicine: {scan.medicineName || 'N/A'}</div>
+                <div className="text-slate-600">Code: <span className="font-mono font-bold text-slate-900">{scan.barcodeValue || scan.code}</span></div>
+                <div className="text-xs text-slate-500">Medicine: {scan.medicineName || 'N/A'}</div>
               </div>
             ))}
             {scans.length === 0 && (
-              <div className="p-4 text-center text-slate-400 text-xs py-10">No barcode scans processed this session.</div>
+              <div className="p-8 flex-1 flex flex-col items-center justify-center text-center py-20">
+                <div className="relative mb-6">
+                  <ClipboardList className="w-16 h-16 text-[#BFDBFE]/40" strokeWidth={1.5} />
+                  <div className="absolute -bottom-2 -right-2 p-1 bg-white rounded-full">
+                    <div className="w-8 h-8 bg-[#BFDBFE]/40 rounded-full flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  {/* Plus decorative stars */}
+                  <div className="absolute -top-2 -left-2 text-[#BFDBFE]/40 text-xl font-bold">+</div>
+                  <div className="absolute top-2 -right-4 text-[#BFDBFE]/40 text-lg font-bold">+</div>
+                  <div className="absolute bottom-4 -left-4 text-[#BFDBFE]/40 text-sm font-bold">+</div>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">No barcode scans processed this session.</h4>
+                <p className="text-sm text-slate-500">Scanned items will appear here.</p>
+              </div>
             )}
           </div>
         </div>

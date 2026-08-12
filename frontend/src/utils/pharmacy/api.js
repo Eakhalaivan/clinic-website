@@ -3,22 +3,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 
-// Ensure baseURL always ends with '/api/pharmacy' to match the Spring Boot backend
-let base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-if (base.endsWith('/api')) base = base.substring(0, base.length - 4);
-base = base + '/api/pharmacy';
-
-// For local development with Vite proxy, strip out absolute URL to prevent cross-origin cookie rejection
-if (base.startsWith('http://localhost') || base.startsWith('http://127.0.0.1')) {
-  base = '/api/pharmacy';
-}
-
-if (base && !base.endsWith('/api/pharmacy')) {
-  base = base.endsWith('/') ? `${base}api/pharmacy` : `${base}/api/pharmacy`;
-}
-
 const api = axios.create({
-  baseURL: base,
+  baseURL: '/api/pharmacy',
   withCredentials: true,
 });
 
@@ -28,6 +14,14 @@ api.interceptors.request.use(
     // Prevent double /pharmacy/pharmacy due to baseURL and component URLs
     if (config.url && config.url.startsWith('/pharmacy/')) {
       config.url = config.url.substring('/pharmacy'.length);
+    }
+
+    // Map identity module requests to bypass the pharmacy baseURL
+    if (config.url) {
+      if (config.url.startsWith('/auth') && !config.url.startsWith('/auth/roles') && !config.url.startsWith('/auth/users')) {
+        config.url = config.url.replace('/auth', '/api/auth');
+        config.baseURL = '';
+      }
     }
     
     const token = useAuthStore.getState().token;

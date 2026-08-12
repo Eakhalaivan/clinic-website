@@ -61,7 +61,7 @@ export const useWorklistStore = create(devtools((set, get) => ({
 
     set({ worklistsLoading: true, worklistsError: false });
     try {
-      const res = await pharmacyService.api.get('/pharmacy/prescriptions/dispense-worklists', {
+      const res = await pharmacyService.api.get('/pharmacy/prescriptions/pending', {
         signal: abortController.signal
       });
       const data = res.data?.data || [];

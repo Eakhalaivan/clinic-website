@@ -1,5 +1,6 @@
 package com.healthcare.clinic.medicalrecord.controller;
 
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 import com.healthcare.clinic.medicalrecord.dto.MedicalRecordRequest;
 import com.healthcare.clinic.medicalrecord.dto.MedicalRecordResponse;
 import com.healthcare.clinic.medicalrecord.service.MedicalRecordService;
@@ -21,6 +22,7 @@ public class MedicalRecordController {
 
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("(hasAuthority('ROLE_PATIENT') and @securityUtils.isSameUser(#patientId)) or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "MEDICAL_RECORD", action = "VIEW", resourceType = "MedicalRecord", sensitivityLevel = "HIGH")
     public ResponseEntity<List<MedicalRecordResponse>> getPatientRecords(@PathVariable Long patientId) {
         List<MedicalRecordResponse> records = medicalRecordService.getRecordsForPatient(patientId);
         return ResponseEntity.ok(records);
@@ -35,6 +37,7 @@ public class MedicalRecordController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    @AuditableAction(module = "MEDICAL_RECORD", action = "CREATE", resourceType = "MedicalRecord", sensitivityLevel = "HIGH")
     public ResponseEntity<MedicalRecordResponse> createRecord(@Valid @RequestBody MedicalRecordRequest request) {
         MedicalRecordResponse created = medicalRecordService.createRecord(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -42,6 +45,7 @@ public class MedicalRecordController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPER_ADMIN')")
+    @AuditableAction(module = "MEDICAL_RECORD", action = "DELETE", resourceType = "MedicalRecord", sensitivityLevel = "HIGH")
     public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
         MedicalRecordResponse record = medicalRecordService.getRecordById(id);
         Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
@@ -59,6 +63,7 @@ public class MedicalRecordController {
 
     @GetMapping("/patient/{patientId}/clinical-notes")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "MEDICAL_RECORD", action = "VIEW", resourceType = "ClinicalNote", sensitivityLevel = "HIGH")
     public ResponseEntity<List<com.healthcare.clinic.medicalrecord.entity.ClinicalNote>> getPatientClinicalNotes(
             @PathVariable Long patientId,
             @org.springframework.beans.factory.annotation.Autowired com.healthcare.clinic.medicalrecord.repository.ClinicalNoteRepository noteRepository) {
@@ -67,6 +72,7 @@ public class MedicalRecordController {
 
     @PostMapping("/patient/{patientId}/clinical-notes")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    @AuditableAction(module = "MEDICAL_RECORD", action = "CREATE", resourceType = "ClinicalNote", sensitivityLevel = "HIGH")
     public ResponseEntity<com.healthcare.clinic.medicalrecord.entity.ClinicalNote> createClinicalNote(
             @PathVariable Long patientId,
             @RequestBody com.healthcare.clinic.medicalrecord.entity.ClinicalNote note,

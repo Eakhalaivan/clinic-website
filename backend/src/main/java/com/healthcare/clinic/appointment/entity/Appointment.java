@@ -55,4 +55,7 @@ public class Appointment {
 
     @LastModifiedDate
     private ZonedDateTime updatedAt;
+
+    @Version
+    private Long version;
 }

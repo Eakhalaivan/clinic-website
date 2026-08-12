@@ -12,25 +12,25 @@ import javax.sql.DataSource;
 public class FlywayConfig {
 
     @Bean
-    public Flyway clinicFlyway(@Qualifier("clinicDataSource") DataSource clinicDataSource) {
+    public Flyway clinicFlyway(@Qualifier("clinicDataSource") DataSource clinicDataSource, org.springframework.core.env.Environment env) {
         Flyway flyway = Flyway.configure()
                 .dataSource(clinicDataSource)
                 .locations("classpath:db/migration/clinic")
                 .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
                 .load();
-        // flyway.migrate();
+        flyway.migrate();
         return flyway;
     }
 
     @Bean
     @DependsOn("clinicFlyway")
-    public Flyway pharmacyFlyway(@Qualifier("pharmacyDataSource") DataSource pharmacyDataSource) {
+    public Flyway pharmacyFlyway(@Qualifier("pharmacyDataSource") DataSource pharmacyDataSource, org.springframework.core.env.Environment env) {
         Flyway flyway = Flyway.configure()
                 .dataSource(pharmacyDataSource)
                 .locations("classpath:db/migration/pharmacy")
                 .baselineOnMigrate(true).ignoreMigrationPatterns("*:missing", "*:ignored", "*:pending")
                 .load();
-        // flyway.migrate();
+        flyway.migrate();
         return flyway;
     }
 }

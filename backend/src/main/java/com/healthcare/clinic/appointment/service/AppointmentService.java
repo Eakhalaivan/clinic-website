@@ -25,7 +25,7 @@ import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.appointment.event.AppointmentBookedEvent;
 import com.healthcare.clinic.appointment.event.AppointmentStatusChangedEvent;
 import com.healthcare.clinic.notification.event.AppointmentCancelledEvent;
-import com.healthcare.clinic.appointment.entity.AppointmentStatus;
+import com.healthcare.clinic.appointment.event.AppointmentCompletedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
 
@@ -65,7 +65,7 @@ public class AppointmentService {
                     return patientRepository.save(newProfile);
                 });
 
-        AppointmentSlot slot = slotRepository.findById(slotId)
+        AppointmentSlot slot = slotRepository.findByIdWithLock(slotId)
                 .orElseThrow(() -> new RuntimeException("Slot not found: " + slotId));
 
         if (slot.getIsBooked()) {
@@ -170,6 +170,10 @@ public class AppointmentService {
                 .doctorId(appointment.getDoctor() != null ? appointment.getDoctor().getUserId() : null)
                 .branchId(appointment.getBranchId())
                 .build());
+
+        if (newStatus == AppointmentStatus.COMPLETED && oldStatus != AppointmentStatus.COMPLETED) {
+            eventPublisher.publishEvent(new AppointmentCompletedEvent(this, appointmentId));
+        }
         
         if (newStatus == AppointmentStatus.CHECKED_IN) {
             generateTokenForAppointment(appointment);

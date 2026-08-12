@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
-import { ShieldAlert, Search, RefreshCw, AlertTriangle, ShieldCheck, ListPlus, Trash2 } from 'lucide-react';
+import { ShieldAlert, Search, RefreshCw, AlertTriangle, ShieldCheck, ListPlus, Trash2, Pill, Activity, ClipboardList, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 
@@ -96,16 +96,21 @@ export default function DrugInteractions() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">Drug Interaction Checker</h2>
-        <p className="text-sm text-slate-400">Perform multi-drug analysis to detect contraindicated or dangerous clinical combinations.</p>
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
+          <Pill className="w-7 h-7 text-blue-500" />
+        </div>
+        <div>
+          <h2 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">Drug Interaction Checker</h2>
+          <p className="text-sm text-slate-500 font-medium">Perform multi-drug analysis to detect contraindicated or dangerous clinical combinations.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Interaction Picker & Checker */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl border border-slate-100 p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-700">Select Drugs for Analysis</h3>
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-6 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900">Select Drugs for Analysis</h3>
             
             {/* Search Input */}
             <div className="relative">
@@ -114,20 +119,20 @@ export default function DrugInteractions() {
                 placeholder="Search medicine by name or code..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                className="w-full pl-11 pr-4 py-3 text-sm border border-slate-200 rounded-full outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors"
               />
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
 
               {filteredMedicines.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto divide-y divide-slate-50">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto divide-y divide-slate-50">
                   {filteredMedicines.map(med => (
                     <button
                       key={med.id}
                       onClick={() => handleAddMedicine(med)}
-                      className="w-full px-4 py-2 text-left text-xs hover:bg-slate-50 flex items-center justify-between"
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-slate-50 flex items-center justify-between transition-colors"
                     >
-                      <span className="font-bold text-slate-700">{med.name}</span>
-                      <span className="text-slate-400 font-mono">{med.code}</span>
+                      <span className="font-semibold text-slate-700">{med.name}</span>
+                      <span className="text-slate-400 font-mono text-xs">{med.code}</span>
                     </button>
                   ))}
                 </div>
@@ -135,19 +140,19 @@ export default function DrugInteractions() {
             </div>
 
             {/* Selected Drugs list */}
-            <div className="space-y-2">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Analysis List</div>
+            <div className="space-y-3">
+              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Analysis List</div>
               <div className="flex flex-wrap gap-2">
                 {selectedMedicines.map(med => (
-                  <div key={med.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 rounded-lg">
+                  <div key={med.id} className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-700 rounded-full">
                     <span>{med.name}</span>
-                    <button onClick={() => handleRemoveMedicine(med.id)} className="text-slate-400 hover:text-red-600 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => handleRemoveMedicine(med.id)} className="text-slate-400 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
                 {selectedMedicines.length === 0 && (
-                  <span className="text-xs text-slate-400 italic">No drugs selected yet. Search and add.</span>
+                  <span className="text-sm text-slate-500">No drugs selected yet. Search and add.</span>
                 )}
               </div>
             </div>
@@ -155,71 +160,89 @@ export default function DrugInteractions() {
             <button
               onClick={handleCheck}
               disabled={checkMutation.isPending || selectedMedicines.length < 2}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+              className="w-full py-3 bg-[#2563eb] hover:bg-[#2563eb] disabled:opacity-50 text-white text-sm font-bold rounded-full transition-all flex items-center justify-center gap-2 shadow-sm"
             >
+              <Activity className="w-4 h-4" />
               {checkMutation.isPending ? 'Running Screen...' : 'Analyze Inter-Drug Action'}
             </button>
           </div>
 
           {/* Checker Results */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-700">Analysis Output</h3>
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-6 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900">Analysis Output</h3>
             
             {interactions.length > 0 ? (
               <div className="space-y-4">
                 {interactions.map((inter, idx) => (
-                  <div key={idx} className="p-4 border border-slate-200 rounded-xl space-y-2">
+                  <div key={idx} className="p-5 border border-[#bfdbfe] bg-blue-50/30 rounded-2xl space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-700">{inter.drugAName}</span>
-                        <span className="text-slate-400 font-bold">&</span>
-                        <span className="font-bold text-slate-700">{inter.drugBName}</span>
+                        <span className="font-bold text-slate-800">{inter.drugAName}</span>
+                        <span className="text-blue-400 font-bold">&</span>
+                        <span className="font-bold text-slate-800">{inter.drugBName}</span>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${getSeverityColor(inter.severity)}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getSeverityColor(inter.severity)}`}>
                         {inter.severity}
                       </span>
                     </div>
-                    {inter.description && <p className="text-xs text-slate-600 leading-relaxed">{inter.description}</p>}
-                    {inter.mechanism && <div className="text-[10px] text-slate-500"><span className="font-bold">Mechanism:</span> {inter.mechanism}</div>}
-                    {inter.management && <div className="text-[10px] text-red-600 font-medium"><span className="font-bold">Clinical Action:</span> {inter.management}</div>}
+                    {inter.description && <p className="text-sm text-slate-600 leading-relaxed">{inter.description}</p>}
+                    {inter.mechanism && <div className="text-xs text-slate-500"><span className="font-bold text-slate-700">Mechanism:</span> {inter.mechanism}</div>}
+                    {inter.management && <div className="text-xs text-red-600 font-medium"><span className="font-bold">Clinical Action:</span> {inter.management}</div>}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl">
-                <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
-                <p className="text-xs font-bold text-slate-400">Screen cleared. No clinical interaction detected.</p>
+              <div className="text-center py-16 border border-dashed border-[#bfdbfe] rounded-2xl bg-white">
+                <ShieldCheck className="w-14 h-14 text-[#10b981] mx-auto mb-4" strokeWidth={2.5} />
+                <h4 className="text-lg font-bold text-slate-800 mb-1">Screen cleared</h4>
+                <p className="text-sm text-slate-500">No clinical interaction detected.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Checker Incident Audit Logs */}
-        <div className="bg-white rounded-xl border border-slate-100 overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-700">Interaction Log</h3>
-            <button onClick={() => queryClient.invalidateQueries(['interaction-logs'])} disabled={loadingLogs} className="p-1 text-slate-400 hover:text-slate-600">
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingLogs ? 'animate-spin' : ''}`} />
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col shadow-sm">
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-base font-bold text-slate-900">Interaction Log</h3>
+            <button onClick={() => queryClient.invalidateQueries(['interaction-logs'])} disabled={loadingLogs} 
+              className="p-1.5 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+              <RefreshCw className={`w-4 h-4 ${loadingLogs ? 'animate-spin' : ''}`} />
             </button>
           </div>
-          <div className="divide-y divide-slate-50 overflow-auto max-h-[500px]">
+          <div className="divide-y divide-slate-50 overflow-auto max-h-[800px] flex-1 flex flex-col">
             {incidentLogs.map(log => (
-              <div key={log.id} className="p-4 text-xs space-y-1">
+              <div key={log.id} className="p-5 text-sm space-y-1.5 hover:bg-slate-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-700">Audit Log #{log.id}</span>
-                  <span className="font-mono text-slate-400 text-[10px]">{log.checkedAt}</span>
+                  <span className="font-bold text-slate-800">Audit Log #{log.id}</span>
+                  <span className="font-mono text-slate-400 text-xs">{log.checkedAt}</span>
                 </div>
                 <div className="text-slate-600">Checked {log.itemsCheckedCount} drugs.</div>
                 <div className="text-slate-500">
                   Detected Interactions:{' '}
-                  <span className={`font-bold ${log.interactionsDetectedCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <span className={`font-bold ${log.interactionsDetectedCount > 0 ? 'text-red-600' : 'text-[#10b981]'}`}>
                     {log.interactionsDetectedCount}
                   </span>
                 </div>
               </div>
             ))}
             {incidentLogs.length === 0 && (
-              <div className="p-4 text-center text-slate-400 text-xs">No scan history logs yet.</div>
+              <div className="p-8 flex-1 flex flex-col items-center justify-center text-center">
+                <div className="relative mb-6">
+                  <ClipboardList className="w-16 h-16 text-[#bfdbfe]/40" strokeWidth={1.5} />
+                  <div className="absolute -bottom-2 -right-2 p-1 bg-white rounded-full">
+                    <div className="w-8 h-8 bg-[#bfdbfe]/40 rounded-full flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  {/* Plus decorative stars */}
+                  <div className="absolute -top-2 -left-2 text-[#bfdbfe]/40 text-xl font-bold">+</div>
+                  <div className="absolute top-2 -right-4 text-[#bfdbfe]/40 text-lg font-bold">+</div>
+                  <div className="absolute bottom-4 -left-4 text-[#bfdbfe]/40 text-sm font-bold">+</div>
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-1">No scan history logs yet.</h4>
+                <p className="text-sm text-slate-500 max-w-[200px]">Your recent interaction checks will appear here.</p>
+              </div>
             )}
           </div>
         </div>

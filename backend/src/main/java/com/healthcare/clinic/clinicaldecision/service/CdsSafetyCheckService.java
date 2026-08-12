@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import com.healthcare.clinic.emr.entity.Allergy;
+import com.healthcare.clinic.emr.repository.AllergyRepository;
 
 /**
  * Synchronous Blocking Clinical Decision Safety Check Service.
@@ -32,6 +36,7 @@ import java.util.*;
 public class CdsSafetyCheckService {
 
     private final PatientProfileRepository patientProfileRepository;
+    private final AllergyRepository allergyRepository;
     private final CdsAlertService cdsAlertService;
 
     // Demonstrative Drug-Disease Contraindications (Example Data)
@@ -61,7 +66,13 @@ public class CdsSafetyCheckService {
         List<String> warningAlerts = new ArrayList<>();
 
         Optional<PatientProfile> patientOpt = patientProfileRepository.findByUserId(patientId);
-        String patientAllergiesStr = patientOpt.map(p -> p.getAllergies() != null ? p.getAllergies().toUpperCase() : "").orElse("");
+        
+        List<Allergy> patientAllergies = allergyRepository.findByPatientId(patientId);
+        List<String> activeAllergens = patientAllergies.stream()
+                .filter(a -> "ACTIVE".equalsIgnoreCase(a.getStatus()))
+                .map(a -> a.getAllergen().toUpperCase())
+                .collect(Collectors.toList());
+        
         String patientConditionsStr = patientOpt.map(p -> p.getChronicConditions() != null ? p.getChronicConditions().toUpperCase() : "").orElse("");
 
         for (String medName : medicationNames) {
@@ -73,7 +84,9 @@ public class CdsSafetyCheckService {
                 String allergyKey = entry.getKey();
                 List<String> relatedDrugs = entry.getValue();
 
-                if (patientAllergiesStr.contains(allergyKey)) {
+                boolean hasCrossAllergy = activeAllergens.stream().anyMatch(a -> a.contains(allergyKey));
+                
+                if (hasCrossAllergy) {
                     for (String drug : relatedDrugs) {
                         if (upperMed.contains(drug)) {
                             criticalAlerts.add("CRITICAL DRUG ALLERGY: Patient has recorded allergy '" + allergyKey
@@ -84,7 +97,8 @@ public class CdsSafetyCheckService {
             }
 
             // Direct allergy string match
-            if (patientAllergiesStr.contains(upperMed)) {
+            boolean hasDirectAllergy = activeAllergens.stream().anyMatch(a -> a.contains(upperMed) || upperMed.contains(a));
+            if (hasDirectAllergy) {
                 criticalAlerts.add("CRITICAL DRUG ALLERGY: Patient is allergic to '" + medName + "'.");
             }
 

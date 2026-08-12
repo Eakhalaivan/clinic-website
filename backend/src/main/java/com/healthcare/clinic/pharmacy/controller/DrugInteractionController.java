@@ -18,7 +18,7 @@ import com.healthcare.clinic.pharmacy.dto.common.PageResponse;
 import java.util.List;
 
 @RestController("pharmacyDrugInteractionController")
-@RequestMapping("/api/drug-interactions")
+@RequestMapping("/api/pharmacy/drug-interactions")
 public class DrugInteractionController {
 
     private final DrugInteractionService service;

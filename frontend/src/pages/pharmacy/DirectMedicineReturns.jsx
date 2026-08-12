@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useShallow } from 'zustand/react/shallow';
 import { useLocation } from 'react-router-dom';
-import { Search, Plus, Eye, Printer, RotateCcw, CheckCircle } from 'lucide-react';
-import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
+import { Search, Plus, Eye, Printer, RotateCcw, CheckCircle, FileText } from 'lucide-react';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -126,15 +125,41 @@ export default function DirectMedicineReturns() {
         <p className="text-sm text-gray-500 font-medium">Manage returns for over-the-counter (OTC) transactions</p>
       </div>
 
-      <ModuleFilterBar searchPlaceholder="Search..." 
-        onSearch={setSearchTerm}
-        searchValue={searchTerm}
-        dateRange={dateRange}
-        onDateChange={(type, val) => setDateRange(prev => ({ ...prev, [type]: val }))}
-        actions={[
-          { label: 'New Return', icon: Plus, variant: 'primary', onClick: () => setIsModalOpen(true) }
-        ]}
-      />
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4 flex-1">
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+              value={dateRange.from || ''}
+              onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+            />
+            <span className="text-sm font-bold text-slate-400">to</span>
+            <input
+              type="date"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+              value={dateRange.to || ''}
+              onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+            />
+          </div>
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-4 top-2.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2563eb] text-slate-600"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" /> New Return
+        </button>
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
@@ -148,18 +173,38 @@ export default function DirectMedicineReturns() {
                   const searchLower = debouncedSearch.toLowerCase();
                   const receiptNum = row.originalBill?.billNumber?.toLowerCase() || '';
                   const patientName = row.originalBill?.patientName?.toLowerCase() || '';
-                  return !debouncedSearch || receiptNum.includes(searchLower) || patientName.includes(searchLower);
+                  
+                  const returnDate = new Date(row.returnDate || new Date());
+                  const matchesFrom = !dateRange.from || returnDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || returnDate <= new Date(dateRange.to);
+                  
+                  return (!debouncedSearch || receiptNum.includes(searchLower) || patientName.includes(searchLower)) && matchesFrom && matchesTo;
                 });
                 return pageSize === 'All' ? filtered : filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
               })()} 
               hover 
               striped 
+              emptyStateTitle="No records found"
+              emptyStateDesc="Try adjusting your filters or search term"
+              emptyStateIcon={
+                <div className="relative">
+                  <FileText className="w-6 h-6 text-[#2563EB]" />
+                  <div className="absolute -bottom-1 -right-1 bg-[#2563EB] text-white w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">
+                    <Search className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+              }
             />
             <Pagination totalRecords={returnsList.filter(row => {
                   const searchLower = debouncedSearch.toLowerCase();
                   const receiptNum = row.originalBill?.billNumber?.toLowerCase() || '';
                   const patientName = row.originalBill?.patientName?.toLowerCase() || '';
-                  return !debouncedSearch || receiptNum.includes(searchLower) || patientName.includes(searchLower);
+                  
+                  const returnDate = new Date(row.returnDate || new Date());
+                  const matchesFrom = !dateRange.from || returnDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || returnDate <= new Date(dateRange.to);
+                  
+                  return (!debouncedSearch || receiptNum.includes(searchLower) || patientName.includes(searchLower)) && matchesFrom && matchesTo;
                 }).length} currentPage={currentPage} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />
           </>
         )}

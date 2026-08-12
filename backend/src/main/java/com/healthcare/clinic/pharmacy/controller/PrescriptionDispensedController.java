@@ -3,6 +3,7 @@ package com.healthcare.clinic.pharmacy.controller;
 import com.healthcare.clinic.inventory.entity.BaseEntity;
 import com.healthcare.clinic.inventory.entity.Patient;
 
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.pharmacy.entity.PrescriptionDispensed;
 import com.healthcare.clinic.pharmacy.repository.PrescriptionDispensedRepository;
@@ -24,11 +25,13 @@ public class PrescriptionDispensedController {
     private final PrescriptionDispensedRepository dispensedRepository;
 
     @GetMapping
+    @AuditableAction(module = "PHARMACY", action = "VIEW", resourceType = "PrescriptionDispensed", sensitivityLevel = "NORMAL")
     public ResponseEntity<List<PrescriptionDispensed>> getMyDispensedPrescriptions(@AuthenticationPrincipal User pharmacist) {
         return ResponseEntity.ok(dispensedRepository.findByPharmacistId(pharmacist.getId()));
     }
 
     @PostMapping
+    @AuditableAction(module = "PHARMACY", action = "DISPENSE", resourceType = "PrescriptionDispensed", sensitivityLevel = "HIGH")
     public ResponseEntity<PrescriptionDispensed> dispensePrescription(@RequestBody PrescriptionDispensed dispensed, @AuthenticationPrincipal User pharmacist) {
         dispensed.setPharmacistId(pharmacist.getId());
         dispensed.setDispensedAt(ZonedDateTime.now());

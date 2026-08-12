@@ -31,17 +31,21 @@ public class PharmacyDatabaseConfig {
     }
 
     @Bean(name = "pharmacyEntityManagerFactory")
+    @org.springframework.context.annotation.DependsOn("pharmacyFlyway")
     public LocalContainerEntityManagerFactoryBean pharmacyEntityManagerFactory(
-            @Qualifier("pharmacyDataSource") DataSource dataSource) {
+            @Qualifier("pharmacyDataSource") DataSource dataSource,
+            org.springframework.core.env.Environment env) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan("com.healthcare.clinic.pharmacy");
+        em.setPersistenceUnitName("pharmacy");
+        em.setPackagesToScan(
+                "com.healthcare.clinic.pharmacy"
+        );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        properties.put("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto", "validate"));
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         em.setJpaPropertyMap(properties);
 

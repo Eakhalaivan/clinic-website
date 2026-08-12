@@ -72,7 +72,7 @@ export default {
         "secondary": "#585f66",
         "outline": "#727783",
         "on-background": "#151c27",
-        "primary": "#00478d",
+        "primary": "#2563EB",
         "on-tertiary-container": "#cadaff",
         "on-tertiary-fixed": "#031b3d",
         "tertiary-fixed-dim": "#b3c7f2",
@@ -89,17 +89,17 @@ export default {
         "gold": "#C5A059"
       },
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        sans: ['Inter', '-apple-system', 'sans-serif'],
-        body: ['Inter', '-apple-system', 'sans-serif'],
-        "label-sm": ["Inter"],
-        "label-md": ["Inter"],
-        "headline-lg-mobile": ["Playfair Display"],
-        "headline-sm": ["Playfair Display"],
-        "headline-md": ["Playfair Display"],
-        "headline-lg": ["Playfair Display"],
-        "body-lg": ["Inter"],
-        "body-md": ["Inter"]
+        display: ['Poppins', 'sans-serif'],
+        sans: ['Poppins', 'sans-serif'],
+        body: ['Poppins', 'sans-serif'],
+        "label-sm": ["Poppins"],
+        "label-md": ["Poppins"],
+        "headline-lg-mobile": ["Poppins"],
+        "headline-sm": ["Poppins"],
+        "headline-md": ["Poppins"],
+        "headline-lg": ["Poppins"],
+        "body-lg": ["Poppins"],
+        "body-md": ["Poppins"]
       },
       fontSize: {
         "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "500"}],

@@ -281,45 +281,105 @@ export default function UserManagement() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10 font-sans">
+      
+      {/* Header */}
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-          <Shield className="w-6 h-6 text-primary" />
+        <h2 className="text-[32px] font-bold tracking-tight text-[#0f172a] flex items-center gap-4">
+          <div className="w-12 h-12 bg-white border-2 border-[#bfdbfe] rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+            <User className="w-6 h-6 text-[#2563EB]" />
+          </div>
           User Management
         </h2>
-        <p className="text-sm text-gray-500 font-medium">Manage staff accounts, credentials, and access roles</p>
+        <p className="text-[14px] text-[#64748b] font-medium ml-16">Manage staff accounts, credentials, and access roles</p>
       </div>
 
-      <div className="flex border-b border-gray-200 gap-6">
+      {/* Tabs */}
+      <div className="flex border-b border-slate-100 gap-8 px-4 mt-8">
         <button 
           onClick={() => setActiveTab('users')}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`pb-4 text-[14px] font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'users' ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
         >
-          Staff Directory
+          <Users className="w-4 h-4" /> Staff Directory
         </button>
         <button 
           onClick={() => setActiveTab('roles')}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'roles' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`pb-4 text-[14px] font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'roles' ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
         >
-          Manage Roles
+          <Shield className="w-4 h-4" /> Manage Roles
         </button>
       </div>
 
       {activeTab === 'users' ? (
-        <>
-          <ModuleFilterBar 
-            onSearch={setSearchTerm}
-            searchValue={searchTerm}
-            searchPlaceholder="Search by Name, Username, Email..."
-            actions={[
-              { label: 'Add New User', icon: Plus, variant: 'primary', onClick: openAddModal }
-            ]}
-          />
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-            <DataTable columns={columns} data={displayedUsers} loading={loading} onRowClick={(u) => openDrawer(u, 'profile')} hover striped />
+        <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col">
+          
+          {/* Custom Filter Bar */}
+          <div className="p-6 flex flex-wrap items-center gap-4 border-b border-slate-100">
+            <div className="flex items-center gap-4 flex-1">
+              {/* Date Filters */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Calendar className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="text" placeholder="From Date" className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 transition-all w-36 placeholder:text-slate-400" />
+                </div>
+                <span className="text-[13px] text-slate-400 font-medium">to</span>
+                <div className="relative">
+                  <Calendar className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="text" placeholder="To Date" className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 transition-all w-36 placeholder:text-slate-400" />
+                </div>
+              </div>
+              
+              {/* Search */}
+              <div className="relative max-w-md w-full ml-2">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by Name, Username, Email..." 
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] outline-none focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 transition-all placeholder:text-slate-400" 
+                />
+              </div>
+            </div>
+            
+            <button 
+              onClick={openAddModal}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white rounded-xl text-[13px] font-bold shadow-md shadow-[#2563EB]/20 hover:bg-[#1e40af] transition-all"
+            >
+              <Plus className="w-4 h-4" /> Add New User
+            </button>
           </div>
-        </>
+
+          <div className="overflow-x-auto">
+            <DataTable columns={columns} data={displayedUsers} loading={loading} onRowClick={(u) => openDrawer(u, 'profile')} hover striped={false} className="border-0 shadow-none rounded-none" />
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-white rounded-b-2xl">
+            <p className="text-[13px] text-slate-500 font-medium">
+              Showing {displayedUsers.length > 0 ? 1 : 0} to {displayedUsers.length} of {displayedUsers.length} results
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50" disabled>
+                  <span className="text-xs">&lt;</span>
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#bfdbfe] bg-[#eff6ff] text-[#2563EB] font-bold transition-colors">
+                  1
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50" disabled>
+                  <span className="text-xs">&gt;</span>
+                </button>
+              </div>
+              <select className="pl-3 pr-8 py-1.5 border border-slate-200 rounded-lg text-[13px] text-slate-600 outline-none focus:border-[#7c3aed] appearance-none bg-white cursor-pointer relative">
+                <option value="10">10 / page</option>
+                <option value="20">20 / page</option>
+                <option value="50">50 / page</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
       ) : (
         <RoleManagementPanel />
       )}

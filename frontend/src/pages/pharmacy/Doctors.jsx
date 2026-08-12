@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { Cardio } from 'ldrs/react';
+import 'ldrs/react/Cardio.css';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import {
   Plus, Search, Edit3, Trash2, X, UserRound, Phone, FileText, MapPin, Activity
@@ -173,9 +175,14 @@ export default function Doctors() {
 
       <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
         {loading ? (
-          <div className="p-12 flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
-            <p className="text-sm text-slate-400 font-bold">Loading doctors…</p>
+          <div className="p-12 flex flex-col items-center gap-4">
+            <Cardio
+              size="50"
+              stroke="4"
+              speed="2"
+              color="#3b82f6" 
+            />
+            <p className="text-sm text-slate-400 font-bold">Loading doctors...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center">

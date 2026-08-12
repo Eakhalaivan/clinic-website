@@ -31,6 +31,9 @@ import PatientBilling from './pages/patient/PatientBilling';
 import PatientPrescriptions from './pages/patient/PatientPrescriptions';
 import AppointmentHistory from './pages/patient/AppointmentHistory';
 import LabReports from './pages/patient/LabReports';
+import HomeVisit from './pages/patient/HomeVisit';
+import MembershipPlans from './pages/patient/MembershipPlans';
+import PatientDocuments from './pages/patient/PatientDocuments';
 
 // Doctor pages
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
@@ -41,6 +44,13 @@ import PatientList from './pages/doctor/PatientList';
 import PatientDetail from './pages/doctor/PatientDetail';
 import ClinicalNotes from './pages/doctor/ClinicalNotes';
 import NewPrescription from './pages/doctor/NewPrescription';
+import EMRChart from './pages/doctor/emr/EMRChart';
+
+// Patient Engagement
+import PatientReminders from './pages/patient/PatientReminders';
+import SurveyResponse from './pages/patient/SurveyResponse';
+import EngagementDashboard from './pages/admin/EngagementDashboard';
+
 import LabRequest from './pages/doctor/LabRequest';
 import PrescriptionTemplates from './pages/doctor/PrescriptionTemplates';
 import DoctorPrescriptions from './pages/doctor/DoctorPrescriptions';
@@ -54,9 +64,11 @@ import ClinicalDecisionSupport from './pages/doctor/ClinicalDecisionSupport';
 import CarePathwayBuilder from './pages/doctor/CarePathwayBuilder';
 import PatientCarePathwayView from './pages/doctor/PatientCarePathwayView';
 import DoctorScheduleSettings from './pages/doctor/DoctorScheduleSettings';
+import PredictiveAnalytics from './pages/doctor/PredictiveAnalytics';
 
 // Admin pages (legacy — kept for ROLE_ADMIN / ROLE_BRANCH_ADMIN via old AuthLayout)
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AuditDashboard from './pages/admin/AuditDashboard';
 
 // Clinical Dashboard pages
 import NurseDashboard from './pages/nurse/NurseDashboard';
@@ -77,6 +89,8 @@ import RadiologistDashboard from './pages/radiologist/RadiologistDashboard';
 import HrDashboard from './pages/hr/HrDashboard';
 import Employees from './pages/hr/Employees';
 import LeaveManagement from './pages/hr/LeaveManagement';
+import PayrollManagement from './pages/hr/PayrollManagement';
+import StaffDocuments from './pages/hr/StaffDocuments';
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 import InvoicesList from './pages/finance/InvoicesList';
 import PnLStatement from './pages/finance/PnLStatement';
@@ -86,6 +100,7 @@ import StockTransfers from './pages/inventory/StockTransfers';
 
 // Phase 4 portal dashboard pages
 import MarketingDashboard from './pages/marketing/MarketingDashboard';
+import MarketingCampaigns from './pages/marketing/MarketingCampaigns';
 import EcommerceDashboard from './pages/ecommerce/EcommerceDashboard';
 import SupportDashboard from './pages/support/SupportDashboard';
 import VendorDashboard from './pages/vendor/VendorDashboard';
@@ -93,8 +108,28 @@ import InsuranceDashboard from './pages/insurance/InsuranceDashboard';
 import AmbulanceDashboard from './pages/ambulance/AmbulanceDashboard';
 import SuperAdminConsole from './pages/super-admin/SuperAdminConsole';
 import BranchManagement from './pages/admin/BranchManagement';
+import FhirImport from './pages/admin/FhirImport';
 import UserManagement from './pages/admin/UserManagement';
 import DicomViewer from './pages/radiologist/DicomViewer';
+
+// Inpatient Dashboard
+import InpatientDashboard from './pages/inpatient/InpatientDashboard';
+import BedStatusBoard from './pages/inpatient/BedStatusBoard';
+import NursingStationDashboard from './pages/inpatient/NursingStationDashboard';
+import AdmissionWorkflow from './pages/inpatient/AdmissionWorkflow';
+
+// Emergency Dashboard
+import EmergencyQueue from './pages/emergency/EmergencyQueue';
+
+// Surgery Dashboard
+import OtSchedulingCalendar from './pages/surgery/OtSchedulingCalendar';
+
+// Analytics Dashboards
+import OPDAnalyticsDashboard from './pages/analytics/OPDAnalyticsDashboard';
+import ClinicalAnalyticsDashboard from './pages/analytics/ClinicalAnalyticsDashboard';
+import IPDAnalyticsDashboard from './pages/analytics/IPDAnalyticsDashboard';
+import LabAnalyticsDashboard from './pages/analytics/LabAnalyticsDashboard';
+import FinanceAnalyticsDashboard from './pages/analytics/FinanceAnalyticsDashboard';
 
 // Pharmacy full module routes
 import { PharmacyRoutes } from './pages/pharmacy/PharmacyRoutes';
@@ -189,8 +224,11 @@ function App() {
             {/* Previously missing patient routes */}
             <Route path="radiology-reports" element={<RadiologyReports />} />
             <Route path="insurance" element={<Insurance />} />
+            <Route path="home-visits" element={<HomeVisit />} />
+            <Route path="membership" element={<MembershipPlans />} />
             <Route path="timeline" element={<HealthTimeline />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="documents" element={<PatientDocuments />} />
             <Route path="ai-assistant" element={<AIAssistantComingSoon />} />
           </Route>
 
@@ -224,6 +262,10 @@ function App() {
             <Route path="follow-ups" element={<FollowUps />} />
             <Route path="earnings" element={<DoctorEarnings />} />
             <Route path="analytics" element={<DoctorAnalytics />} />
+            <Route path="clinical-analytics" element={<ClinicalAnalyticsDashboard />} />
+            <Route path="lab-analytics" element={<LabAnalyticsDashboard />} />
+            <Route path="opd-analytics" element={<OPDAnalyticsDashboard />} />
+            <Route path="predictive" element={<PredictiveAnalytics />} />
             <Route path="cds" element={<ClinicalDecisionSupport />} />
             <Route path="care-pathways/builder" element={<CarePathwayBuilder />} />
             <Route path="schedule-settings" element={<DoctorScheduleSettings />} />
@@ -248,6 +290,7 @@ function App() {
             <Route path="notes" element={PH('Nursing Notes', 'Document and review nursing notes for assigned patients.')} />
             <Route path="monitoring" element={PH('Patient Monitoring', 'Live vitals monitoring and alert escalation panel.')} />
             <Route path="tasks" element={PH('Task Management', 'View and complete assigned clinical tasks and care checklists.')} />
+            <Route path="ipd-analytics" element={<IPDAnalyticsDashboard />} />
           </Route>
 
           {/* ── Reception Routes ────────────────────────────────────────── */}
@@ -270,6 +313,7 @@ function App() {
             <Route path="billing" element={PH('Billing', 'Create and manage patient invoices and front-desk payments.')} />
             <Route path="checkin" element={PH('Check-In / Check-Out', 'Manage patient arrival check-ins and discharge check-outs.')} />
             <Route path="search" element={PH('Patient Search', 'Search patient records by name, phone, or patient ID.')} />
+            <Route path="opd-analytics" element={<OPDAnalyticsDashboard />} />
           </Route>
 
           {/* ── Pharmacist Routes ───────────────────────────────────────── */}
@@ -353,6 +397,7 @@ function App() {
             <Route path="dashboard" element={<FinanceDashboard />} />
             <Route path="invoices" element={<InvoicesList />} />
             <Route path="pnl" element={<PnLStatement />} />
+            <Route path="finance-analytics" element={<FinanceAnalyticsDashboard />} />
             {/* Previously missing finance routes */}
             <Route path="payments" element={PH('Payments', 'Track all incoming and outgoing payments.')} />
             <Route path="insurance-claims" element={PH('Insurance Claims', 'Manage insurance claim submissions and reconciliation.')} />
@@ -379,9 +424,9 @@ function App() {
             {/* Previously missing HR routes */}
             <Route path="recruitment" element={PH('Recruitment', 'Post jobs, screen applicants, and manage onboarding.')} />
             <Route path="attendance" element={PH('Attendance', 'View staff attendance logs, shifts, and check-in history.')} />
-            <Route path="payroll" element={PH('Payroll', 'Process monthly salaries, deductions, and payslip generation.')} />
+            <Route path="payroll" element={<PayrollManagement />} />
             <Route path="performance" element={PH('Performance Reviews', 'Conduct and track staff performance evaluations.')} />
-            <Route path="documents" element={PH('Documents', 'Manage staff contracts, certifications, and credentials.')} />
+            <Route path="documents" element={<StaffDocuments />} />
           </Route>
 
           {/* ── Inventory Routes ────────────────────────────────────────── */}
@@ -418,9 +463,9 @@ function App() {
             <Route index element={<Navigate to="/marketing/dashboard" replace />} />
             <Route path="dashboard" element={<MarketingDashboard />} />
             {/* Previously missing marketing routes */}
-            <Route path="campaigns" element={PH('Campaigns', 'Create and manage health awareness and promotional campaigns.')} />
+            <Route path="campaigns" element={<MarketingCampaigns />} />
             <Route path="loyalty" element={PH('Loyalty Program', 'Configure patient loyalty tiers and reward point rules.')} />
-            <Route path="membership" element={PH('Membership Plans', 'Manage premium membership packages and benefits.')} />
+            <Route path="membership" element={<MembershipPlans />} />
             <Route path="referrals" element={PH('Referrals', 'Track patient referral programs and referral rewards.')} />
             <Route path="gift-cards" element={PH('Gift Cards', 'Issue and manage digital health gift cards.')} />
             <Route path="coupons" element={PH('Coupons', 'Create discount coupons and promotional codes.')} />
@@ -459,6 +504,9 @@ function App() {
             <Route path="inventory" element={PH('Inventory', 'Track product stock levels and restock points.')} />
             <Route path="orders" element={PH('Orders', 'Process and track customer orders.')} />
             <Route path="shipping" element={PH('Shipping', 'Configure shipping zones and track deliveries.')} />
+            <Route path="users" element={PH('User Management', 'Manage user accounts, roles, and system access.')} />
+            <Route path="engagement" element={<EngagementDashboard />} />
+            <Route path="settings" element={PH('System Settings', 'Configure global application parameters.')} />
             <Route path="coupons" element={PH('Coupons', 'Manage store discount codes and promotions.')} />
             <Route path="reviews" element={PH('Reviews', 'Moderate customer product reviews.')} />
             <Route path="returns" element={PH('Returns', 'Process return and refund requests.')} />
@@ -559,8 +607,10 @@ function App() {
             <Route path="appointments" element={PH('Appointments', 'Manage branch appointment schedule.')} />
             <Route path="pharmacy" element={PH('Pharmacy', 'Branch pharmacy stock and dispensing overview.')} />
             <Route path="laboratory" element={PH('Laboratory', 'Branch lab test queue and results.')} />
-            <Route path="inventory" element={PH('Inventory', 'Branch stock levels and transfer requests.')} />
-            <Route path="billing" element={PH('Billing', 'Branch billing and invoice management.')} />
+            <Route path="records" element={PH('Medical Records', 'Access your complete medical history and test results.')} />
+            <Route path="reminders" element={<PatientReminders />} />
+            <Route path="survey" element={<SurveyResponse />} />
+            <Route path="billing" element={PH('Billing & Payments', 'View invoices and make online payments.')} />
             <Route path="reports" element={PH('Reports', 'Branch-level operational reports.')} />
             <Route path="analytics" element={PH('Analytics', 'Branch performance KPIs and analytics.')} />
           </Route>
@@ -583,8 +633,9 @@ function App() {
             <Route path="doctors" element={<UserManagement />} />
             <Route path="patients" element={<UserManagement />} />
             <Route path="analytics" element={<SuperAdminConsole />} />
+            <Route path="fhir-import" element={<FhirImport />} />
             <Route path="security" element={<SuperAdminConsole defaultTab="security" />} />
-            <Route path="audit-logs" element={<SuperAdminConsole defaultTab="audit" />} />
+            <Route path="audit-logs" element={<AuditDashboard />} />
             <Route path="monitoring" element={<SuperAdminConsole defaultTab="health" />} />
             <Route path="notifications" element={<SuperAdminConsole defaultTab="notifications" />} />
             <Route path="subscriptions" element={<SuperAdminConsole defaultTab="plans" />} />
@@ -611,6 +662,48 @@ function App() {
             }
           >
             {PharmacyRoutes}
+          </Route>
+
+          {/* ── Inpatient Module ─────────────────────────────────────────── */}
+          <Route 
+            path="/inpatient" 
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} portalSlug="inpatient">
+                <DashboardLayout portalSlug="inpatient" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/inpatient/dashboard" replace />} />
+            <Route path="dashboard" element={<InpatientDashboard />} />
+            <Route path="beds" element={<BedStatusBoard />} />
+            <Route path="nursing-station" element={<NursingStationDashboard />} />
+            <Route path="admission" element={<AdmissionWorkflow />} />
+          </Route>
+
+          {/* ── Emergency Module ──────────────────────────────────────────── */}
+          <Route 
+            path="/emergency" 
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTION']} portalSlug="emergency">
+                <DashboardLayout portalSlug="emergency" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTION']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/emergency/queue" replace />} />
+            <Route path="queue" element={<EmergencyQueue />} />
+          </Route>
+
+          {/* ── Surgery Module ────────────────────────────────────────────── */}
+          <Route 
+            path="/surgery" 
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} portalSlug="surgery">
+                <DashboardLayout portalSlug="surgery" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/surgery/schedule" replace />} />
+            <Route path="schedule" element={<OtSchedulingCalendar />} />
           </Route>
 
           {/* ── Fallbacks ───────────────────────────────────────────────── */}

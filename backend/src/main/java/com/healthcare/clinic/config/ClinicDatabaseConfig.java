@@ -38,10 +38,13 @@ public class ClinicDatabaseConfig {
 
     @Primary
     @Bean(name = "clinicEntityManagerFactory")
+    @org.springframework.context.annotation.DependsOn("clinicFlyway")
     public LocalContainerEntityManagerFactoryBean clinicEntityManagerFactory(
-            @Qualifier("clinicDataSource") DataSource dataSource) {
+            @Qualifier("clinicDataSource") DataSource dataSource,
+            org.springframework.core.env.Environment env) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
+        em.setPersistenceUnitName("clinic");
         em.setPackagesToScan(
                 "com.healthcare.clinic.identity",
                 "com.healthcare.clinic.patient",
@@ -73,8 +76,7 @@ public class ClinicDatabaseConfig {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        properties.put("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto", "validate"));
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         em.setJpaPropertyMap(properties);
 

@@ -14,16 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.healthcare.clinic.exception.ResourceNotFoundException;
 
 /**
  * Service layer for all PharmacyUser management operations.
  * Extracted from AuthController to enforce the single-responsibility principle.
  */
 @Service("pharmacyUserService")
-@Transactional
+@Transactional(transactionManager = "pharmacyTransactionManager")
 public class UserService {
 
     private final PharmacyUserRepository userRepository;
@@ -42,7 +42,7 @@ public class UserService {
     }
 
     /** Returns all non-deleted users mapped to response DTOs. */
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = "pharmacyTransactionManager")
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -68,9 +68,11 @@ public class UserService {
     }
 
     /** Updates a user's profile (name, email, phone, branch, shift). */
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public UserResponseDTO updateProfile(Long id, String name, String email,
                                          String phone, String branch, String shift) {
         PharmacyUser user = findUserById(id);
+        
         if (name   != null) user.setName(name);
         if (email  != null) user.setEmail(email);
         if (phone  != null) user.setPhone(phone);
@@ -183,9 +185,10 @@ public class UserService {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private PharmacyUser findUserById(Long id) {
+    /** Helper to find an active user by ID, throws exception if not found or deleted. */
+    public PharmacyUser findUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PharmacyUser not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("PharmacyUser not found: " + id));
     }
 
     private Set<PharmacyRole> resolveRoles(List<String> roleNames) {

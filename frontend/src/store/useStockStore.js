@@ -20,11 +20,19 @@ export const useStockStore = create((set, get) => ({
         pharmacyService.getSuppliers().catch(() => ({ data: [] }))
       ]);
 
+      const extractArray = (res) => {
+        if (!res) return [];
+        const d = res.data;
+        if (Array.isArray(d)) return d;
+        if (d && Array.isArray(d.content)) return d.content;
+        return [];
+      };
+
       set({
-        stocks: stockRes?.success ? stockRes.data : (Array.isArray(stockRes?.data) ? stockRes.data : []),
-        medicines: medRes?.success ? medRes.data : (Array.isArray(medRes?.data) ? medRes.data : []),
+        stocks: extractArray(stockRes),
+        medicines: extractArray(medRes),
         valuation: valRes?.data?.success ? valRes.data.data : null,
-        suppliers: suppRes?.success ? suppRes.data : (Array.isArray(suppRes?.data) ? suppRes.data : []),
+        suppliers: extractArray(suppRes),
         stockLoading: false
       });
     } catch (error) {

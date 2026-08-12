@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pharmacy_medicines")
-@SQLDelete(sql = "UPDATE medicines SET is_deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE pharmacy_medicines SET is_deleted = true WHERE id=?")
 @SQLRestriction("is_deleted=false")
 public class Medicine extends BaseEntity {
 

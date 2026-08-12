@@ -11,8 +11,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 @Repository("pharmacyPurchaseOrderRepository")
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, String> {
+
+    @EntityGraph(attributePaths = {"supplier", "lineItems", "lineItems.medicine"})
+    org.springframework.data.domain.Page<PurchaseOrder> findAll(org.springframework.data.domain.Pageable pageable);
+
+    @EntityGraph(attributePaths = {"supplier", "lineItems", "lineItems.medicine"})
+    java.util.Optional<PurchaseOrder> findById(String id);
 
     List<PurchaseOrder> findByStatus(String status);
 
@@ -23,9 +31,11 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, St
 
     long countByStatus(String status);
 
+    @EntityGraph(attributePaths = {"supplier", "lineItems", "lineItems.medicine"})
     org.springframework.data.domain.Page<PurchaseOrder> findByStatus(
             String status, org.springframework.data.domain.Pageable pageable);
 
+    @EntityGraph(attributePaths = {"supplier", "lineItems", "lineItems.medicine"})
     org.springframework.data.domain.Page<PurchaseOrder> findByPoNumberContainingIgnoreCaseOrSupplierNameContainingIgnoreCase(
             String poNumber, String supplierName,
             org.springframework.data.domain.Pageable pageable);

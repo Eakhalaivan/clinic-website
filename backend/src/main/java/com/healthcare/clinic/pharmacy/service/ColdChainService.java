@@ -37,15 +37,30 @@ public class ColdChainService {
 
     @Transactional
     public TemperatureLog recordTemperature(TemperatureLog log) {
+        if (log.getStorageUnit() == null || log.getStorageUnit().getUnitId() == null) {
+            throw new IllegalArgumentException("storageUnit.unitId is required");
+        }
+        StorageUnit unit = unitRepository.findById(log.getStorageUnit().getUnitId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Storage unit not found: " + log.getStorageUnit().getUnitId()));
+        log.setStorageUnit(unit); // replace the transient reference with a managed one
+
         log.setLogId(java.util.UUID.randomUUID().toString());
         log.setRecordedAt(LocalDateTime.now());
         
-        // Manual check for breach if generated value doesn't compile dynamically
+        if (log.getRecordedTemperature() == null || log.getMinThreshold() == null || log.getMaxThreshold() == null) {
+            throw new IllegalArgumentException("recordedTemperature, minThreshold, and maxThreshold are required");
+        }
+        
         boolean isBreach = log.getRecordedTemperature().compareTo(log.getMinThreshold()) < 0 || 
                            log.getRecordedTemperature().compareTo(log.getMaxThreshold()) > 0;
         
+        log.setBreach(isBreach);
+        
         if (isBreach) {
             log.setBreachSeverity("critical");
+        } else {
+            log.setBreachSeverity(null);
         }
         
         return logRepository.save(log);

@@ -85,7 +85,7 @@ export default function ModuleFilterBar({
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm",
               action.variant === 'primary' 
-                ? "bg-primary text-white hover:bg-blue-700 shadow-blue-200/50" 
+                ? "bg-[#2563EB] text-white hover:bg-blue-700 shadow-blue-200/50" 
                 : action.variant === 'success'
                 ? "bg-green-600 text-white hover:bg-green-700 shadow-green-200/50"
                 : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-gray-100"

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.ZonedDateTime;
 
@@ -25,11 +27,13 @@ public class OrderSetTemplate {
     @Column(nullable = false, length = 100)
     private String category;
 
-    @Column(name = "diagnosis_codes", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "diagnosis_codes", nullable = false, columnDefinition = "json")
     @Builder.Default
     private String diagnosisCodes = "[]";
 
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false, columnDefinition = "json")
     @Builder.Default
     private String items = "[]";
 

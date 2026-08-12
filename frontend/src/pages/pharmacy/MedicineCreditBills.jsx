@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useShallow } from 'zustand/react/shallow';
-import { useLocation } from 'react-router-dom';
-import { Search, CreditCard, Eye, Printer, CheckCircle } from 'lucide-react';
-import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Search, CreditCard, Eye, Printer, CheckCircle, Plus, FileText, Wallet, IndianRupee, Users, Filter, ClipboardList } from 'lucide-react';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -16,6 +15,7 @@ import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
 
 export default function MedicineCreditBills() {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { items: creditBillsList = [], isLoading: loading } = usePageData(
@@ -86,20 +86,133 @@ export default function MedicineCreditBills() {
 
   if (loading) return <div className="p-8 text-center text-slate-500 font-bold">Loading Credit Bills...</div>;
 
+  const totalCreditBills = creditBillsList.length;
+  const totalOutstanding = creditBillsList.reduce((sum, b) => sum + b.balanceAmount, 0);
+  const totalPaidAmount = creditBillsList.reduce((sum, b) => sum + b.paidAmount, 0);
+  const totalBalance = totalOutstanding;
+  const overdueBills = creditBillsList.filter(b => b.status !== 'PAID').length; // Simplify overdue logic to not paid for now
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Medicine Credit Bills</h2>
-        <p className="text-sm text-gray-500 font-medium">Track outstanding balances and manage credit settlements</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Medicine Credit Bills</h2>
+          <p className="text-sm text-gray-500 font-medium">Track outstanding balances and manage credit settlements</p>
+        </div>
+        <button
+          onClick={() => navigate('/pharmacy/pharmacy-sales', { state: { openModal: true, paymentType: 'CREDIT' } })}
+          className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" /> New Credit Bill
+        </button>
       </div>
 
-      <ModuleFilterBar searchPlaceholder="Search..." 
-        onSearch={setSearchTerm}
-        searchValue={searchTerm}
-        dateRange={dateRange}
-        onDateChange={(type, val) => setDateRange(prev => ({ ...prev, [type]: val }))}
-        actions={[]}
-      />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Card 1 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#2563eb]/10 flex items-center justify-center shrink-0">
+              <FileText className="w-5 h-5 text-[#2563eb]" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Credit Bills</p>
+              <h3 className="text-2xl font-bold text-slate-900">{totalCreditBills}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-[#2563eb]">₹0.00</p>
+        </div>
+        {/* Card 2 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <CreditCard className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Outstanding</p>
+              <h3 className="text-2xl font-bold text-slate-900">{totalOutstanding > 0 ? totalOutstanding : 0}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-blue-500">₹{totalOutstanding.toFixed(2)}</p>
+        </div>
+        {/* Card 3 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+              <Wallet className="w-5 h-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Paid Amount</p>
+              <h3 className="text-2xl font-bold text-slate-900">{totalPaidAmount > 0 ? totalPaidAmount : 0}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-green-500">₹{totalPaidAmount.toFixed(2)}</p>
+        </div>
+        {/* Card 4 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+              <IndianRupee className="w-5 h-5 text-orange-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Balance</p>
+              <h3 className="text-2xl font-bold text-slate-900">{totalBalance > 0 ? totalBalance : 0}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-orange-500">₹{totalBalance.toFixed(2)}</p>
+        </div>
+        {/* Card 5 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Overdue Bills</p>
+              <h3 className="text-2xl font-bold text-slate-900">{overdueBills}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-red-500">₹{(totalOutstanding).toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Inline Filter Bar */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+            value={dateRange.from || ''}
+            onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+          />
+          <span className="text-sm font-bold text-slate-400">to</span>
+          <input
+            type="date"
+            className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+            value={dateRange.to || ''}
+            onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+          />
+        </div>
+        <div className="relative flex-1 min-w-[300px]">
+          <Search className="absolute left-4 top-2.5 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by bill no., patient name, ..."
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm outline-none focus:border-[#2563eb] text-slate-600"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-5 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-semibold flex items-center gap-2 hover:bg-blue-50 transition-colors">
+            <Filter className="w-4 h-4" /> Filters
+          </button>
+          <button className="px-6 py-2 bg-[#2563eb] text-white rounded-full text-sm font-semibold shadow-sm hover:bg-[#1d4ed8] transition-colors flex items-center gap-2">
+            <Search className="w-4 h-4" /> Apply
+          </button>
+        </div>
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
@@ -116,8 +229,8 @@ export default function MedicineCreditBills() {
                     row.bill?.patientName?.toLowerCase().includes(searchLower);
                   
                   const billDate = new Date(row.bill?.billingDate || new Date());
-                  const matchesFrom = !dateRange.from || billDate >= dateRange.from;
-                  const matchesTo = !dateRange.to || billDate <= dateRange.to;
+                  const matchesFrom = !dateRange.from || billDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || billDate <= new Date(dateRange.to);
                   
                   return matchesSearch && matchesFrom && matchesTo;
                 });
@@ -125,6 +238,16 @@ export default function MedicineCreditBills() {
               })()} 
               hover 
               striped 
+              emptyStateTitle="No credit bills found"
+              emptyStateDesc="Try adjusting your filters or search term"
+              emptyStateIcon={
+                <div className="relative">
+                  <ClipboardList className="w-6 h-6 text-[#7c3aed]" />
+                  <div className="absolute -bottom-1 -right-1 bg-[#7c3aed] text-white w-4 h-4 rounded-full flex items-center justify-center border-[1.5px] border-white">
+                    <Search className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+              }
             />
             <Pagination totalRecords={creditBillsList.filter(row => {
                   const searchLower = debouncedSearch.toLowerCase();
@@ -133,8 +256,8 @@ export default function MedicineCreditBills() {
                     row.bill?.patientName?.toLowerCase().includes(searchLower);
                   
                   const billDate = new Date(row.bill?.billingDate || new Date());
-                  const matchesFrom = !dateRange.from || billDate >= dateRange.from;
-                  const matchesTo = !dateRange.to || billDate <= dateRange.to;
+                  const matchesFrom = !dateRange.from || billDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || billDate <= new Date(dateRange.to);
                   
                   return matchesSearch && matchesFrom && matchesTo;
                 }).length} currentPage={currentPage} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />
