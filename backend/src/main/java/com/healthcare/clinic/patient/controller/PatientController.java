@@ -18,6 +18,7 @@ public class PatientController {
     private final PatientProfileRepository patientRepository;
     private final com.healthcare.clinic.patient.repository.VitalsRepository vitalsRepository;
     private final com.healthcare.clinic.identity.repository.UserRepository userRepository;
+    private final com.healthcare.clinic.patient.service.Patient360Service patient360Service;
 
     @GetMapping("/profile/{userId}")
     @PreAuthorize("hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_ADMIN')")
@@ -34,6 +35,12 @@ public class PatientController {
         return patientRepository.findById(patientId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{patientId}/360")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_PHARMACIST') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<com.healthcare.clinic.patient.dto.Patient360DTO> getPatient360(@PathVariable Long patientId) {
+        return ResponseEntity.ok(patient360Service.getPatient360(patientId));
     }
 
     @PostMapping("/profile")
@@ -140,7 +147,7 @@ public class PatientController {
     }
 
     @PostMapping("/{patientId}/vitals/record")
-    @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE')")
     public ResponseEntity<com.healthcare.clinic.patient.entity.Vitals> recordVitals(
             @PathVariable Long patientId,
             @RequestBody com.healthcare.clinic.patient.entity.Vitals vitals) {
@@ -148,6 +155,19 @@ public class PatientController {
         PatientProfile patient = patientRepository.findById(patientId).orElse(null);
         if (patient == null) {
             return ResponseEntity.notFound().build();
+        }
+        
+        if (vitals.getHeightCm() != null && (vitals.getHeightCm() <= 0 || vitals.getHeightCm() > 300)) {
+            throw new IllegalArgumentException("Height must be between 1 and 300 cm");
+        }
+        if (vitals.getWeightKg() != null && (vitals.getWeightKg() <= 0 || vitals.getWeightKg() > 500)) {
+            throw new IllegalArgumentException("Weight must be between 1 and 500 kg");
+        }
+        if (vitals.getPulseBpm() != null && (vitals.getPulseBpm() <= 0 || vitals.getPulseBpm() > 300)) {
+            throw new IllegalArgumentException("Pulse must be between 1 and 300 bpm");
+        }
+        if (vitals.getBloodPressure() != null && !vitals.getBloodPressure().matches("^\\d{2,3}/\\d{2,3}$")) {
+            throw new IllegalArgumentException("Blood pressure must be in format SYS/DIA (e.g. 120/80)");
         }
         
         vitals.setPatient(patient);

@@ -25,16 +25,33 @@ export default function Tabs({
   className = ''
 }) {
   return (
-    <div className={`flex items-center gap-1 border-b border-[var(--color-border)] overflow-x-auto no-scrollbar ${className}`}>
-      {tabs.map((tab) => {
+    <div className={`flex items-center gap-1 border-b border-[var(--color-border)] overflow-x-auto no-scrollbar ${className}`} role="tablist">
+      {tabs.map((tab, index) => {
         const isActive = activeTab === tab.id;
         const Icon = tab.icon;
+
+        const handleKeyDown = (e) => {
+          let newIndex = index;
+          if (e.key === 'ArrowRight') {
+            newIndex = (index + 1) % tabs.length;
+          } else if (e.key === 'ArrowLeft') {
+            newIndex = (index - 1 + tabs.length) % tabs.length;
+          }
+          if (newIndex !== index) {
+            onChange(tabs[newIndex].id);
+            // In a real app we'd also focus the new button, but this is a start
+          }
+        };
 
         return (
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={isActive}
+            tabIndex={isActive ? 0 : -1}
             onClick={() => onChange(tab.id)}
+            onKeyDown={handleKeyDown}
             className={`relative px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)] focus-visible:ring-inset rounded-t-sm ${
               isActive
                 ? 'text-[var(--color-gold)] dark:text-[var(--color-gold)] font-semibold'

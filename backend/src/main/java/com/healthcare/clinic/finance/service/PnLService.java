@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,22 +32,26 @@ public class PnLService {
         BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalExpenses = BigDecimal.ZERO;
 
-        Map<String, BigDecimal> revenueByCategory = entries.stream()
-                .filter(e -> "REVENUE".equalsIgnoreCase(e.getEntryType()))
-                .collect(Collectors.groupingBy(LedgerEntry::getCategory,
-                        Collectors.reducing(BigDecimal.ZERO, LedgerEntry::getAmount, BigDecimal::add)));
+        Map<String, BigDecimal> revenueByCategory = new HashMap<>();
+        Map<String, BigDecimal> expenseByCategory = new HashMap<>();
 
-        Map<String, BigDecimal> expenseByCategory = entries.stream()
-                .filter(e -> "EXPENSE".equalsIgnoreCase(e.getEntryType()))
-                .collect(Collectors.groupingBy(LedgerEntry::getCategory,
-                        Collectors.reducing(BigDecimal.ZERO, LedgerEntry::getAmount, BigDecimal::add)));
-
-        for (BigDecimal amount : revenueByCategory.values()) {
-            totalRevenue = totalRevenue.add(amount);
-        }
-
-        for (BigDecimal amount : expenseByCategory.values()) {
-            totalExpenses = totalExpenses.add(amount);
+        for (LedgerEntry entry : entries) {
+            if (entry.getAccount() == null) continue;
+            
+            String accType = entry.getAccount().getAccountType().name();
+            String accName = entry.getAccount().getAccountName();
+            
+            if ("REVENUE".equals(accType)) {
+                // For Revenue, Credit increases it, Debit decreases it.
+                BigDecimal amount = entry.getCreditAmount().subtract(entry.getDebitAmount());
+                totalRevenue = totalRevenue.add(amount);
+                revenueByCategory.put(accName, revenueByCategory.getOrDefault(accName, BigDecimal.ZERO).add(amount));
+            } else if ("EXPENSE".equals(accType)) {
+                // For Expense, Debit increases it, Credit decreases it.
+                BigDecimal amount = entry.getDebitAmount().subtract(entry.getCreditAmount());
+                totalExpenses = totalExpenses.add(amount);
+                expenseByCategory.put(accName, expenseByCategory.getOrDefault(accName, BigDecimal.ZERO).add(amount));
+            }
         }
 
         List<PnLResponse.CategoryBreakdown> revenueBreakdown = revenueByCategory.entrySet().stream()

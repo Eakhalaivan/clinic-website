@@ -1,7 +1,7 @@
 package com.healthcare.clinic.pharmacy.entity;
 
 import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pharmacy_medicines")
-@SQLDelete(sql = "UPDATE medicines SET is_deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE pharmacy_medicines SET is_deleted = true WHERE id=?")
 @SQLRestriction("is_deleted=false")
 public class Medicine extends BaseEntity {
 

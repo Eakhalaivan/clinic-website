@@ -10,5 +10,5 @@ CREATE TABLE medication_administration_records (
     administered_at TIMESTAMP,
     status VARCHAR(50) DEFAULT 'DUE',
     administered_by_user_id BIGINT,
-    notes TEXT
+    notes VARCHAR(255)
 );

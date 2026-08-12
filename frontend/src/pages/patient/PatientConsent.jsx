@@ -1,78 +1,104 @@
 import React, { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import useAuthStore from '../../store/authStore';
+import { Shield, CheckCircle, XCircle } from 'lucide-react';
 
 const PatientConsent = () => {
-  const { user } = useAuthStore();
-  const [signature, setSignature] = useState('');
-  
-  const consentMutation = useMutation({
-    mutationFn: async (data) => {
-      // In a real implementation this would hit a POST /api/v1/consent endpoint
-      // const res = await axiosPrivate.post('/api/v1/consent', data);
-      // return res.data;
-      return new Promise(resolve => setTimeout(() => resolve({ success: true }), 1000));
-    },
-    onSuccess: () => {
-      alert('Consent form signed successfully!');
-      setSignature('');
+  const queryClient = useQueryClient();
+
+  const { data: versions, isLoading: loadingVersions } = useQuery({
+    queryKey: ['consent-versions'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/api/v1/patient/settings/consents/versions');
+      return res.data;
     }
   });
 
-  const handleSign = (e) => {
-    e.preventDefault();
-    if (!signature) {
-      alert("Please type your signature to agree.");
-      return;
+  const { data: consents, isLoading: loadingConsents } = useQuery({
+    queryKey: ['patient-consents'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/api/v1/patient/settings/consents');
+      return res.data;
     }
-    consentMutation.mutate({
-      patientId: user?.id,
-      formType: 'GENERAL_CONSENT',
-      signatureData: signature
-    });
+  });
+
+  const grantMutation = useMutation({
+    mutationFn: async (consentType) => {
+      await axiosPrivate.post(`/api/v1/patient/settings/consents/${consentType}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries(['patient-consents'])
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: async (consentType) => {
+      await axiosPrivate.delete(`/api/v1/patient/settings/consents/${consentType}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries(['patient-consents'])
+  });
+
+  const isGranted = (consentType) => {
+    const consent = consents?.find(c => c.consentVersion?.consentType === consentType);
+    return consent?.isGranted || false;
   };
 
+  if (loadingVersions || loadingConsents) return <div className="p-8 text-center text-slate-500">Loading consents...</div>;
+
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-slate-800">General Consent for Treatment</h2>
-      
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-6">
-        <p className="mb-4 text-slate-600 leading-relaxed">
-          I hereby authorize the medical staff of ClinicApp to provide me with medical treatment and care. 
-          I understand that I have the right to be informed about my condition and the recommended surgical, 
-          medical, or diagnostic procedure to be used so that I may make an informed decision whether or not 
-          to undergo the procedure after knowing the risks and hazards involved.
-        </p>
-        <p className="text-slate-600 leading-relaxed">
-          By signing below, I acknowledge that I have read and understand this consent form, and I voluntarily 
-          agree to the treatments and procedures as deemed necessary by my attending physicians.
-        </p>
+    <div className="p-8 max-w-4xl mx-auto animate-in fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <Shield className="text-blue-600 h-8 w-8" />
+        <h2 className="text-2xl font-bold text-slate-800">Digital Consents & Agreements</h2>
       </div>
 
-      <form onSubmit={handleSign} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Electronic Signature (Type your full name)
-          </label>
-          <input 
-            type="text" 
-            value={signature}
-            onChange={(e) => setSignature(e.target.value)}
-            placeholder="John Doe"
-            className="w-full p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={consentMutation.isPending}
-          className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-        >
-          {consentMutation.isPending ? 'Submitting...' : 'Sign and Agree'}
-        </button>
-      </form>
+      <div className="grid gap-6">
+        {versions?.map(version => (
+          <div key={version.id} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800">{version.consentType.replace(/_/g, ' ')}</h3>
+                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full mt-1 inline-block">
+                  Version: {version.versionId}
+                </span>
+              </div>
+              <div>
+                {isGranted(version.consentType) ? (
+                  <span className="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full text-sm">
+                    <CheckCircle size={16} /> Granted
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm">
+                    <XCircle size={16} /> Not Granted
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 leading-relaxed max-h-40 overflow-y-auto mb-4 border border-slate-200">
+              {version.documentText}
+            </div>
+
+            <div className="flex justify-end">
+              {isGranted(version.consentType) ? (
+                <button 
+                  onClick={() => { if(window.confirm('Revoke this consent?')) revokeMutation.mutate(version.consentType) }}
+                  disabled={revokeMutation.isPending}
+                  className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Revoke Consent
+                </button>
+              ) : (
+                <button 
+                  onClick={() => grantMutation.mutate(version.consentType)}
+                  disabled={grantMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Grant Consent
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

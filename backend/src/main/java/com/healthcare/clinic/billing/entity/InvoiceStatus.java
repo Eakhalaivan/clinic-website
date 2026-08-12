@@ -1,7 +1,12 @@
 package com.healthcare.clinic.billing.entity;
 
 public enum InvoiceStatus {
-    PENDING,
+    DRAFT,
+    ISSUED,
+    PARTIALLY_PAID,
     PAID,
-    CANCELLED
+    CANCELLED,
+    CREDIT_NOTED,
+    REFUNDED,
+    WRITTEN_OFF
 }

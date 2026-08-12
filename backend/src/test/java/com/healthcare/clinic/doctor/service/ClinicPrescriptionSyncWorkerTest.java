@@ -3,7 +3,7 @@ package com.healthcare.clinic.doctor.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.clinic.doctor.entity.ClinicOutboxEvent;
 import com.healthcare.clinic.doctor.repository.ClinicOutboxEventRepository;
-import com.healthcare.clinic.pharmacy.service.PharmacyPrescriptionSyncService;
+import com.healthcare.clinic.integration.PharmacyIntegrationClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ public class ClinicPrescriptionSyncWorkerTest {
     private ClinicOutboxEventRepository clinicOutboxEventRepository;
 
     @Mock
-    private PharmacyPrescriptionSyncService pharmacyPrescriptionSyncService;
+    private PharmacyIntegrationClient pharmacyIntegrationClient;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -51,7 +51,7 @@ public class ClinicPrescriptionSyncWorkerTest {
     @Test
     void testProcessOutbox_Failure_RetryIncremented() throws Exception {
         when(clinicOutboxEventRepository.findByStatus("PENDING")).thenReturn(Collections.singletonList(event));
-        doThrow(new RuntimeException("Simulated failure")).when(pharmacyPrescriptionSyncService).syncVoidPrescription(anyLong());
+        doThrow(new RuntimeException("Simulated failure")).when(pharmacyIntegrationClient).syncVoidPrescription(anyLong());
 
         worker.processOutbox();
 
@@ -65,7 +65,7 @@ public class ClinicPrescriptionSyncWorkerTest {
     void testProcessOutbox_Failure_MaxRetriesReached() throws Exception {
         event.setRetryCount(4);
         when(clinicOutboxEventRepository.findByStatus("PENDING")).thenReturn(Collections.singletonList(event));
-        doThrow(new RuntimeException("Simulated failure")).when(pharmacyPrescriptionSyncService).syncVoidPrescription(anyLong());
+        doThrow(new RuntimeException("Simulated failure")).when(pharmacyIntegrationClient).syncVoidPrescription(anyLong());
 
         worker.processOutbox();
 
@@ -84,7 +84,7 @@ public class ClinicPrescriptionSyncWorkerTest {
         worker.processOutbox();
 
         // Should be skipped, so syncVoidPrescription should not be called
-        verify(pharmacyPrescriptionSyncService, never()).syncVoidPrescription(anyLong());
+        verify(pharmacyIntegrationClient, never()).syncVoidPrescription(anyLong());
         // Since it's skipped, save shouldn't be called either
         verify(clinicOutboxEventRepository, never()).save(any());
     }

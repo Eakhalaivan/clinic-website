@@ -1,6 +1,7 @@
 package com.healthcare.clinic.identity.config;
 
 import com.healthcare.clinic.security.RateLimitAndAuditInterceptor;
+import com.healthcare.clinic.tenant.interceptor.TenantInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -11,9 +12,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final RateLimitAndAuditInterceptor rateLimitAndAuditInterceptor;
+    private final TenantInterceptor tenantInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(rateLimitAndAuditInterceptor).addPathPatterns("/api/auth/**");
+        registry.addInterceptor(tenantInterceptor).addPathPatterns("/api/**");
     }
+
+    // Uploads are now served via an authenticated REST controller,
+    // not as a publicly accessible static resource directory.
 }

@@ -41,7 +41,10 @@ public class ImagingRequest {
 
     @Column(nullable = false, length = 30)
     @Builder.Default
-    private String status = "REQUESTED"; // REQUESTED, SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+    private String status = "DRAFT"; // DRAFT, ORDERED, AWAITING_PAYMENT, SCHEDULED, CHECKED_IN, ACQUIRED, REPORTING, VERIFIED, RELEASED, AMENDED, CANCELLED, REJECTED
+
+    @Column(name = "turnaround_target_sla")
+    private ZonedDateTime turnaroundTargetSla;
 
     @CreationTimestamp
     @Column(name = "requested_at", nullable = false, updatable = false)
@@ -49,4 +52,16 @@ public class ImagingRequest {
 
     @Column(name = "scheduled_at")
     private ZonedDateTime scheduledAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "encounter_id")
+    private com.healthcare.clinic.medicalrecord.entity.MedicalRecord encounter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private com.healthcare.clinic.branch.entity.Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private com.healthcare.clinic.billing.entity.Invoice invoice;
 }

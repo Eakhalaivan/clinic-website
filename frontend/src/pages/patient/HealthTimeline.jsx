@@ -1,144 +1,117 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { axiosPrivate as axios } from '../../api/axios';
-import { Activity, FileText, Stethoscope, Image as ImageIcon, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { axiosPrivate } from '../../api/axios';
+import { Calendar, FileText, Activity, Home, Clock, CheckCircle, Video, FileOutput, Loader2 } from 'lucide-react';
 
-export default function HealthTimeline() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchTimeline = async () => {
-      try {
-        const response = await axios.get('/api/patient/timeline');
-        setEvents(response.data);
-      } catch (err) {
-        console.error('Error fetching timeline:', err);
-        setError('Failed to load health timeline.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTimeline();
-  }, []);
-
-  const getEventIcon = (type) => {
+const getIconForType = (type) => {
     switch (type) {
-      case 'RADIOLOGY': return <ImageIcon className="w-5 h-5 text-purple-600" />;
-      case 'PRESCRIPTION': return <Activity className="w-5 h-5 text-blue-600" />;
-      case 'CLINICAL_NOTE': return <Stethoscope className="w-5 h-5 text-emerald-600" />;
-      case 'INVOICE': return <FileText className="w-5 h-5 text-amber-600" />;
-      default: return <CheckCircle className="w-5 h-5 text-gray-600" />;
+        case 'APPOINTMENT': return <Calendar size={18} />;
+        case 'HOME_VISIT': return <Home size={18} />;
+        case 'TELECONSULTATION': return <Video size={18} />;
+        case 'LAB_REPORT': return <Activity size={18} />;
+        case 'PRESCRIPTION': return <FileText size={18} />;
+        default: return <FileOutput size={18} />;
     }
-  };
+};
 
-  const getEventBgClass = (type) => {
+const getColorForType = (type) => {
     switch (type) {
-      case 'RADIOLOGY': return 'bg-purple-100 ring-purple-50';
-      case 'PRESCRIPTION': return 'bg-blue-100 ring-blue-50';
-      case 'CLINICAL_NOTE': return 'bg-emerald-100 ring-emerald-50';
-      case 'INVOICE': return 'bg-amber-100 ring-amber-50';
-      default: return 'bg-gray-100 ring-gray-50';
+        case 'APPOINTMENT': return 'bg-blue-100 text-blue-600 border-blue-200';
+        case 'HOME_VISIT': return 'bg-amber-100 text-amber-600 border-amber-200';
+        case 'TELECONSULTATION': return 'bg-purple-100 text-purple-600 border-purple-200';
+        case 'LAB_REPORT': return 'bg-rose-100 text-rose-600 border-rose-200';
+        case 'PRESCRIPTION': return 'bg-emerald-100 text-emerald-600 border-emerald-200';
+        default: return 'bg-slate-100 text-slate-600 border-slate-200';
     }
-  };
+};
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+const getStatusBadge = (status) => {
+    if (!status) return null;
+    const lowerStatus = status.toLowerCase();
+    
+    if (['completed', 'verified', 'released', 'done'].includes(lowerStatus)) {
+        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"><CheckCircle size={12} /> {status}</span>;
+    }
+    if (['scheduled', 'in progress', 'requested', 'active'].includes(lowerStatus)) {
+        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700"><Clock size={12} /> {status}</span>;
+    }
+    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{status}</span>;
+};
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-          </div>
-          <div className="ml-3">
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+const HealthTimeline = () => {
+    const { data: timelineEvents, isLoading } = useQuery({
+        queryKey: ['healthTimeline'],
+        queryFn: async () => {
+            const res = await axiosPrivate.get('/api/v1/patient/timeline');
+            return res.data;
+        }
+    });
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-900">Health Timeline</h2>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center">
-          <div className="p-3 bg-white rounded-lg shadow-sm mr-4 text-indigo-600">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Your Medical History</h3>
-            <p className="text-sm text-gray-600">A chronological view of all your medical events, visits, and reports.</p>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        {events.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-            <div className="w-16 h-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Clock className="w-8 h-8" />
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="animate-spin text-indigo-600 w-8 h-8" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
-            <p className="text-gray-500 max-w-sm mx-auto">
-              Your health timeline is currently empty. Medical records, prescriptions, and reports will appear here automatically.
-            </p>
-          </div>
-        ) : (
-          <div className="flow-root mt-8">
-            <ul className="-mb-8">
-              {events.map((event, eventIdx) => (
-                <li key={event.id}>
-                  <div className="relative pb-8">
-                    {eventIdx !== events.length - 1 ? (
-                      <span className="absolute top-4 left-6 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
-                    ) : null}
-                    <div className="relative flex space-x-4">
-                      <div>
-                        <span className={`h-12 w-12 rounded-full flex items-center justify-center ring-8 ${getEventBgClass(event.type)}`}>
-                          {getEventIcon(event.type)}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                        <div className="bg-white border border-gray-100 p-4 rounded-lg shadow-sm flex-1 ml-2 hover:shadow-md transition-shadow">
-                          <div className="flex justify-between items-center mb-1">
-                            <h4 className="text-sm font-medium text-gray-900">{event.title}</h4>
-                            <span className="text-xs text-gray-500">
-                              {event.eventDate ? format(new Date(event.eventDate), 'MMM d, yyyy h:mm a') : 'Unknown Date'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{event.description}</p>
-                          <div className="flex justify-between items-center mt-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                              Status: {event.status}
-                            </span>
-                            <span className="text-xs font-mono text-gray-400 text-right w-full block">
-                              Ref: {event.id}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+        );
+    }
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-800">Health Timeline</h2>
+                <p className="text-slate-500 mt-1">A chronological history of your interactions and medical records.</p>
+            </div>
+
+            {timelineEvents?.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 shadow-sm">
+                    <Clock size={48} className="mx-auto text-slate-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">No History Found</h3>
+                    <p className="text-slate-500">Your timeline is empty. Appointments and lab results will appear here.</p>
+                </div>
+            ) : (
+                <div className="relative border-l-2 border-slate-200 ml-4 md:ml-6 pb-4">
+                    {timelineEvents?.map((event, index) => {
+                        const eventDate = new Date(event.eventDate);
+                        const isToday = new Date().toDateString() === eventDate.toDateString();
+                        
+                        return (
+                            <div key={event.id} className="mb-10 ml-8 relative group">
+                                {/* Timeline Dot/Icon */}
+                                <div className={`absolute -left-[41px] top-1 w-10 h-10 rounded-full border-4 border-white flex items-center justify-center shadow-sm ${getColorForType(event.type)}`}>
+                                    {getIconForType(event.type)}
+                                </div>
+                                
+                                {/* Card */}
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group-hover:border-slate-300">
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <h3 className="text-lg font-semibold text-slate-800">{event.title}</h3>
+                                                {getStatusBadge(event.status)}
+                                            </div>
+                                            <p className="text-slate-600">{event.description}</p>
+                                        </div>
+                                        
+                                        <div className="flex flex-col sm:items-end shrink-0">
+                                            <span className={`text-sm font-medium ${isToday ? 'text-indigo-600' : 'text-slate-500'}`}>
+                                                {isToday ? 'Today' : eventDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </span>
+                                            <span className="text-xs text-slate-400 mt-1">
+                                                {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                            <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider mt-2">
+                                                ID: {event.id}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default HealthTimeline;

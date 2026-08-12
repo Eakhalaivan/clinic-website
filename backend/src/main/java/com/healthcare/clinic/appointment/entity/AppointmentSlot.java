@@ -36,6 +36,10 @@ public class AppointmentSlot {
     @Column(nullable = false)
     private Long branchId;
 
+    @Column(name = "is_priority")
+    @Builder.Default
+    private Boolean isPriority = false;
+
     @Version
     private Long version; // Optimistic locking
 }

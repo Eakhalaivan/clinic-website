@@ -168,7 +168,7 @@ export default function UserManagement() {
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold text-xs shrink-0 overflow-hidden">
                   {row.profilePhotoUrl ? (
-                    <img src={row.profilePhotoUrl} alt={row.name} className="w-full h-full object-cover" />
+                    <img loading="lazy" src={row.profilePhotoUrl} alt={row.name} className="w-full h-full object-cover" />
                   ) : (
                     row.name?.substring(0, 2).toUpperCase() || 'U'
                   )}

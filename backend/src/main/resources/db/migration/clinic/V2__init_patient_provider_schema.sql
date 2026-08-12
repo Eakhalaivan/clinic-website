@@ -21,6 +21,7 @@ CREATE TABLE doctor_profiles (
     experience_years INTEGER,
     consultation_fee DECIMAL(10, 2) NOT NULL,
     bio TEXT,
+    registration_number VARCHAR(255),
     is_active BOOLEAN DEFAULT true,
     branch_id BIGINT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

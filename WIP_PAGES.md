@@ -1,8 +1,9 @@
 # Work In Progress Pages
 
-The following pages are currently frontend mocks or require backend API wiring to be functional. They have been tagged with the `<WipBanner />` component.
+*All WIP pages have been successfully wired to backend endpoints!*
 
 | Page | Feature | Status |
 |---|---|---|
-| `DicomViewer.jsx` | DicomViewer | Backend endpoint missing or unlinked |
-| `AIAssistant.jsx` | AIAssistant | Backend endpoint missing or unlinked |
+| `DicomViewer.jsx` | DicomViewer | **Complete** (Connected to `RadiologyService` and `/radiology/dicom/study/request/{id}`) |
+| `AiAssistant.jsx` | AIAssistant | **Complete** (Connected to `AiChatController` and `AIAssistantController`) |
+

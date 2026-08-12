@@ -37,7 +37,9 @@ public class PatientRadiologyController {
         Long patientId = patientOpt.get().getId();
         
         // Fetch reports by patient profile ID
-        List<RadiologyReport> myReports = radiologyReportRepository.findByRequestPatientId(patientId);
+        List<RadiologyReport> myReports = radiologyReportRepository.findByRequestPatientId(patientId).stream()
+            .filter(r -> "FINALIZED".equals(r.getStatus()))
+            .toList();
             
         return ResponseEntity.ok(myReports);
     }

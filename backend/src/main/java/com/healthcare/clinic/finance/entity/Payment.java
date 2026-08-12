@@ -20,9 +20,13 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", nullable = false)
-    private Invoice invoice;
+    @Column(name = "payment_reference", unique = true, length = 100)
+    private String paymentReference;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private PaymentStatus status = PaymentStatus.INITIATED;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
@@ -40,9 +44,15 @@ public class Payment {
     @Column(name = "recorded_by")
     private Long recordedBy;
 
+    @Column(name = "idempotency_key", length = 100)
+    private String idempotencyKey;
+
     @CreationTimestamp
-    @Column(name = "paid_at", nullable = false, updatable = false)
-    private ZonedDateTime paidAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private ZonedDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private ZonedDateTime updatedAt;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

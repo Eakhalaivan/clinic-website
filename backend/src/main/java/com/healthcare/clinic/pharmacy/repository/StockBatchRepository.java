@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.repository;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import com.healthcare.clinic.pharmacy.entity.StockBatch;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +23,10 @@ public interface StockBatchRepository extends JpaRepository<StockBatch, String> 
 
     @Query("SELECT b FROM StockBatch b WHERE b.medicine.id = :medicineId AND b.expired = false AND b.quarantined = false AND b.quantityAvailable > 0 ORDER BY b.expiryDate ASC")
     List<StockBatch> findBatchesForDispensing(@Param("medicineId") Long medicineId);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM StockBatch b WHERE b.medicine.id = :medicineId AND b.expired = false AND b.quarantined = false AND b.quantityAvailable > 0 ORDER BY b.expiryDate ASC")
+    List<StockBatch> findBatchesForDispensingWithLock(@Param("medicineId") Long medicineId);
     
     @Query("SELECT COUNT(b) FROM StockBatch b WHERE b.quantityAvailable > 0")
     long countActiveBatches();

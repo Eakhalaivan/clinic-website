@@ -43,6 +43,20 @@ public class Expense {
     @Column(name = "receipt_url", length = 500)
     private String receiptUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private ExpenseStatus status = ExpenseStatus.PENDING_APPROVAL;
+
+    @Column(name = "approved_by")
+    private Long approvedBy;
+
+    @Column(name = "approved_at")
+    private ZonedDateTime approvedAt;
+
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;

@@ -3,14 +3,29 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { Users, Clock, Bell, ChevronRight, Loader } from 'lucide-react';
 
+import useAuthStore from '../../store/authStore';
+
 const ConsultationQueue = () => {
   const queryClient = useQueryClient();
+  const token = useAuthStore(state => state.token);
 
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['doctor-queue'],
     queryFn: async () => (await axiosPrivate.get('/appointments/queue')).data,
-    refetchInterval: 15000,
+    staleTime: 60000,
   });
+
+  React.useEffect(() => {
+    if (!token) return;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    const evtSource = new EventSource(`${baseUrl.replace('/api', '')}/api/sse/appointments?token=${token}`);
+    
+    evtSource.onmessage = () => {
+      queryClient.invalidateQueries(['doctor-queue']);
+    };
+    
+    return () => evtSource.close();
+  }, [token, queryClient]);
 
   const callNext = useMutation({
     mutationFn: async (appointmentId) => axiosPrivate.patch(`/appointments/${appointmentId}/status?status=IN_PROGRESS`),

@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import viteCompression from 'vite-plugin-compression'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    viteCompression({ algorithm: 'gzip' }),
+    viteCompression({ algorithm: 'brotliCompress' }),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
@@ -30,6 +33,29 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/lucide-react/') || id.includes('node_modules/@headlessui/react/') || id.includes('node_modules/framer-motion/')) {
+            return 'ui-vendor';
+          }
+          if (id.includes('node_modules/recharts/')) {
+            return 'chart-vendor';
+          }
+          if (id.includes('node_modules/@tanstack/react-query/')) {
+            return 'query-vendor';
+          }
+          if (id.includes('node_modules/')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
+  },
   server: {
     port: 5173,
     strictPort: true,

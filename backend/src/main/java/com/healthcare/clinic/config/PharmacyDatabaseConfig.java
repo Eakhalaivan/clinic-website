@@ -11,6 +11,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -23,6 +25,9 @@ import java.util.HashMap;
         transactionManagerRef = "pharmacyTransactionManager"
 )
 public class PharmacyDatabaseConfig {
+
+    @Autowired
+    private Environment env;
 
     @Bean(name = "pharmacyDataSource")
     @ConfigurationProperties(prefix = "spring.datasource.pharmacy")
@@ -40,8 +45,8 @@ public class PharmacyDatabaseConfig {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        properties.put("hibernate.dialect", env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.MySQLDialect"));
+        properties.put("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto", "validate"));
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         em.setJpaPropertyMap(properties);
 

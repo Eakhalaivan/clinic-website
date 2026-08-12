@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "prescriptions_dispensed")
@@ -33,4 +35,17 @@ public class PrescriptionDispensed {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "idempotency_key", unique = true, length = 100)
+    private String idempotencyKey;
+
+    @Column(name = "transaction_reference", length = 100)
+    private String transactionReference;
+
+    @Column(name = "partial_dispense")
+    private boolean partialDispense;
+
+    @OneToMany(mappedBy = "dispensed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PrescriptionDispensedItem> items = new ArrayList<>();
 }

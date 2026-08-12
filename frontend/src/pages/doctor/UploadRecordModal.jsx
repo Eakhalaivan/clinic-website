@@ -13,14 +13,20 @@ const UploadRecordModal = ({ isOpen, onClose, patientId }) => {
   });
 
   React.useEffect(() => {
+    let previousFocus = null;
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose();
     };
     if (isOpen) {
+      previousFocus = document.activeElement;
       window.addEventListener('keydown', handleEsc);
-      // Optional: focus trap logic could go here
     }
-    return () => window.removeEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
+    };
   }, [isOpen, onClose]);
 
   const uploadMutation = useMutation({

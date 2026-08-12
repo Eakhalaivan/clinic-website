@@ -1,6 +1,6 @@
 package com.healthcare.clinic.inventory.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,16 +12,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import org.springframework.cache.annotation.Cacheable;
+
 
 @RestController("pharmacyLookupController")
 @RequestMapping("/api/pharmacy/lookups")
 @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
 public class LookupController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
+    public LookupController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Cacheable(value = "lookups", key = "#lookupType")
     @GetMapping("/{lookupType}")
     public List<Map<String, Object>> getLookupsByType(@PathVariable String lookupType) {
         String query = "SELECT lookup_key, lookup_value FROM system_lookups " +
@@ -29,6 +35,7 @@ public class LookupController {
         return jdbcTemplate.queryForList(query, lookupType);
     }
 
+    @Cacheable(value = "bulkLookups", key = "#types ?: 'all'")
     @GetMapping("/bulk")
     public Map<String, List<Map<String, Object>>> getBulkLookups(@RequestParam(required = false) String types) {
         String query;

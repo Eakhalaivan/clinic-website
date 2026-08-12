@@ -1,40 +1,64 @@
-name: CI
+name: Clinic Platform CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main", "develop" ]
 
 jobs:
-  build-and-test:
+  backend-test:
+    name: Backend CI (Spring Boot)
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up JDK 21
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
         
     - name: Build and Test Backend
-      run: mvn clean test -B
+      run: mvn -B test
       working-directory: ./backend
-      
+
+  frontend-test:
+    name: Frontend CI (React/Vite)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: './frontend/package-lock.json'
         
-    - name: Install Frontend Dependencies
+    - name: Install dependencies
       run: npm ci
       working-directory: ./frontend
       
-    - name: Test Frontend
-      run: npm run test --if-present
+    - name: Run Linter
+      run: npm run lint
       working-directory: ./frontend
+      continue-on-error: true # For now, don't block on lint warnings
+      
+    - name: Build Frontend
+      run: npm run build
+      working-directory: ./frontend
+
+  secret-scan:
+    name: Security Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified

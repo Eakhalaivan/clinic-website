@@ -30,6 +30,10 @@ public class PrescriptionResponse {
     private String medicalHistory;
     private java.time.LocalDateTime followUpDate;
     private String notes;
+    private Long encounterId;
+    private String status;
+    private LocalDateTime signedAt;
+    private String signatureHash;
     private String pharmacyStatus;
     private LocalDateTime dispensedAt;
     private String dispensedBy;

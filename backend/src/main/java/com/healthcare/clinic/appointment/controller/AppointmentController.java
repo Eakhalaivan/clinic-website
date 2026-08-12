@@ -88,6 +88,7 @@ public class AppointmentController {
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<Void> cancelAppointment(@PathVariable Long id, @RequestParam String reason) {
+        assertCanAccessAppointment(id);
         appointmentService.cancelAppointment(id, reason);
         return ResponseEntity.ok().build();
     }
@@ -95,6 +96,7 @@ public class AppointmentController {
     @PatchMapping("/{id}/reschedule")
     @PreAuthorize("hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<Appointment> rescheduleAppointment(@PathVariable Long id, @RequestParam Long newSlotId) {
+        assertCanAccessAppointment(id);
         Appointment newAppt = appointmentService.rescheduleAppointment(id, newSlotId);
         return ResponseEntity.ok(newAppt);
     }
@@ -108,6 +110,26 @@ public class AppointmentController {
         // or we can fetch by doctor if it's a doctor. For simplicity and as required, returning today's queue.
         // I will need to add `getAllTodayAppointments()` to `AppointmentService`. Let's add it in the next step.
         return ResponseEntity.ok(appointmentService.getAllTodayAppointments());
+    }
+
+    private void assertCanAccessAppointment(Long id) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean hasPrivilegedRole = auth.getAuthorities().stream().anyMatch(a -> 
+            a.getAuthority().equals("ROLE_ADMIN") || 
+            a.getAuthority().equals("ROLE_RECEPTION") ||
+            a.getAuthority().equals("ROLE_DOCTOR") ||
+            a.getAuthority().equals("ROLE_NURSE") ||
+            a.getAuthority().equals("ROLE_SUPER_ADMIN")
+        );
+        if (hasPrivilegedRole) {
+            return;
+        }
+        
+        Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        if (currentUserId == null || (appointment.getPatient() != null && !currentUserId.equals(appointment.getPatient().getUserId()))) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Not authorized to access this appointment");
+        }
     }
 }
 

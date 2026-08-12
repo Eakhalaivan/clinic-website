@@ -12,15 +12,15 @@ import { fadeIn } from '../../components/ui/motion';
 
 const PatientRegistration = () => {
   const [patient, setPatient] = useState({
-    name: '', age: '', gender: 'Male', phone: '', email: '',
-    address: '', bloodGroup: 'O+', emergencyContact: ''
+    firstName: '', lastName: '', age: '', gender: 'Male', phone: '', email: '',
+    address: '', bloodGroup: 'O+', emergencyContact: '', reasonForVisit: ''
   });
 
   const registerPatient = useMutation({
-    mutationFn: async () => axiosPrivate.post('/patients/profile', patient),
-    onSuccess: () => {
-      toast.success('Patient registered successfully!');
-      setPatient({ name: '', age: '', gender: 'Male', phone: '', email: '', address: '', bloodGroup: 'O+', emergencyContact: '' });
+    mutationFn: async () => axiosPrivate.post('/reception/patients/register', patient),
+    onSuccess: (data) => {
+      toast.success(`Patient registered successfully! OP Number: ${data.data.opNumber}`);
+      setPatient({ firstName: '', lastName: '', age: '', gender: 'Male', phone: '', email: '', address: '', bloodGroup: 'O+', emergencyContact: '', reasonForVisit: '' });
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to register patient');
@@ -29,8 +29,8 @@ const PatientRegistration = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!patient.name || !patient.phone) {
-      toast.error('Name and Phone are required fields');
+    if (!patient.firstName || !patient.phone) {
+      toast.error('First Name and Phone are required fields');
       return;
     }
     registerPatient.mutate();
@@ -62,15 +62,26 @@ const PatientRegistration = () => {
         <Card.Body>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Full Name" required id="name">
+              <FormField label="First Name" required id="firstName">
                 <input 
-                  id="name"
+                  id="firstName"
                   type="text"
-                  value={patient.name} 
-                  onChange={e => setPatient({ ...patient, name: e.target.value })} 
-                  placeholder="e.g. Ramesh Kumar" 
+                  value={patient.firstName} 
+                  onChange={e => setPatient({ ...patient, firstName: e.target.value })} 
+                  placeholder="e.g. Ramesh" 
                   className="input-field" 
                   required
+                />
+              </FormField>
+
+              <FormField label="Last Name" id="lastName">
+                <input 
+                  id="lastName"
+                  type="text"
+                  value={patient.lastName} 
+                  onChange={e => setPatient({ ...patient, lastName: e.target.value })} 
+                  placeholder="e.g. Kumar" 
+                  className="input-field" 
                 />
               </FormField>
 
@@ -131,6 +142,18 @@ const PatientRegistration = () => {
                   onChange={e => setPatient({ ...patient, emergencyContact: e.target.value })} 
                   placeholder="Emergency Phone Number"
                   className="input-field" 
+                />
+              </FormField>
+
+              <FormField label="Reason for Visit" required id="reasonForVisit">
+                <input 
+                  id="reasonForVisit"
+                  type="text"
+                  value={patient.reasonForVisit} 
+                  onChange={e => setPatient({ ...patient, reasonForVisit: e.target.value })} 
+                  placeholder="e.g. Fever and Cough"
+                  className="input-field" 
+                  required
                 />
               </FormField>
             </div>

@@ -9,7 +9,6 @@ import com.healthcare.clinic.doctor.entity.Prescription;
 import com.healthcare.clinic.doctor.entity.PrescriptionItem;
 import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.security.SecurityUtils;
-import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem;
 import com.healthcare.clinic.clinicaldecision.service.CdsSafetyCheckService;
 import com.healthcare.clinic.laboratory.entity.LabTestRequest;
 import com.healthcare.clinic.laboratory.repository.LabTestCatalogRepository;
@@ -18,6 +17,8 @@ import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
 import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
 import com.healthcare.clinic.branch.repository.BranchRepository;
+import com.healthcare.clinic.appointment.repository.AppointmentRepository;
+import com.healthcare.clinic.appointment.entity.Appointment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -49,6 +50,7 @@ public class PrescriptionService {
     private final LabTestCatalogRepository labTestCatalogRepository;
     private final LabTestRequestRepository labTestRequestRepository;
     private final com.healthcare.clinic.nursing.repository.MedicationAdministrationRecordRepository marRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Transactional(readOnly = true)
     public List<PrescriptionResponse> getPrescriptionsForPatient(Long patientId) {
@@ -56,6 +58,11 @@ public class PrescriptionService {
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Prescription> getPrescriptionsByEncounter(Long encounterId) {
+        return prescriptionRepository.findByEncounterId(encounterId);
     }
 
     @Transactional(readOnly = true)
@@ -425,6 +432,10 @@ public class PrescriptionService {
                 .medicalHistory(prescription.getMedicalHistory())
                 .followUpDate(prescription.getFollowUpDate())
                 .notes(prescription.getNotes())
+                .encounterId(prescription.getEncounterId())
+                .status(prescription.getStatus())
+                .signedAt(prescription.getSignedAt())
+                .signatureHash(prescription.getSignatureHash())
                 .pharmacyStatus(prescription.getPharmacyStatus())
                 .dispensedAt(prescription.getDispensedAt())
                 .dispensedBy(prescription.getDispensedBy())
@@ -448,6 +459,7 @@ public class PrescriptionService {
             throw new RuntimeException("Cannot void prescription after 15 minutes");
         }
 
+        prescription.setStatus("Void");
         prescription.setVoidedAt(LocalDateTime.now());
         prescription.setVoidReason(reason);
         prescription.setPharmacyStatus("VOIDED");
@@ -488,18 +500,27 @@ public class PrescriptionService {
             com.lowagie.text.Font normalFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA, 10);
             com.lowagie.text.Font rxFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.TIMES_BOLDITALIC, 24);
 
-            String clinicName = "City General Hospital";
-            String clinicAddress = "123 Medical Center Drive, Healthcare City, HC 12345";
-            String clinicPhone = "+1 (555) 123-4567";
-
             com.healthcare.clinic.identity.entity.User doctorUser = userRepository.findById(prescription.getDoctorId()).orElse(null);
             String doctorName = doctorUser != null ? "Dr. " + doctorUser.getFirstName() + " " + doctorUser.getLastName() : "Dr. Unknown";
-            String doctorQualifications = "";
-            String registrationNumber = "";
-            String doctorSpecialty = "General Practitioner";
+            
+            com.healthcare.clinic.doctor.entity.DoctorProfile doctorProfile = doctorProfileRepository.findByUserId(prescription.getDoctorId()).orElse(null);
+            String doctorSpecialty = doctorProfile != null && doctorProfile.getSpecialty() != null ? doctorProfile.getSpecialty() : "General Practitioner";
+            String doctorQualifications = doctorProfile != null && doctorProfile.getQualifications() != null ? doctorProfile.getQualifications() : "";
+            String registrationNumber = doctorProfile != null && doctorProfile.getRegistrationNumber() != null ? doctorProfile.getRegistrationNumber() : "";
 
-            // Assuming doctorProfileRepository is injected or we fetch it if we had it, but for now we'll just use dummy or fetch from DB manually if needed.
-            // Since we didn't inject it, we'll try to fetch if we can, else just use the user.
+            com.healthcare.clinic.branch.entity.Branch branch = null;
+            if (prescription.getAppointmentId() != null) {
+                Appointment appointment = appointmentRepository.findById(prescription.getAppointmentId()).orElse(null);
+                if (appointment != null && appointment.getBranchId() != null) {
+                    branch = branchRepository.findById(appointment.getBranchId()).orElse(null);
+                }
+            } else if (doctorProfile != null && doctorProfile.getBranchId() != null) {
+                branch = branchRepository.findById(doctorProfile.getBranchId()).orElse(null);
+            }
+
+            String clinicName = branch != null && branch.getName() != null ? branch.getName() : "";
+            String clinicAddress = branch != null && branch.getAddress() != null ? branch.getAddress() : "";
+            String clinicPhone = branch != null && branch.getPhoneNumber() != null ? branch.getPhoneNumber() : "";
             
             com.healthcare.clinic.identity.entity.User patientUser = userRepository.findById(prescription.getPatientId()).orElse(null);
             String patientName = patientUser != null ? patientUser.getFirstName() + " " + patientUser.getLastName() : "Unknown Patient";
@@ -595,5 +616,31 @@ public class PrescriptionService {
             throw new RuntimeException("Error generating PDF", e);
         }
     }
+
+    @Transactional
+    public PrescriptionResponse signPrescription(Long id) {
+        Prescription prescription = prescriptionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Prescription not found with id: " + id));
+
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (!prescription.getDoctorId().equals(currentUserId)) {
+            throw new RuntimeException("Only the prescribing doctor can sign this prescription.");
+        }
+
+        if (!"Draft".equals(prescription.getStatus())) {
+            throw new RuntimeException("Only Draft prescriptions can be signed.");
+        }
+
+        prescription.setStatus("Signed");
+        prescription.setSignedAt(LocalDateTime.now());
+        
+        // Simple mock signature hash for demonstration
+        String dataToSign = prescription.getId() + "-" + prescription.getPatientId() + "-" + prescription.getSignedAt().toString();
+        prescription.setSignatureHash(java.util.Base64.getEncoder().encodeToString(dataToSign.getBytes()));
+
+        return mapToResponse(prescriptionRepository.save(prescription));
+    }
+
+
 
 }

@@ -33,7 +33,7 @@ CREATE TABLE stock_items (
     unit                VARCHAR(30) NOT NULL DEFAULT 'PCS', -- PCS, BOX, BOTTLE, ML, MG, etc.
     quantity            INT NOT NULL DEFAULT 0,
     reorder_level       INT NOT NULL DEFAULT 10,
-    medicine_batch_id   BIGINT REFERENCES medicine_batches(id) ON DELETE SET NULL,
+    medicine_batch_id   BIGINT,
     last_updated        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

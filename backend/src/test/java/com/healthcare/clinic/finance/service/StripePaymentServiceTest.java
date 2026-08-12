@@ -48,7 +48,7 @@ public class StripePaymentServiceTest {
         invoice.setId(1L);
         invoice.setInvoiceNumber("INV-1001");
         invoice.setTotalAmount(new BigDecimal("150.00"));
-        invoice.setStatus(InvoiceStatus.PENDING);
+        invoice.setStatus(InvoiceStatus.ISSUED);
 
         when(invoiceRepository.findById(1L)).thenReturn(Optional.of(invoice));
 

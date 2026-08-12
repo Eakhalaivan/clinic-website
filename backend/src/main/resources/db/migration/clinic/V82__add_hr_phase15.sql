@@ -1,0 +1,45 @@
+CREATE TABLE IF NOT EXISTS salary_structures (
+    id BIGSERIAL PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    basic_salary DECIMAL(12,2) NOT NULL,
+    effective_from TIMESTAMP WITH TIME ZONE NOT NULL,
+    effective_to TIMESTAMP WITH TIME ZONE,
+    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS salary_components (
+    id BIGSERIAL PRIMARY KEY,
+    salary_structure_id BIGINT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    is_taxable BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS payroll_runs (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    payment_date DATE NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS payslips (
+    id BIGSERIAL PRIMARY KEY,
+    payroll_run_id BIGINT NOT NULL,
+    employee_id BIGINT NOT NULL,
+    basic_pay DECIMAL(12,2) NOT NULL,
+    total_allowances DECIMAL(12,2) NOT NULL DEFAULT 0,
+    total_deductions DECIMAL(12,2) NOT NULL DEFAULT 0,
+    net_pay DECIMAL(12,2) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
+    breakdown JSONB,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

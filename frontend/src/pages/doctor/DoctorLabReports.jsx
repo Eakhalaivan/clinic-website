@@ -1,110 +1,70 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, Plus, Eye, Download, MoreVertical, ArrowUp, Upload, FileText, Activity, Droplet, Brain, Scan } from 'lucide-react';
+import { Search, ChevronDown, Eye, Download, MoreVertical, ArrowUp, Upload, Activity, Droplet, Brain, Scan } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { axiosPrivate } from '../../api/axios';
+import { format } from 'date-fns';
 
 const DoctorLabReports = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('All Reports');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const labReports = [
-    {
-      id: 'LAB-0001',
-      patient: { name: 'Robert Williams', details: '45 Years, Male', id: 1 },
-      test: { name: 'Complete Blood Count (CBC)', type: 'Blood Test', icon: <Droplet size={14} />, iconColor: 'text-red-500 bg-red-50' },
-      reportDate: '21 May 2024',
-      reportTime: '09:00 AM',
-      testDate: '20 May 2024',
-      lab: { name: 'Aurelian Diagnostic Center', location: 'New York, USA' },
-      status: 'Normal',
-      statusColor: 'green'
-    },
-    {
-      id: 'LAB-0002',
-      patient: { name: 'Emily Davis', details: '36 Years, Female', id: 2 },
-      test: { name: 'Thyroid Profile (T3, T4, TSH)', type: 'Blood Test', icon: <Activity size={14} />, iconColor: 'text-purple-600 bg-purple-50' },
-      reportDate: '20 May 2024',
-      reportTime: '08:45 AM',
-      testDate: '19 May 2024',
-      lab: { name: 'City Medical Labs', location: 'New York, USA' },
-      status: 'Abnormal',
-      statusColor: 'orange'
-    },
-    {
-      id: 'LAB-0003',
-      patient: { name: 'Michael Johnson', details: '50 Years, Male', id: 3 },
-      test: { name: 'Chest X-Ray', type: 'Imaging', icon: <Scan size={14} />, iconColor: 'text-blue-500 bg-blue-50' },
-      reportDate: '19 May 2024',
-      reportTime: '11:30 AM',
-      testDate: '18 May 2024',
-      lab: { name: 'Aurelian Imaging Center', location: 'New York, USA' },
-      status: 'Normal',
-      statusColor: 'green'
-    },
-    {
-      id: 'LAB-0004',
-      patient: { name: 'Sarah Wilson', details: '34 Years, Female', id: 4 },
-      test: { name: 'Lipid Profile', type: 'Blood Test', icon: <Activity size={14} />, iconColor: 'text-orange-500 bg-orange-50' },
-      reportDate: '18 May 2024',
-      reportTime: '02:30 PM',
-      testDate: '17 May 2024',
-      lab: { name: 'Health Plus Labs', location: 'New York, USA' },
-      status: 'Abnormal',
-      statusColor: 'orange'
-    },
-    {
-      id: 'LAB-0005',
-      patient: { name: 'David Brown', details: '47 Years, Male', id: 5 },
-      test: { name: 'MRI Brain', type: 'Imaging', icon: <Brain size={14} />, iconColor: 'text-blue-500 bg-blue-50' },
-      reportDate: '17 May 2024',
-      reportTime: '03:15 PM',
-      testDate: '16 May 2024',
-      lab: { name: 'Advanced Imaging Center', location: 'New York, USA' },
-      status: 'Normal',
-      statusColor: 'green'
-    },
-    {
-      id: 'LAB-0006',
-      patient: { name: 'Linda Taylor', details: '40 Years, Female', id: 6 },
-      test: { name: 'Vitamin D Test', type: 'Blood Test', icon: <Activity size={14} />, iconColor: 'text-orange-500 bg-orange-50' },
-      reportDate: '16 May 2024',
-      reportTime: '10:00 AM',
-      testDate: '15 May 2024',
-      lab: { name: 'City Medical Labs', location: 'New York, USA' },
-      status: 'Normal',
-      statusColor: 'green'
-    },
-    {
-      id: 'LAB-0007',
-      patient: { name: 'Daniel Martinez', details: '41 Years, Male', id: 7 },
-      test: { name: 'Ultrasound Abdomen', type: 'Imaging', icon: <Scan size={14} />, iconColor: 'text-blue-500 bg-blue-50' },
-      reportDate: '15 May 2024',
-      reportTime: '01:10 PM',
-      testDate: '14 May 2024',
-      lab: { name: 'Aurelian Imaging Center', location: 'New York, USA' },
-      status: 'Normal',
-      statusColor: 'green'
-    },
-    {
-      id: 'LAB-0008',
-      patient: { name: 'Patricia Harris', details: '38 Years, Female', id: 8 },
-      test: { name: 'HbA1c Test', type: 'Blood Test', icon: <Activity size={14} />, iconColor: 'text-red-500 bg-red-50' },
-      reportDate: '14 May 2024',
-      reportTime: '09:05 AM',
-      testDate: '13 May 2024',
-      lab: { name: 'Health Plus Labs', location: 'New York, USA' },
-      status: 'Abnormal',
-      statusColor: 'orange'
+  const { data: myRequests, isLoading, error } = useQuery({
+    queryKey: ['doctorLabRequests'],
+    queryFn: async () => {
+      const response = await axiosPrivate.get('/lab/doctor/my-requests');
+      return response.data;
     }
-  ];
+  });
 
-  const getStatusBadgeClasses = (color) => {
-    switch (color) {
-      case 'green': return 'bg-[#F0FDF4] text-[#16A34A]';
-      case 'orange': return 'bg-[#FFF7ED] text-[#EA580C]';
-      case 'blue': return 'bg-[#EFF6FF] text-[#2563EB]';
+  const handleDownloadPdf = async (id) => {
+    try {
+      const response = await axiosPrivate.get(`/lab/requests/${id}/report/pdf`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Lab_Report_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Failed to download PDF', err);
+      alert('Failed to download PDF report. It may not be ready yet.');
+    }
+  };
+
+  const getStatusBadgeClasses = (status) => {
+    switch (status) {
+      case 'RELEASED': return 'bg-[#F0FDF4] text-[#16A34A]';
+      case 'VERIFIED': return 'bg-[#EFF6FF] text-[#2563EB]';
+      case 'RESULT_ENTERED': return 'bg-[#FFF7ED] text-[#EA580C]';
+      case 'PROCESSING': return 'bg-yellow-100 text-yellow-800';
+      case 'SAMPLE_COLLECTED': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  const getIconForTest = (testName) => {
+    if (!testName) return <Activity size={14} />;
+    const name = testName.toLowerCase();
+    if (name.includes('blood') || name.includes('cbc') || name.includes('lipid')) return <Droplet size={14} className="text-red-500" />;
+    if (name.includes('x-ray') || name.includes('mri') || name.includes('ultrasound')) return <Scan size={14} className="text-blue-500" />;
+    if (name.includes('brain')) return <Brain size={14} className="text-purple-500" />;
+    return <Activity size={14} className="text-orange-500" />;
+  };
+
+  const filteredRequests = myRequests?.filter(req => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return req.patient?.firstName?.toLowerCase().includes(q) || 
+             req.patient?.lastName?.toLowerCase().includes(q) ||
+             req.testCatalog?.testName?.toLowerCase().includes(q);
+    }
+    return true;
+  }) || [];
 
   const tabs = ['All Reports', 'Blood Tests', 'Imaging', 'Pathology', 'Microbiology', 'Other Tests'];
 
@@ -149,6 +109,8 @@ const DoctorLabReports = () => {
                 type="text" 
                 placeholder="Search lab reports..." 
                 className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-700 focus:outline-none focus:border-[#5B21B6] w-[220px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             
@@ -181,66 +143,75 @@ const DoctorLabReports = () => {
                 </tr>
               </thead>
               <tbody>
-                {labReports.map((report, idx) => (
-                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors bg-white">
-                    <td className="py-4 px-6">
-                      <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.id}</p>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={`https://i.pravatar.cc/150?u=${report.patient.id}`} 
-                          alt={report.patient.name}
-                          className="w-8 h-8 rounded-full object-cover shadow-sm"
-                        />
-                        <div>
-                          <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.patient.name}</p>
-                          <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.patient.details}</p>
+                {isLoading ? (
+                  <tr><td colSpan="8" className="text-center py-8 text-slate-500">Loading reports...</td></tr>
+                ) : filteredRequests.length === 0 ? (
+                  <tr><td colSpan="8" className="text-center py-8 text-slate-500">No lab reports found.</td></tr>
+                ) : (
+                  filteredRequests.map((report) => (
+                    <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors bg-white">
+                      <td className="py-4 px-6">
+                        <p className="text-[13px] font-bold text-slate-800 leading-tight">REQ-{report.id}</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <img loading="lazy" 
+                            src={`https://i.pravatar.cc/150?u=${report.patient?.id || 1}`} 
+                            alt={report.patient?.firstName}
+                            className="w-8 h-8 rounded-full object-cover shadow-sm"
+                          />
+                          <div>
+                            <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.patient?.firstName} {report.patient?.lastName}</p>
+                            <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.patient?.gender}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${report.test.iconColor}`}>
-                           {report.test.icon}
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-slate-50`}>
+                             {getIconForTest(report.testCatalog?.testName)}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.testCatalog?.testName || 'Unknown Test'}</p>
+                            <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.testCatalog?.testCode}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.test.name}</p>
-                          <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.test.type}</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <p className="text-[13px] font-bold text-slate-800 leading-tight">
+                          {report.sampleCollectedAt ? format(new Date(report.sampleCollectedAt), 'dd MMM yyyy') : '-'}
+                        </p>
+                      </td>
+                      <td className="py-4 px-6 text-[13px] font-bold text-slate-800">
+                        {report.requestedAt ? format(new Date(report.requestedAt), 'dd MMM yyyy') : '-'}
+                      </td>
+                      <td className="py-4 px-6">
+                        <p className="text-[13px] font-bold text-slate-800 leading-tight">In-house Lab</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md ${getStatusBadgeClasses(report.status)}`}>
+                          {report.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center justify-center gap-3 text-[#5B21B6]">
+                          <button className="w-7 h-7 flex items-center justify-center rounded bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                            <Eye size={14} strokeWidth={2.5} />
+                          </button>
+                          {(report.status === 'VERIFIED' || report.status === 'RELEASED') && (
+                            <button 
+                              onClick={() => handleDownloadPdf(report.id)}
+                              className="w-7 h-7 flex items-center justify-center rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                              title="Download PDF"
+                            >
+                              <Download size={14} strokeWidth={2.5} />
+                            </button>
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.reportDate}</p>
-                      <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.reportTime}</p>
-                    </td>
-                    <td className="py-4 px-6 text-[13px] font-bold text-slate-800">
-                      {report.testDate}
-                    </td>
-                    <td className="py-4 px-6">
-                      <p className="text-[13px] font-bold text-slate-800 leading-tight">{report.lab.name}</p>
-                      <p className="text-[11px] font-medium text-slate-500 mt-0.5">{report.lab.location}</p>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md ${getStatusBadgeClasses(report.statusColor)}`}>
-                        {report.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center justify-center gap-3 text-[#5B21B6]">
-                        <button className="w-7 h-7 flex items-center justify-center rounded bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                          <Eye size={14} strokeWidth={2.5} />
-                        </button>
-                        <button className="w-7 h-7 flex items-center justify-center rounded bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                          <Download size={14} strokeWidth={2.5} />
-                        </button>
-                        <button className="text-slate-400 hover:text-slate-600">
-                          <MoreVertical size={16} strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
             
@@ -271,27 +242,23 @@ const DoctorLabReports = () => {
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-4 flex flex-col justify-center">
-                  <span className="text-[24px] font-bold text-[#16A34A] leading-none mb-2">24</span>
+                  <span className="text-[24px] font-bold text-[#16A34A] leading-none mb-2">{myRequests?.length || 0}</span>
                   <span className="text-[11px] font-bold text-slate-800 mb-1">Total Reports</span>
-                  <span className="text-[9px] font-bold text-[#16A34A] flex items-center gap-0.5"><ArrowUp size={10} strokeWidth={3}/> 12% from last month</span>
                 </div>
                 
                 <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-4 flex flex-col justify-center">
-                  <span className="text-[24px] font-bold text-[#16A34A] leading-none mb-2">18</span>
-                  <span className="text-[11px] font-bold text-[#15803D] mb-1">Normal</span>
-                  <span className="text-[9px] font-semibold text-slate-500">(75%)</span>
+                  <span className="text-[24px] font-bold text-[#16A34A] leading-none mb-2">{myRequests?.filter(r => r.status === 'RELEASED').length || 0}</span>
+                  <span className="text-[11px] font-bold text-[#15803D] mb-1">Released</span>
                 </div>
                 
                 <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-4 flex flex-col justify-center">
-                  <span className="text-[18px] font-bold text-[#EA580C] leading-none mb-2">4</span>
-                  <span className="text-[11px] font-bold text-[#C2410C] mb-1">Abnormal</span>
-                  <span className="text-[9px] font-semibold text-slate-500">(16.7%)</span>
+                  <span className="text-[18px] font-bold text-[#EA580C] leading-none mb-2">{myRequests?.filter(r => r.status === 'VERIFIED').length || 0}</span>
+                  <span className="text-[11px] font-bold text-[#C2410C] mb-1">Verified</span>
                 </div>
                 
                 <div className="bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-4 flex flex-col justify-center">
-                  <span className="text-[18px] font-bold text-[#2563EB] leading-none mb-2">2</span>
+                  <span className="text-[18px] font-bold text-[#2563EB] leading-none mb-2">{myRequests?.filter(r => !['RELEASED', 'VERIFIED'].includes(r.status)).length || 0}</span>
                   <span className="text-[11px] font-bold text-[#1D4ED8] mb-1">Pending</span>
-                  <span className="text-[9px] font-semibold text-slate-500">(8.3%)</span>
                 </div>
               </div>
             </div>
@@ -306,27 +273,7 @@ const DoctorLabReports = () => {
               </div>
 
               <div className="flex flex-col gap-4">
-                {[
-                  { name: 'Blood Tests', icon: <Droplet size={14} />, count: '12', pct: '50%', fill: 'w-[50%]', iconColor: 'text-red-500' },
-                  { name: 'Imaging', icon: <Scan size={14} />, count: '7', pct: '29.2%', fill: 'w-[29.2%]', iconColor: 'text-blue-500' },
-                  { name: 'Pathology', icon: <Activity size={14} />, count: '3', pct: '12.5%', fill: 'w-[12.5%]', iconColor: 'text-orange-500' },
-                  { name: 'Other Tests', icon: <FileText size={14} />, count: '2', pct: '8.3%', fill: 'w-[8.3%]', iconColor: 'text-green-500' }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded bg-slate-50 flex items-center justify-center ${item.iconColor}`}>
-                           {item.icon}
-                        </div>
-                        <span>{item.name}</span>
-                      </div>
-                      <span className="text-slate-500">{item.count} ({item.pct})</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 ml-8 max-w-[calc(100%-2rem)]">
-                      <div className={`bg-[#5B21B6] h-1.5 rounded-full ${item.fill}`}></div>
-                    </div>
-                  </div>
-                ))}
+                <div className="text-center py-4 text-sm text-slate-500 font-medium">Data unavailable</div>
               </div>
             </div>
 
@@ -337,20 +284,8 @@ const DoctorLabReports = () => {
                 <button className="text-[11px] font-bold text-[#5B21B6] hover:underline">View All</button>
               </div>
 
-              <div className="flex items-center justify-between p-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded bg-red-50 text-red-600 flex items-center justify-center font-bold text-[10px]">
-                    PDF
-                  </div>
-                  <div>
-                    <p className="text-[12px] font-bold text-slate-800">Robert Williams</p>
-                    <p className="text-[10px] font-medium text-slate-800">CBC Report</p>
-                    <p className="text-[9px] font-medium text-slate-400">21 May 2024, 09:00 AM</p>
-                  </div>
-                </div>
-                <button className="w-8 h-8 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50">
-                  <Download size={14} />
-                </button>
+              <div className="p-3 text-center text-sm text-slate-500 font-medium">
+                No recent uploads
               </div>
             </div>
             

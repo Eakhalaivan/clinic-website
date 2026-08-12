@@ -1,28 +1,75 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { motion } from 'framer-motion';
-import { FlaskConical, Download, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { FlaskConical, Download, CheckCircle2, Clock, AlertCircle, Calendar } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
+import Modal from '../../components/ui/Modal';
+import Button from '../../components/ui/Button';
 
 const statusConfig = {
   RELEASED:        { variant: 'success', label: 'Released',         icon: CheckCircle2 },
+  VERIFIED:        { variant: 'success', label: 'Verified',         icon: CheckCircle2 },
   RESULT_ENTERED:  { variant: 'info',    label: 'Result Entered',   icon: CheckCircle2 },
-  IN_PROGRESS:     { variant: 'warning', label: 'In Progress',      icon: Clock },
+  PROCESSING:      { variant: 'warning', label: 'Processing',       icon: Clock },
   SAMPLE_COLLECTED:{ variant: 'warning', label: 'Sample Collected', icon: Clock },
   REQUESTED:       { variant: 'neutral', label: 'Requested',        icon: Clock },
 };
 
 const LabReports = () => {
+  const queryClient = useQueryClient();
+  const [selectedReportId, setSelectedReportId] = useState(null);
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data: reports = [], isLoading, isError } = useQuery({
     queryKey: ['patient-lab-reports'],
     queryFn: async () => (await axiosPrivate.get('/lab/patient/lab-reports')).data,
     retry: 1,
   });
+
+  const bookMutation = useMutation({
+    mutationFn: async (id) => {
+      const formattedDate = new Date(scheduledAt).toISOString();
+      return axiosPrivate.post(`/lab/patient/requests/${id}/book`, { scheduledAt: formattedDate });
+    },
+    onSuccess: () => {
+      toast.success('Appointment scheduled successfully');
+      queryClient.invalidateQueries(['patient-lab-reports']);
+      setIsModalOpen(false);
+      setScheduledAt('');
+    },
+    onError: (err) => {
+      toast.error('Failed to schedule appointment');
+    }
+  });
+
+  const openBookModal = (id) => {
+    setSelectedReportId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDownloadPdf = async (id) => {
+    try {
+      const response = await axiosPrivate.get(`/lab/requests/${id}/report/pdf`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Lab_Report_${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      alert('Failed to download PDF report. It may not be ready yet.');
+    }
+  };
 
   return (
     <motion.div
@@ -110,16 +157,32 @@ const LabReports = () => {
                       <Badge variant={cfg.variant} icon={cfg.icon}>
                         {cfg.label}
                       </Badge>
-                      {(r.status === 'RELEASED' || r.status === 'RESULT_ENTERED') && (
+                      {r.status === 'RELEASED' && (
                         <button
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
                             bg-[var(--color-navy-800)] text-white rounded-sm hover:bg-[var(--color-navy-900)]
                             transition-colors focus-visible:outline-none"
-                          onClick={() => alert('PDF download coming soon.')}
+                          onClick={() => handleDownloadPdf(r.id)}
                         >
                           <Download className="w-3.5 h-3.5" />
                           Download PDF
                         </button>
+                      )}
+                      {r.status === 'REQUESTED' && (
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
+                            bg-indigo-600 text-white rounded-sm hover:bg-indigo-700
+                            transition-colors focus-visible:outline-none"
+                          onClick={() => openBookModal(r.id)}
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          Schedule
+                        </button>
+                      )}
+                      {r.status === 'SCHEDULED' && (
+                        <div className="text-xs text-indigo-700 font-medium bg-indigo-50 px-2 py-1 rounded">
+                          Scheduled: {new Date(r.scheduledAt).toLocaleString()}
+                        </div>
                       )}
                     </div>
                   </Card.Body>
@@ -129,6 +192,35 @@ const LabReports = () => {
           })}
         </motion.div>
       )}
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Schedule Lab Appointment">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Date and Time
+            </label>
+            <input
+              type="datetime-local"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+            />
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => bookMutation.mutate(selectedReportId)}
+              isLoading={bookMutation.isPending}
+              disabled={!scheduledAt}
+            >
+              Confirm Booking
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.div>
   );
 };

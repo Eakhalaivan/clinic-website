@@ -69,7 +69,7 @@ const formatRelativeTime = (dateStr) => {
 };
 
 const DoctorDashboard = () => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -98,6 +98,7 @@ const DoctorDashboard = () => {
       },
       enabled: !!user?.id,
       refetchInterval: 30000,
+      staleTime: 60000,
   });
 
   // ─── API: All doctor appointments (used for New Appointments - future ones) ───
@@ -123,8 +124,8 @@ const DoctorDashboard = () => {
 
   // Subscribe to real-time appointment updates
   useEffect(() => {
+      if (!token) return;
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-      const token = localStorage.getItem('access_token');
       const evtSource = new EventSource(`${baseUrl.replace('/api', '')}/api/sse/appointments?token=${token}`);
       
       evtSource.addEventListener('appointment-booked', (event) => {
@@ -167,7 +168,7 @@ const DoctorDashboard = () => {
       });
 
       return () => evtSource.close();
-  }, [user?.id, queryClient]);
+  }, [user?.id, queryClient, token]);
 
   const handlePatientClick = (id) => {
     navigate(`/doctor/patients/${id}`); return;
@@ -344,47 +345,6 @@ const DoctorDashboard = () => {
         </section>
         {/* END: QuickActionsBar */}
 
-        {/* BEGIN: NavigationTabs */}
-        <nav className="nav-tabs flex border-b border-slate-200 bg-white rounded-xl px-2 shadow-xs">
-          <button onClick={() => setSearchParams(new URLSearchParams())} className="px-4 py-2 flex items-center gap-1.5 text-xs font-bold border-b-2 border-indigo-600 text-indigo-600">
-            <LayoutGrid className="w-4 h-4" />
-            Dashboard
-          </button>
-          <button onClick={() => navigate('/doctor/appointments/today')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <Clock className="w-4 h-4" />
-            Appointments
-          </button>
-          <button onClick={() => setSearchParams({ panel: 'patients' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <Users className="w-4 h-4" />
-            Patients
-          </button>
-          <button onClick={() => setSearchParams({ panel: 'calendar' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <CalendarIcon className="w-4 h-4" />
-            Calendar
-          </button>
-          <button onClick={() => navigate('/doctor/prescriptions')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <FileText className="w-4 h-4" />
-            Prescriptions
-          </button>
-          <button onClick={() => setSearchParams({ panel: 'follow-ups' })} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <Heart className="w-4 h-4" />
-            Follow-ups
-          </button>
-          <button onClick={() => navigate('/doctor/lab-reports')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <FlaskConical className="w-4 h-4" />
-            Lab Reports
-          </button>
-          <button onClick={() => navigate('/doctor/medical-certificate')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
-            <FileText className="w-4 h-4" />
-            Medical Certificate
-          </button>
-          <button onClick={() => navigate('/doctor/schedule-settings')} className="px-4 py-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition ml-auto">
-            <SettingsIcon className="w-4 h-4" />
-            Settings
-          </button>
-        </nav>
-        {/* END: NavigationTabs */}
-
         {/* Main Content Grid */}
         <div className="main-grid">
           {/* BEGIN: LeftColumn */}
@@ -406,8 +366,8 @@ const DoctorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="text-slate-700 font-medium">
-                    {opPatients.map((row, i) => (
-                      <tr key={i} className="border-t border-slate-50">
+                    {opPatients.map((row) => (
+                      <tr key={row.id || row.token} className="border-t border-slate-50">
                         <td className="py-2 font-semibold">{row.token}</td>
                         <td className="py-2 font-semibold">{row.name}</td>
                         <td className="py-2 text-slate-500">{row.time}</td>
@@ -548,8 +508,8 @@ const DoctorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="text-slate-700 font-medium">
-                    {newAppointmentsList.map((apt, i) => (
-                      <tr key={i}>
+                    {newAppointmentsList.map((apt) => (
+                      <tr key={apt.token}>
                         <td className="py-2">{apt.opNo}</td>
                         <td className="py-2">{apt.token}</td>
                         <td className="py-2 font-bold">{apt.name}</td>

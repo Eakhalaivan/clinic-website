@@ -35,12 +35,9 @@ public class PatientProfile {
     @Column(length = 5)
     private String bloodGroup;
 
-    @jakarta.validation.constraints.NotBlank
     @Column(length = 100)
     private String emergencyContactName;
 
-    @jakarta.validation.constraints.NotBlank
-    @jakarta.validation.constraints.Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Invalid phone number format")
     @Column(length = 20)
     private String emergencyContactPhone;
 
@@ -75,8 +72,26 @@ public class PatientProfile {
     @Builder.Default
     private String currentMedications = "[]";
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "documents")
+    @Builder.Default
+    private String documents = "[]";
+
     @Column(nullable = false)
     private Long branchId;
+
+    @Column(name = "op_number", length = 50, unique = true)
+    private String opNumber;
+
+    @Column(name = "is_duplicate_of")
+    private Long isDuplicateOf;
+
+    @Column(name = "merge_reason")
+    private String mergeReason;
+
+    @Column(name = "preferred_communication", length = 20)
+    @Builder.Default
+    private String preferredCommunication = "EMAIL";
 
     @CreatedDate
     @Column(updatable = false)

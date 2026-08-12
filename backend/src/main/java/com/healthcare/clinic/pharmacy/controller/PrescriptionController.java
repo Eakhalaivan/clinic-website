@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.controller;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import com.healthcare.clinic.common.dto.ApiResponse;
 import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord;
@@ -15,6 +13,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord;
+import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem;
+import com.healthcare.clinic.pharmacy.entity.Medicine;
+import com.healthcare.clinic.pharmacy.repository.MedicineRepository;
+import com.healthcare.clinic.pharmacy.dto.DispenseItemRequest;
+import java.util.ArrayList;
+import java.util.List;
+import com.healthcare.clinic.pharmacy.service.PharmacyDispensingService;
+import com.healthcare.clinic.pharmacy.dto.DispenseRequest;
+import com.healthcare.clinic.pharmacy.entity.PrescriptionDispensed;
+import com.healthcare.clinic.identity.entity.User;
 
 @RestController("pharmacyPrescriptionController")
 @RequestMapping("/api/pharmacy/prescriptions")
@@ -23,14 +32,20 @@ public class PrescriptionController {
     private final PrescriptionRepository prescriptionRepository;
     private final PrescriptionVerificationService verificationService;
     private final UserRepository userRepository;
+    private final PharmacyDispensingService pharmacyDispensingService;
+    private final MedicineRepository medicineRepository;
 
     public PrescriptionController(
             PrescriptionRepository prescriptionRepository,
             PrescriptionVerificationService verificationService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            PharmacyDispensingService pharmacyDispensingService,
+            MedicineRepository medicineRepository) {
         this.prescriptionRepository = prescriptionRepository;
         this.verificationService = verificationService;
         this.userRepository = userRepository;
+        this.pharmacyDispensingService = pharmacyDispensingService;
+        this.medicineRepository = medicineRepository;
     }
 
     /** Returns all PENDING prescriptions with medication items */
@@ -73,16 +88,62 @@ public class PrescriptionController {
                 verificationService.rejectPrescription(id, reason, pharmacist), "Prescription rejected"));
     }
 
-    /** Dispense a prescription — marks it DISPENSED and syncs back to clinical record */
+    /** Dispense a prescription — marks it DISPENSED, deducts stock, and syncs back to clinical record */
     @PostMapping("/{id}/dispense")
     @PreAuthorize("hasAnyAuthority('ROLE_PHARMACIST','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<PharmacyPrescriptionRecord>> dispense(@PathVariable Long id) {
-        String pharmacist = getCurrentPharmacistName();
+    public ResponseEntity<ApiResponse<PrescriptionDispensed>> dispense(
+            @PathVariable Long id, 
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestBody(required = false) DispenseRequest request) {
+        User pharmacist = getCurrentUser();
+        
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+            // Auto-build the dispense request based on the prescription items
+            PharmacyPrescriptionRecord record = prescriptionRepository.findById(id).orElseThrow();
+            request = DispenseRequest.builder().prescriptionId(id).items(new ArrayList<>()).build();
+            
+            for (PharmacyPrescriptionItem item : record.getItems()) {
+                // Try to find the medicine by name
+                List<Medicine> meds = medicineRepository.findByNameContainingIgnoreCase(item.getMedicationName());
+                if (!meds.isEmpty()) {
+                    Medicine med = meds.get(0);
+                    // Default to 1 quantity or parse dosage if possible, but 1 is safe for testing
+                    int qty = 1; 
+                    try {
+                        if (item.getDuration() != null && item.getDuration().contains("day")) {
+                             String num = item.getDuration().replaceAll("[^0-9]", "");
+                             if (!num.isEmpty()) qty = Integer.parseInt(num);
+                        }
+                    } catch(Exception ignored) {}
+                    
+                    request.getItems().add(DispenseItemRequest.builder()
+                            .medicineId(med.getId())
+                            .quantity(qty)
+                            .build());
+                } else {
+                     throw new RuntimeException("Could not find stock for medication: " + item.getMedicationName());
+                }
+            }
+        }
+        
+        request.setPrescriptionId(id);
+        if (idempotencyKey != null) {
+            request.setIdempotencyKey(idempotencyKey);
+        }
+        
         return ResponseEntity.ok(ApiResponse.success(
-                verificationService.dispensePrescription(id, pharmacist), "Prescription dispensed"));
+                pharmacyDispensingService.dispensePrescription(request, pharmacist), "Prescription dispensed"));
     }
-
-    // ── helpers ───────────────────────────────────────────────────────────────
+    // ── helpers ─
+    private User getCurrentUser() {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            return userRepository.findById(userId).orElseThrow();
+        } catch (Exception e) {
+            throw new RuntimeException("User not found");
+        }
+    }
+    // ── helpers ─
     private String getCurrentPharmacistName() {
         try {
             Long userId = SecurityUtils.getCurrentUserId();

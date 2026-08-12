@@ -5,5 +5,6 @@ public enum ItemType {
     LAB_TEST,
     PHARMACY,
     CONSULTATION,
+    RADIOLOGY,
     OTHER
 }

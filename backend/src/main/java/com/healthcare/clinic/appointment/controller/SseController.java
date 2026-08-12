@@ -12,18 +12,28 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
+import com.healthcare.clinic.security.SseTicketService;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sse/appointments")
 @Slf4j
 public class SseController {
+
+    private final SseTicketService sseTicketService;
+
+    public SseController(SseTicketService sseTicketService) {
+        this.sseTicketService = sseTicketService;
+    }
 
     private static class ClientConnection {
         final SseEmitter emitter;
@@ -39,15 +49,25 @@ public class SseController {
 
     private final List<ClientConnection> connections = new CopyOnWriteArrayList<>();
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping("/ticket")
     @PreAuthorize("isAuthenticated()")
-    public SseEmitter subscribe(@AuthenticationPrincipal UserPrincipal user) {
-        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L); // 1 hour timeout
-        
+    public ResponseEntity<?> generateTicket(@AuthenticationPrincipal UserPrincipal user) {
         boolean isAdmin = user.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_RECEPTIONIST"));
+        String ticket = sseTicketService.generateTicket(user.getUserId(), isAdmin);
+        return ResponseEntity.ok(Map.of("ticket", ticket));
+    }
+
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(@RequestParam("ticket") String ticket) {
+        SseTicketService.TicketDetails details = sseTicketService.consumeTicket(ticket);
+        if (details == null) {
+            throw new org.springframework.security.access.AccessDeniedException("Invalid or expired SSE ticket");
+        }
+
+        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L); // 1 hour timeout
         
-        ClientConnection connection = new ClientConnection(emitter, user.getUserId(), isAdmin);
+        ClientConnection connection = new ClientConnection(emitter, details.userId(), details.isAdminOrReceptionist());
         connections.add(connection);
 
         emitter.onCompletion(() -> connections.remove(connection));
@@ -59,22 +79,22 @@ public class SseController {
 
     @EventListener
     public void onAppointmentBooked(AppointmentBookedEvent event) {
-        broadcastEvent("appointment-booked", event, event.getPatientId(), event.getDoctorId());
+        broadcastEvent("appointment-booked", event, event.getPatientUserId(), event.getDoctorUserId());
     }
 
     @EventListener
     public void onAppointmentCancelled(AppointmentCancelledEvent event) {
-        broadcastEvent("appointment-cancelled", event, event.getPatientId(), event.getDoctorId());
+        broadcastEvent("appointment-cancelled", event, event.getPatientUserId(), event.getDoctorUserId());
     }
 
     @EventListener
     public void onAppointmentStatusChanged(AppointmentStatusChangedEvent event) {
-        broadcastEvent("appointment-status-changed", event, null, event.getDoctorId());
+        broadcastEvent("appointment-status-changed", event, null, event.getDoctorUserId());
     }
 
     @EventListener
     public void onQueueTokenCalled(QueueTokenCalledEvent event) {
-        broadcastEvent("queue-token-called", event, event.getPatientId(), null);
+        broadcastEvent("queue-token-called", event, event.getPatientUserId(), null);
     }
 
     private void broadcastEvent(String name, Object eventData, Long targetPatientId, Long targetDoctorId) {

@@ -1,5 +1,6 @@
 package com.healthcare.clinic.appointment;
 
+import com.healthcare.clinic.appointment.entity.Appointment;
 import com.healthcare.clinic.appointment.entity.AppointmentSlot;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.appointment.repository.AppointmentSlotRepository;
@@ -17,6 +18,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,10 +82,11 @@ public class AppointmentConcurrencyTest {
                 .branchId(1L)
                 .build());
 
+        ZonedDateTime testStart = ZonedDateTime.now().with(TemporalAdjusters.next(java.time.DayOfWeek.WEDNESDAY));
         testSlot = slotRepository.save(AppointmentSlot.builder()
                 .doctor(doctor)
-                .startTime(ZonedDateTime.now().plusDays(1))
-                .endTime(ZonedDateTime.now().plusDays(1).plusMinutes(20))
+                .startTime(testStart)
+                .endTime(testStart.plusMinutes(20))
                 .isBooked(false)
                 .branchId(1L)
                 .build());

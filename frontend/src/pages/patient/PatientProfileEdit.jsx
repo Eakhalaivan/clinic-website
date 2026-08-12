@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import EmergencyContactsList from '../../components/patient/EmergencyContactsList';
 
 const PatientProfileEdit = () => {
     const { user } = useAuthStore();
@@ -91,29 +92,6 @@ const PatientProfileEdit = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                        <label className="label-caps" style={{ display: 'block', marginBottom: 'var(--space-2)' }}>Emergency Contact Name *</label>
-                        <input 
-                            type="text" 
-                            name="emergencyContactName"
-                            value={formData.emergencyContactName} 
-                            onChange={handleChange} 
-                            required
-                            className="input-field"
-                        />
-                    </div>
-                    <div>
-                        <label className="label-caps" style={{ display: 'block', marginBottom: 'var(--space-2)' }}>Emergency Contact Phone *</label>
-                        <input 
-                            type="text" 
-                            name="emergencyContactPhone"
-                            value={formData.emergencyContactPhone} 
-                            onChange={handleChange} 
-                            required
-                            placeholder="+1234567890"
-                            className="input-field"
-                        />
-                    </div>
-                    <div>
                         <label className="label-caps" style={{ display: 'block', marginBottom: 'var(--space-2)' }}>Date of Birth</label>
                         <input 
                             type="date" 
@@ -199,6 +177,8 @@ const PatientProfileEdit = () => {
                     </button>
                 </div>
             </form>
+
+            <EmergencyContactsList />
         </div>
     );
 };

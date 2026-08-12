@@ -109,7 +109,7 @@ export default function PortalLoginPage() {
                     {/* Placeholder for doctors image from mockup */}
                     <div className="absolute bottom-32 w-full h-[400px] flex items-end justify-center opacity-80">
                         {/* If /assets/doctors.png exists, this will load it, otherwise shows generic gradient */}
-                        <img src="/assets/clinic_hero.png" alt="Doctors" className="object-cover h-full max-w-full opacity-20 mix-blend-multiply rounded-t-[100px]" onError={(e) => e.target.style.display = 'none'} />
+                        <img loading="lazy" src="/assets/clinic_hero.png" alt="Doctors" className="object-cover h-full max-w-full opacity-20 mix-blend-multiply rounded-t-[100px]" onError={(e) => e.target.style.display = 'none'} />
                     </div>
                     
                     {/* Floating icons matching mockup */}

@@ -1,10 +1,8 @@
 package com.healthcare.clinic.identity.controller;
 
 import com.healthcare.clinic.identity.entity.RefreshToken;
-import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.identity.service.RefreshTokenService;
 import com.healthcare.clinic.security.JwtUtils;
-import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +21,10 @@ public class RefreshTokenController {
     private final UserDetailsService userDetailsService;
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+    public ResponseEntity<?> refreshtoken(@CookieValue(name = "refresh_token", required = false) String requestRefreshToken) {
+        if (requestRefreshToken == null || requestRefreshToken.isEmpty()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Refresh token is missing");
+        }
 
         try {
             return refreshTokenService.findByToken(requestRefreshToken)
@@ -40,7 +40,17 @@ public class RefreshTokenController {
                         refreshTokenService.deleteByUserId(user.getId());
                         String newRefreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
                         
-                        return ResponseEntity.ok(new TokenRefreshResponse(token, newRefreshToken));
+                        org.springframework.http.ResponseCookie refreshCookie = org.springframework.http.ResponseCookie.from("refresh_token", newRefreshToken)
+                                .httpOnly(true)
+                                .secure(true)
+                                .path("/api/auth")
+                                .maxAge(7 * 24 * 60 * 60)
+                                .sameSite("Strict")
+                                .build();
+
+                        return ResponseEntity.ok()
+                                .header(org.springframework.http.HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(new TokenRefreshResponse(token));
                     })
                     .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
         } catch (Exception e) {
@@ -49,11 +59,24 @@ public class RefreshTokenController {
     }
     
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(@Valid @RequestBody TokenRefreshRequest request) {
-        refreshTokenService.findByToken(request.getRefreshToken()).ifPresent(token -> {
-            refreshTokenService.deleteByUserId(token.getUser().getId());
-        });
-        return ResponseEntity.ok("Log out successful");
+    public ResponseEntity<?> logoutUser(@CookieValue(name = "refresh_token", required = false) String requestRefreshToken) {
+        if (requestRefreshToken != null && !requestRefreshToken.isEmpty()) {
+            refreshTokenService.findByToken(requestRefreshToken).ifPresent(token -> {
+                refreshTokenService.deleteByUserId(token.getUser().getId());
+            });
+        }
+        
+        org.springframework.http.ResponseCookie clearCookie = org.springframework.http.ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+                
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.SET_COOKIE, clearCookie.toString())
+                .body("Log out successful");
     }
 }
 
@@ -66,11 +89,9 @@ class TokenRefreshRequest {
 @Data
 class TokenRefreshResponse {
     private String accessToken;
-    private String refreshToken;
     private String tokenType = "Bearer";
 
-    public TokenRefreshResponse(String accessToken, String refreshToken) {
+    public TokenRefreshResponse(String accessToken) {
         this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
     }
 }

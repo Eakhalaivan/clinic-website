@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.clinic.doctor.dto.OutboxPrescriptionPayload;
 import com.healthcare.clinic.doctor.entity.ClinicOutboxEvent;
 import com.healthcare.clinic.doctor.repository.ClinicOutboxEventRepository;
-import com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem;
-import com.healthcare.clinic.pharmacy.service.PharmacyPrescriptionSyncService;
+import com.healthcare.clinic.integration.PharmacyIntegrationClient;
+import com.healthcare.clinic.integration.dto.PrescriptionIntegrationItemDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ClinicPrescriptionSyncWorker {
 
     private final ClinicOutboxEventRepository clinicOutboxEventRepository;
-    private final PharmacyPrescriptionSyncService pharmacyPrescriptionSyncService;
+    private final PharmacyIntegrationClient pharmacyIntegrationClient;
     private final ObjectMapper objectMapper;
 
     private static final int MAX_RETRIES = 5;
@@ -33,27 +33,26 @@ public class ClinicPrescriptionSyncWorker {
         List<ClinicOutboxEvent> pendingEvents = clinicOutboxEventRepository.findByStatus("PENDING");
         for (ClinicOutboxEvent event : pendingEvents) {
             try {
-                // Backoff logic: lastAttemptAt + (retryCount * 30s)
                 if (event.getRetryCount() > 0 && event.getProcessedAt() != null) {
                     ZonedDateTime nextRetry = event.getProcessedAt().plusSeconds(event.getRetryCount() * 30L);
                     if (ZonedDateTime.now().isBefore(nextRetry)) {
-                        continue; // Skip this event for now
+                        continue;
                     }
                 }
 
                 if ("PRESCRIPTION".equals(event.getAggregateType())) {
                     if ("PRESCRIPTION_CREATED".equals(event.getEventType())) {
                         OutboxPrescriptionPayload payload = objectMapper.readValue(event.getPayload(), OutboxPrescriptionPayload.class);
-                        List<PharmacyPrescriptionItem> pharmItems = mapItems(payload.getItems());
-                        pharmacyPrescriptionSyncService.syncNewPrescription(
+                        List<PrescriptionIntegrationItemDTO> pharmItems = mapItems(payload.getItems());
+                        pharmacyIntegrationClient.syncNewPrescription(
                                 payload.getPatientName(), payload.getDoctorName(), payload.getClinicalPrescriptionId(), pharmItems);
                     } else if ("PRESCRIPTION_SENT".equals(event.getEventType())) {
                         OutboxPrescriptionPayload payload = objectMapper.readValue(event.getPayload(), OutboxPrescriptionPayload.class);
-                        List<PharmacyPrescriptionItem> pharmItems = mapItems(payload.getItems());
-                        pharmacyPrescriptionSyncService.syncSendPrescription(
+                        List<PrescriptionIntegrationItemDTO> pharmItems = mapItems(payload.getItems());
+                        pharmacyIntegrationClient.syncSendPrescription(
                                 payload.getPatientName(), payload.getDoctorName(), payload.getClinicalPrescriptionId(), payload.getPharmacyUserId(), pharmItems);
                     } else if ("PRESCRIPTION_VOIDED".equals(event.getEventType())) {
-                        pharmacyPrescriptionSyncService.syncVoidPrescription(Long.valueOf(event.getAggregateId()));
+                        pharmacyIntegrationClient.syncVoidPrescription(Long.valueOf(event.getAggregateId()));
                     }
                 }
                 
@@ -65,13 +64,12 @@ public class ClinicPrescriptionSyncWorker {
                 int attempts = (event.getRetryCount() != null ? event.getRetryCount() : 0) + 1;
                 event.setRetryCount(attempts);
                 event.setLastError(e.getMessage());
-                event.setProcessedAt(ZonedDateTime.now()); // Record attempt time
+                event.setProcessedAt(ZonedDateTime.now());
                 
                 if (attempts >= MAX_RETRIES) {
                     event.setStatus("FAILED");
                     log.error("OUTBOX SYNC FAILED PERMANENTLY: EventID={}, Type={}, AggregateID={}, Error={}", 
                             event.getId(), event.getEventType(), event.getAggregateId(), e.getMessage(), e);
-                    // In a full implementation, we might write to a sync_failures table here.
                 } else {
                     event.setStatus("PENDING");
                     log.warn("Outbox sync failed (Attempt {}/{}). Will retry later. EventID={}, Error={}", 
@@ -82,8 +80,8 @@ public class ClinicPrescriptionSyncWorker {
         }
     }
 
-    private List<PharmacyPrescriptionItem> mapItems(List<OutboxPrescriptionPayload.OutboxPrescriptionItem> items) {
-        return items.stream().map(item -> PharmacyPrescriptionItem.builder()
+    private List<PrescriptionIntegrationItemDTO> mapItems(List<OutboxPrescriptionPayload.OutboxPrescriptionItem> items) {
+        return items.stream().map(item -> PrescriptionIntegrationItemDTO.builder()
                 .medicationName(item.getMedicationName())
                 .type(item.getType())
                 .dosage(item.getDosage())

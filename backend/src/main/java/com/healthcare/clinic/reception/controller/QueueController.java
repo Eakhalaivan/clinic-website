@@ -20,9 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import com.healthcare.clinic.reception.service.QueueTokenService;
 
 @RestController
 @RequestMapping("/api/reception")
@@ -36,6 +37,7 @@ public class QueueController {
     private final BranchRepository branchRepository;
     private final NursePatientAssignmentRepository nursePatientAssignmentRepository;
     private final UserRepository userRepository;
+    private final QueueTokenService queueTokenService;
 
     @PostMapping("/branches/{branchId}/walk-ins")
     public ResponseEntity<WalkInRegistration> registerWalkIn(@PathVariable Long branchId, @RequestBody WalkInRegistration registration) {
@@ -70,23 +72,25 @@ public class QueueController {
     public ResponseEntity<QueueToken> generateToken(@PathVariable Long branchId, @RequestParam(required = false) Long walkInId, @RequestParam(required = false) Long appointmentId) {
         Branch branch = branchRepository.findById(branchId).orElseGet(() -> branchRepository.findAll().stream().findFirst().orElseThrow());
         
-        ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-        int currentMaxToken = queueTokenRepository.findMaxTokenForBranchToday(branch.getId(), startOfDay).orElse(0);
-        
-        QueueToken token = QueueToken.builder()
-                .branch(branch)
-                .tokenNumber(currentMaxToken + 1)
-                .status("WAITING")
-                .generatedAt(ZonedDateTime.now())
-                .build();
-                
+        WalkInRegistration walkIn = null;
         if (walkInId != null) {
-            token.setWalkIn(walkInRegistrationRepository.findById(walkInId).orElse(null));
+            walkIn = walkInRegistrationRepository.findById(walkInId).orElse(null);
         }
         
-        // In a real app we'd fetch the appointment here too if appointmentId != null
+        int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                QueueToken token = queueTokenService.generateToken(branch, walkIn, appointmentId);
+                return ResponseEntity.ok(token);
+            } catch (DataIntegrityViolationException e) {
+                if (i == maxRetries - 1) {
+                    throw e;
+                }
+                // wait a tiny bit to avoid hammering? or just loop immediately
+            }
+        }
         
-        return ResponseEntity.ok(queueTokenRepository.save(token));
+        throw new RuntimeException("Failed to generate queue token after retries");
     }
 
     @GetMapping("/branches/{branchId}/queue")

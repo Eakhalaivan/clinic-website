@@ -3,18 +3,26 @@ import { useAuth } from '../../context/AuthContext';
 import { axiosPrivate as axios } from '../../api/axios';
 import { FileText, Download, Calendar, Activity, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
+import Modal from '../../components/ui/Modal';
+import Button from '../../components/ui/Button';
 
 export default function RadiologyReports() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedReport, setSelectedReport] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await axios.get('/api/patient/radiology-reports');
+        const response = await axios.get('/patient/radiology-reports');
         setReports(response.data);
       } catch (err) {
         console.error('Error fetching radiology reports:', err);
@@ -25,6 +33,28 @@ export default function RadiologyReports() {
     };
     fetchReports();
   }, []);
+
+  const bookMutation = useMutation({
+    mutationFn: async (id) => {
+      const formattedDate = new Date(scheduledAt).toISOString();
+      return axios.post(`/radiology/patient/requests/${id}/book`, { scheduledAt: formattedDate });
+    },
+    onSuccess: () => {
+      toast.success('Scan scheduled successfully');
+      // Refetch reports
+      axios.get('/patient/radiology-reports').then(res => setReports(res.data));
+      setIsModalOpen(false);
+      setScheduledAt('');
+    },
+    onError: (err) => {
+      toast.error('Failed to schedule scan');
+    }
+  });
+
+  const openBookModal = (id) => {
+    setSelectedRequestId(id);
+    setIsModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -100,6 +130,20 @@ export default function RadiologyReports() {
                   }`}>
                     {report.status}
                   </span>
+                  {report.status === 'REQUESTED' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openBookModal(report.request.id); }}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                    >
+                      <Calendar className="w-3 h-3" />
+                      Schedule
+                    </button>
+                  )}
+                  {report.status === 'SCHEDULED' && report.request?.scheduledAt && (
+                    <div className="text-xs text-indigo-700 font-medium bg-indigo-50 px-2 py-1 rounded">
+                      {format(new Date(report.request.scheduledAt), 'MMM d, h:mm a')}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -201,6 +245,35 @@ export default function RadiologyReports() {
           </div>
         </div>
       )}
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Schedule Radiology Scan">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Date and Time
+            </label>
+            <input
+              type="datetime-local"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+            />
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => bookMutation.mutate(selectedRequestId)}
+              isLoading={bookMutation.isPending}
+              disabled={!scheduledAt}
+            >
+              Confirm Booking
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

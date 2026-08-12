@@ -4,6 +4,7 @@ import com.healthcare.clinic.common.dto.ApiResponse;
 import com.healthcare.clinic.clinicaldecision.entity.CdsRule;
 import com.healthcare.clinic.clinicaldecision.entity.TriggerEvent;
 import com.healthcare.clinic.clinicaldecision.service.CdsRuleService;
+import com.healthcare.clinic.clinicaldecision.service.CdsAiInsightService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CdsRuleController {
 
     private final CdsRuleService ruleService;
+    private final CdsAiInsightService aiInsightService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'BRANCH_ADMIN')")
@@ -42,6 +44,13 @@ public class CdsRuleController {
 
         Map<String, Object> result = ruleService.evaluateRules(request.getPatientId(), event, request.getItems());
         return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PostMapping("/insights")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<String>> getAiInsights(@RequestBody EvaluateRequest request) {
+        String insight = aiInsightService.generateClinicalInsight(request.getPatientId(), request.getItems());
+        return ResponseEntity.ok(ApiResponse.success(insight, "AI Insight Generated"));
     }
 }
 

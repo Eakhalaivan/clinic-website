@@ -11,7 +11,7 @@ import {
   FileText, AlertTriangle, Activity, Clock, Save, Printer, 
   Eye, BadgeCheck, CheckCircle2, ChevronRight,
   Sun, Moon, Sunrise, Sunset, Heart, 
-  Thermometer, FileCode, CheckCircle, Send, ArrowLeft, Edit2, X
+  Thermometer, FileCode, CheckCircle, Send, ArrowLeft, Edit2, X, Sparkles
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import toast, { Toaster } from 'react-hot-toast';
@@ -121,6 +121,10 @@ const NewPrescription = () => {
   const [errors, setErrors] = useState({});
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCdsModalOpen, setIsCdsModalOpen] = useState(false);
+  const [cdsBlockedAlerts, setCdsBlockedAlerts] = useState([]);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiInsight, setAiInsight] = useState('');
   const [editProfile, setEditProfile] = useState({ 
     bloodGroup: '', 
     allergies: '',
@@ -166,52 +170,7 @@ const NewPrescription = () => {
     queryKey: ['vitals-latest', patientId],
     queryFn: async () => {
         try {
-            
-  if (isPreview) {
-    const documentData = {
-      clinicName: doctorDetails?.clinicName || 'City General Hospital',
-      clinicAddress: doctorDetails?.clinicAddress || '123 Medical Center Drive, Healthcare City, HC 12345',
-      clinicPhone: doctorDetails?.clinicPhone || '+1 (555) 123-4567',
-      clinicEmail: doctorDetails?.clinicEmail || '',
-      doctorName: doctorDetails?.doctorName ? 'Dr. ' + doctorDetails.doctorName : 'Dr. Unknown',
-      doctorSpecialty: doctorDetails?.specialty || 'General Practitioner',
-      doctorQualifications: doctorDetails?.qualifications || '',
-      registrationNumber: doctorDetails?.registrationNumber || '',
-      patientName: profile?.patientName || profile?.name,
-      patientAge: profile?.age || getAge(profile?.dateOfBirth),
-      patientGender: profile?.gender,
-      patientId: patientId,
-      chiefComplaint,
-      diagnosis,
-      items: items.filter(i => i.medicineName).map(i => ({
-        ...i,
-        medicationName: i.medicineName
-      })),
-      followUpDate
-    };
-
-    return (
-      <div className="max-w-4xl mx-auto py-8">
-        <div className="mb-4 flex justify-between items-center print:hidden">
-          <button 
-            onClick={() => setIsPreview(false)}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
-          >
-            <ChevronLeft className="w-4 h-4" /> Back to Edit
-          </button>
-          <button 
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            <Printer className="w-4 h-4" /> Print Prescription
-          </button>
-        </div>
-        <PrescriptionDocument data={documentData} />
-      </div>
-    );
-  }
-
-  return (await axiosPrivate.get(`/patients/${patientId}/vitals/latest`)).data;
+            return (await axiosPrivate.get(`/patients/${patientId}/vitals/latest`)).data;
         } catch(e) {
             return null;
         }
@@ -421,6 +380,15 @@ const NewPrescription = () => {
     }))
   });
 
+  const handleMutationError = (error) => {
+    if (error.response?.status === 422 && error.response.data?.error === 'CRITICAL_SAFETY_VIOLATION') {
+      setCdsBlockedAlerts(error.response.data.alerts || [error.response.data.message]);
+      setIsCdsModalOpen(true);
+    } else {
+      toast.error(error.response?.data?.message || 'An error occurred.');
+    }
+  };
+
   const sendToPharmacyMutation = useMutation({
     mutationFn: async (pharmacyUserId) => {
       const payload = pharmacyUserId ? { pharmacyUserId: parseInt(pharmacyUserId) } : {};
@@ -435,7 +403,8 @@ const NewPrescription = () => {
       queryClient.invalidateQueries(['patientPrescriptions', patientId]);
       toast.success('Prescription sent to pharmacy successfully');
       setIsPharmacyModalOpen(false);
-    }
+    },
+    onError: handleMutationError
   });
   const saveDraftMutation = useMutation({
     mutationFn: async () => axiosPrivate.post(`/prescriptions/draft`, buildPayload()),
@@ -444,7 +413,8 @@ const NewPrescription = () => {
       setPrescriptionStatus('DRAFT');
       queryClient.invalidateQueries(['patientPrescriptions', patientId]);
       toast.success('Draft saved successfully');
-    }
+    },
+    onError: handleMutationError
   });
 
   const sendMutation = useMutation({
@@ -462,8 +432,29 @@ const NewPrescription = () => {
       setIsPreview(true);
       queryClient.invalidateQueries(['patientPrescriptions', patientId]);
       toast.success('Prescription sent successfully');
-    }
+    },
+    onError: handleMutationError
   });
+
+  const aiInsightMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        patientId: parseInt(patientId),
+        items: items.filter(i => i.medicineName).map(i => i.medicineName)
+      };
+      return axiosPrivate.post(`/cds/rules/insights`, payload);
+    },
+    onSuccess: (res) => {
+      setAiInsight(res.data.data);
+      setIsAiModalOpen(true);
+    },
+    onError: (err) => toast.error("Failed to fetch AI Insights.")
+  });
+
+  const handleAiCheck = () => {
+      if(!validate()) { toast.error("Please add medicines."); return; }
+      aiInsightMutation.mutate();
+  };
 
   const handlePrint = () => { window.print(); };
   const handleSend = () => {
@@ -510,6 +501,50 @@ const NewPrescription = () => {
     .filter(d => d.sys !== null)
     .slice(-10);  // show last 10 readings
 
+  if (isPreview) {
+    const documentData = {
+      clinicName: doctorDetails?.clinicName || '',
+      clinicAddress: doctorDetails?.clinicAddress || '',
+      clinicPhone: doctorDetails?.clinicPhone || '',
+      clinicEmail: doctorDetails?.clinicEmail || '',
+      doctorName: doctorDetails?.doctorName ? 'Dr. ' + doctorDetails.doctorName : 'Dr. Unknown',
+      doctorSpecialty: doctorDetails?.specialty || 'General Practitioner',
+      doctorQualifications: doctorDetails?.qualifications || '',
+      registrationNumber: doctorDetails?.registrationNumber || '',
+      patientName: profile?.patientName || profile?.name,
+      patientAge: profile?.age || getAge(profile?.dateOfBirth),
+      patientGender: profile?.gender,
+      patientId: patientId,
+      chiefComplaint,
+      diagnosis,
+      items: items.filter(i => i.medicineName).map(i => ({
+        ...i,
+        medicationName: i.medicineName
+      })),
+      followUpDate
+    };
+
+    return (
+      <div className="max-w-4xl mx-auto py-8">
+        <div className="mb-4 flex justify-between items-center print:hidden">
+          <button 
+            onClick={() => setIsPreview(false)}
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
+          >
+            <ChevronLeft className="w-4 h-4" /> Back to Edit
+          </button>
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            <Printer className="w-4 h-4" /> Print Prescription
+          </button>
+        </div>
+        <PrescriptionDocument data={documentData} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-sans p-6 pb-28 max-w-[1500px] mx-auto text-[#1E293B]">
       <Toaster position="top-right" />
@@ -555,7 +590,7 @@ const NewPrescription = () => {
                 {/* Left side: Avatar and Basic Info */}
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
-                        <img src={`https://ui-avatars.com/api/?name=${profile?.name}&background=cbd5e1&color=334155`} alt="avatar" className="w-full h-full object-cover" />
+                        <img loading="lazy" src={`https://ui-avatars.com/api/?name=${profile?.name}&background=cbd5e1&color=334155`} alt="avatar" className="w-full h-full object-cover" />
                     </div>
                     
                     <div className="flex flex-col gap-1.5">
@@ -1111,7 +1146,11 @@ const NewPrescription = () => {
             </button>
         </div>
         <div className="flex items-center gap-3">
-            <button onClick={handleSend} className="flex items-center justify-center gap-3 px-5 py-2 text-white bg-[#0F766E] hover:bg-teal-800 rounded-lg transition-colors shadow-sm">
+            <button onClick={handleAiCheck} disabled={aiInsightMutation.isPending} className="flex items-center justify-center gap-3 px-5 py-2 text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-lg transition-colors shadow-sm disabled:opacity-50">
+                {aiInsightMutation.isPending ? <div className="w-4 h-4 border-2 border-indigo-700 border-t-transparent rounded-full animate-spin"></div> : <Sparkles className="w-4 h-4 shrink-0" />}
+                <span className="text-[13px] font-bold">AI Safety Check</span>
+            </button>
+            <button onClick={handleSend} disabled={sendMutation.isPending} className="flex items-center justify-center gap-3 px-5 py-2 text-white bg-[#0F766E] hover:bg-teal-800 rounded-lg transition-colors shadow-sm disabled:opacity-50">
                 <Send className="w-4 h-4 shrink-0" />
                 <div className="flex flex-col items-start leading-tight">
                     <span className="text-[13px] font-bold">Send to Patient</span>
@@ -1297,6 +1336,64 @@ const NewPrescription = () => {
                               <Send className="w-4 h-4" />
                           )}
                           Send Prescription
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* CDS Block Modal */}
+      {isCdsModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+                  <div className="px-5 py-4 border-b border-red-100 bg-red-50 flex items-center gap-3">
+                      <AlertTriangle className="w-6 h-6 text-red-600" />
+                      <h3 className="font-bold text-red-900 text-lg">Critical Safety Alert</h3>
+                  </div>
+                  <div className="p-5 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+                      <p className="text-sm text-slate-700 font-medium">
+                          The prescription was blocked by the Clinical Decision Support system due to the following critical contraindications:
+                      </p>
+                      <ul className="list-disc pl-5 text-sm text-red-700 space-y-2">
+                          {cdsBlockedAlerts.map((alert, idx) => (
+                              <li key={idx}><strong>{alert}</strong></li>
+                          ))}
+                      </ul>
+                      <p className="text-xs text-slate-500 mt-2">
+                          Please modify the prescription items. You cannot proceed with these critical safety violations.
+                      </p>
+                  </div>
+                  <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                      <button 
+                          onClick={() => setIsCdsModalOpen(false)}
+                          className="px-5 py-2 text-sm font-bold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                          Acknowledge & Edit
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* AI Insights Modal */}
+      {isAiModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col">
+                  <div className="px-5 py-4 border-b border-indigo-100 bg-indigo-50 flex items-center gap-3">
+                      <Sparkles className="w-6 h-6 text-indigo-600" />
+                      <h3 className="font-bold text-indigo-900 text-lg">AI Clinical Insights</h3>
+                  </div>
+                  <div className="p-5 max-h-[70vh] overflow-y-auto">
+                      <div className="prose prose-sm prose-indigo whitespace-pre-wrap">
+                          {aiInsight}
+                      </div>
+                  </div>
+                  <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                      <button 
+                          onClick={() => setIsAiModalOpen(false)}
+                          className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                          Close
                       </button>
                   </div>
               </div>

@@ -25,7 +25,7 @@ public class InsurancePortalService {
     }
 
     @Transactional
-    public InsuranceClaim adjudicateClaim(Long claimId, String status, BigDecimal approvedAmount, String notes) {
+    public InsuranceClaim adjudicateClaim(Long claimId, com.healthcare.clinic.finance.entity.ClaimStatus status, BigDecimal approvedAmount, String notes) {
         InsuranceClaim claim = claimRepository.findById(claimId).orElseThrow();
         claim.setStatus(status);
         if (approvedAmount != null) {
@@ -34,7 +34,7 @@ public class InsurancePortalService {
         if (notes != null && !notes.isEmpty()) {
             claim.setNotes(notes);
         }
-        if ("APPROVED".equals(status) || "SETTLED".equals(status) || "REJECTED".equals(status)) {
+        if (com.healthcare.clinic.finance.entity.ClaimStatus.APPROVED.equals(status) || com.healthcare.clinic.finance.entity.ClaimStatus.SETTLED.equals(status) || com.healthcare.clinic.finance.entity.ClaimStatus.REJECTED.equals(status)) {
             claim.setSettledAt(ZonedDateTime.now());
         }
         return claimRepository.save(claim);

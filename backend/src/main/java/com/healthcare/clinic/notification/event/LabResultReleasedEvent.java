@@ -9,4 +9,5 @@ public class LabResultReleasedEvent {
     private String patientEmail;
     private String patientName;
     private String testName;
+    private Long doctorId;
 }

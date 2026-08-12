@@ -33,10 +33,7 @@ export default function RoleRoute({ portalSlug, allowedRoles, children }) {
      * arrays in App.jsx instead.
      * ─────────────────────────────────────────────────────────────────────────
      */
-    const hasPermission = userRoles.includes('ROLE_ADMIN') ||
-                          userRoles.includes('ROLE_SUPER_ADMIN') ||
-                          (targetRoles.length === 0) ||
-                          targetRoles.some(r => userRoles.includes(r));
+    const hasPermission = (targetRoles.length === 0) || targetRoles.some(r => userRoles.includes(r));
 
     if (!hasPermission) {
         return <Navigate to="/unauthorized" replace />;

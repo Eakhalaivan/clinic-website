@@ -1,7 +1,5 @@
 package com.healthcare.clinic.doctor.dto;
 
-import com.healthcare.clinic.patient.entity.PatientProfile;
-import com.healthcare.clinic.appointment.entity.Appointment;
 import lombok.Builder;
 import lombok.Data;
 import java.util.List;

@@ -18,6 +18,12 @@ public class Permission {
     @Column(unique = true, nullable = false, length = 100)
     private String name;
 
+    @Column(name = "action_type", length = 50)
+    private String action; // e.g. VIEW, CREATE, UPDATE, DELETE
+
+    @Column(name = "resource_type", length = 100)
+    private String resource; // e.g. APPOINTMENT, PATIENT, INVENTORY
+
     @Column(length = 255)
     private String description;
 }

@@ -44,6 +44,24 @@ public class Employee {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id")
     private Branch branch;
+    
+    @Column(name = "reporting_manager_id")
+    private Long reportingManagerId;
+
+    @Column(name = "emergency_contact_name", length = 100)
+    private String emergencyContactName;
+
+    @Column(name = "emergency_contact_phone", length = 20)
+    private String emergencyContactPhone;
+
+    @Column(name = "bank_account_number", length = 50)
+    private String bankAccountNumber;
+
+    @Column(name = "bank_routing_number", length = 50)
+    private String bankRoutingNumber;
+
+    @Column(name = "tax_identifier", length = 50)
+    private String taxIdentifier;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

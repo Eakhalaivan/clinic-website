@@ -1,7 +1,5 @@
 package com.healthcare.clinic.pharmacy.dto.common;
 
-import com.healthcare.clinic.inventory.entity.BaseEntity;
-import com.healthcare.clinic.inventory.entity.Patient;
 
 import org.springframework.data.domain.Page;
 import java.util.List;

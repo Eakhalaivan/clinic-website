@@ -27,15 +27,6 @@ public class SecurityUtils {
         if (authentication == null) {
             throw new AccessDeniedException("You do not have permission to access this resource");
         }
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
-                               a.getAuthority().equals("ROLE_SUPER_ADMIN") ||
-                               a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
-
-        if (isAdmin) {
-            return;
-        }
-
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null || !currentUserId.equals(resourceUserId)) {
             throw new AccessDeniedException("You do not have permission to access this resource");
@@ -46,14 +37,6 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
             throw new AccessDeniedException("You do not have permission to access this resource");
-        }
-
-        boolean isGlobalAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") ||
-                               a.getAuthority().equals("ROLE_SUPER_ADMIN") ||
-                               a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
-        if (isGlobalAdmin) {
-            return;
         }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();

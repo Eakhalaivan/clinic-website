@@ -1,0 +1,27 @@
+CREATE TABLE nurse_escalations (
+    id BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+    encounter_id BIGINT,
+    nurse_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    doctor_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    reason VARCHAR(255) NOT NULL,
+    clinical_context TEXT NOT NULL,
+    priority VARCHAR(20) NOT NULL, -- ROUTINE, URGENT, EMERGENCY
+    status VARCHAR(20) DEFAULT 'OPEN', -- OPEN, ACKNOWLEDGED, RESOLVED
+    escalated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    resolution_notes TEXT
+);
+
+CREATE TABLE nursing_checklists (
+    id BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+    encounter_id BIGINT,
+    nurse_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    checklist_type VARCHAR(50) NOT NULL, -- ADMISSION, TRANSFER, DISCHARGE, PRE_OP
+    items_json TEXT NOT NULL, -- JSON array of items and their completion status
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'IN_PROGRESS' -- IN_PROGRESS, COMPLETED
+);

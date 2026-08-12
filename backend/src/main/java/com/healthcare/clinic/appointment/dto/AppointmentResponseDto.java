@@ -14,6 +14,7 @@ public class AppointmentResponseDto {
     private String notes;
     private Long branchId;
     private ZonedDateTime createdAt;
+    private Integer tokenNumber;
 
     // Slot info
     private Long slotId;

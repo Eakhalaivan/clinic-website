@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
+import useAuthStore from '../../store/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Plus, Search, Users, Trash2, Edit3, Save, XCircle, Phone, MapPin, CreditCard, User, Calendar, History } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
@@ -15,6 +16,7 @@ import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
 
 export default function Patients() {
   const queryClient = useQueryClient();
+  const { roles = [] } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 300);
   React.useEffect(() => { setCurrentPage(1); }, [debouncedSearch]);
@@ -198,16 +200,18 @@ export default function Patients() {
         >
           <Edit3 className="w-4 h-4" />
         </button>
-        <button 
-          title="Delete" 
-          onClick={() => handleDelete(row.id)}
-          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {(roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SUPER_ADMIN')) && (
+          <button 
+            title="Delete" 
+            onClick={() => handleDelete(row.id)}
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
     )}
-  ], []);
+  ], [roles]);
 
   return (
     <div className="space-y-6">

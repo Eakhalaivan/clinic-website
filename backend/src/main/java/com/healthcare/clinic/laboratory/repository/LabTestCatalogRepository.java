@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface LabTestCatalogRepository extends JpaRepository<LabTestCatalog, Long> {
     List<LabTestCatalog> findByIsActiveTrue();
+    java.util.Optional<LabTestCatalog> findByTestCode(String testCode);
 }

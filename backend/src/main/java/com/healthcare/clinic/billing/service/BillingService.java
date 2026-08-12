@@ -118,7 +118,7 @@ public class BillingService {
                 .taxAmount(tax)
                 .discountAmount(discount)
                 .totalAmount(total)
-                .status(InvoiceStatus.PENDING)
+                .status(InvoiceStatus.ISSUED)
                 .description(request.getDescription())
                 .dueDate(request.getDueDate())
                 .build();
@@ -211,6 +211,22 @@ public class BillingService {
         invoice.setStatus(InvoiceStatus.PAID);
         invoice.setPaidAt(LocalDateTime.now());
         invoice.setPaymentMethod("ONLINE");
+        return mapToResponse(invoiceRepository.save(invoice));
+    }
+
+    @Transactional
+    public InvoiceResponse cancelInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found: " + id));
+
+        if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
+            throw new IllegalStateException("Invoice is already cancelled");
+        }
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalStateException("Cannot cancel a paid invoice. Issue a refund instead.");
+        }
+
+        invoice.setStatus(InvoiceStatus.CANCELLED);
         return mapToResponse(invoiceRepository.save(invoice));
     }
 

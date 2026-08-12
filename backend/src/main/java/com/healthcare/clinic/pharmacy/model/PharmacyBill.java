@@ -2,6 +2,7 @@ package com.healthcare.clinic.pharmacy.model;
 
 import com.healthcare.clinic.inventory.entity.BaseEntity;
 
+
 import com.healthcare.clinic.pharmacy.entity.*;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;

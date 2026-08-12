@@ -195,7 +195,7 @@ const DoctorPrescriptions = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <img 
+                        <img loading="lazy" 
                           src={`https://i.pravatar.cc/150?u=${rx.patient.id}`} 
                           alt={rx.patient.name}
                           className="w-8 h-8 rounded-full object-cover shadow-sm"

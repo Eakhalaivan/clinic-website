@@ -10,7 +10,6 @@ import com.healthcare.clinic.notification.service.EmailNotificationService;
 import com.healthcare.clinic.notification.service.InAppNotificationService;
 import com.healthcare.clinic.notification.service.TwilioNotificationService;
 import com.healthcare.clinic.identity.repository.UserRepository;
-import com.healthcare.clinic.identity.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -33,17 +32,17 @@ public class NotificationEventListener {
     @EventListener
     public void onAppointmentBooked(AppointmentBookedEvent event) {
         log.info("Handling AppointmentBookedEvent for appointment {}", event.getAppointmentId());
-        inApp.sendToUser(event.getPatientId(),
+        inApp.sendToUser(event.getPatientUserId(),
                 "Appointment Confirmed",
                 "Your appointment with Dr. " + event.getDoctorName() + " is confirmed for " + event.getStartTime(),
                 "APPOINTMENT", event.getAppointmentId());
         email.sendAppointmentConfirmation(event);
         
-        userRepository.findById(event.getPatientId()).ifPresent(user -> {
+        userRepository.findById(event.getPatientUserId()).ifPresent(user -> {
             twilio.sendAppointmentConfirmationSms(user.getPhoneNumber(), event.getDoctorName(), event.getStartTime().toString());
         });
         
-        inApp.sendToUser(event.getDoctorId(),
+        inApp.sendToUser(event.getDoctorUserId(),
                 "New Appointment",
                 "New appointment booked for " + event.getStartTime(),
                 "APPOINTMENT", event.getAppointmentId());
@@ -60,17 +59,17 @@ public class NotificationEventListener {
     @EventListener
     public void onAppointmentCancelled(AppointmentCancelledEvent event) {
         log.info("Handling AppointmentCancelledEvent for appointment {}", event.getAppointmentId());
-        inApp.sendToUser(event.getPatientId(),
+        inApp.sendToUser(event.getPatientUserId(),
                 "Appointment Cancelled",
                 "Your appointment with Dr. " + event.getDoctorName() + " on " + event.getStartTime() + " has been cancelled.",
                 "APPOINTMENT", event.getAppointmentId());
         email.sendAppointmentCancellation(event);
         
-        userRepository.findById(event.getPatientId()).ifPresent(user -> {
+        userRepository.findById(event.getPatientUserId()).ifPresent(user -> {
             twilio.sendAppointmentCancellationSms(user.getPhoneNumber(), event.getDoctorName(), event.getStartTime().toString());
         });
         
-        inApp.sendToUser(event.getDoctorId(),
+        inApp.sendToUser(event.getDoctorUserId(),
                 "Appointment Cancelled",
                 "Appointment on " + event.getStartTime() + " has been cancelled.",
                 "APPOINTMENT", event.getAppointmentId());
@@ -113,6 +112,13 @@ public class NotificationEventListener {
         userRepository.findById(event.getPatientId()).ifPresent(user -> {
             twilio.sendLabResultReleasedSms(user.getPhoneNumber(), event.getTestName());
         });
+        
+        if (event.getDoctorId() != null) {
+            inApp.sendToUser(event.getDoctorId(),
+                    "Lab Results Ready",
+                    "Results for " + event.getTestName() + " (Patient: " + event.getPatientName() + ") are now available.",
+                    "LAB_RESULT", event.getRequestId());
+        }
     }
 
     // ─── Queue Token Called ───────────────────────────────────────────────────
@@ -124,8 +130,8 @@ public class NotificationEventListener {
         email.sendQueueTokenCalled(event);
         // In-app for queued patient is optional (they may not be logged in)
         
-        if (event.getPatientId() != null) {
-            userRepository.findById(event.getPatientId()).ifPresent(user -> {
+        if (event.getPatientUserId() != null) {
+            userRepository.findById(event.getPatientUserId()).ifPresent(user -> {
                 twilio.sendQueueTokenCalledSms(user.getPhoneNumber(), event.getTokenNumber(), event.getBranchName());
             });
         }

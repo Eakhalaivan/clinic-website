@@ -1,10 +1,10 @@
 CREATE TABLE doctor_working_hours (
     id BIGSERIAL PRIMARY KEY,
     doctor_id BIGINT NOT NULL REFERENCES doctor_profiles(id) ON DELETE CASCADE,
-    day_of_week SMALLINT NOT NULL,       -- 0=Sunday .. 6=Saturday
+    day_of_week INT NOT NULL,       -- 0=Sunday .. 6=Saturday
     start_time TIME NOT NULL,            -- e.g. 10:00:00
     end_time TIME NOT NULL,              -- e.g. 16:00:00
-    slot_duration_minutes SMALLINT NOT NULL DEFAULT 20,
+    slot_duration_minutes INT NOT NULL DEFAULT 20,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     branch_id BIGINT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
