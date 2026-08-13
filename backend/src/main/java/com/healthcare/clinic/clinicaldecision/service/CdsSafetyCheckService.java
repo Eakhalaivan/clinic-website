@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import com.healthcare.clinic.emr.entity.Allergy;
+import com.healthcare.clinic.emr.repository.AllergyRepository;
 
 import com.healthcare.clinic.patient.service.PatientAllergyService;
 import com.healthcare.clinic.patient.service.PatientDiagnosisService;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class CdsSafetyCheckService {
+
 
     private final CdsAlertService cdsAlertService;
     private final CdsRuleRepository cdsRuleRepository;
@@ -43,8 +48,6 @@ public class CdsSafetyCheckService {
         List<String> criticalAlerts = new ArrayList<>();
         List<String> warningAlerts = new ArrayList<>();
 
-
-        
         List<PatientAllergy> activeAllergies = allergyService.getActiveAllergies(patientId);
         String patientAllergiesStr = activeAllergies.stream().map(a -> a.getAllergen().toUpperCase()).collect(Collectors.joining(","));
         

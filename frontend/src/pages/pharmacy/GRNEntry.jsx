@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { ArrowLeft, Search, Package, CheckCircle2, AlertCircle, Plus, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Search, Package, CheckCircle2, AlertCircle, Plus, Trash2, Save, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -127,151 +127,149 @@ export default function GRNEntry({ onBack }) {
     saveMutation.mutate({ payload, confirm });
   };
 
-  const inputCls = "w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white";
+  const inputCls = "w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors placeholder:text-slate-400";
+  const tableInputCls = "w-full px-3 py-1.5 text-sm border border-slate-200 rounded-full outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors text-center placeholder:text-slate-400";
+  const tableSelectCls = "w-full px-3 py-1.5 text-sm border border-slate-200 rounded-full outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors placeholder:text-slate-400";
+  const tableDateCls = "w-full px-3 py-1.5 text-sm border border-slate-200 rounded-full outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors placeholder:text-slate-400 text-slate-600";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-          <ArrowLeft className="w-4 h-4 text-slate-500" />
-        </button>
+
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Goods Receipt Note (GRN)</h2>
-          <p className="text-xs text-slate-400">Record delivery against a Purchase Order</p>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Goods Receipt Note (GRN)</h2>
+          <p className="text-sm text-slate-500 font-medium">Record delivery against a Purchase Order</p>
         </div>
       </div>
 
       {/* PO Loader */}
-      <div className="bg-white rounded-xl border border-slate-100 p-5">
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Link to Purchase Order (Optional)</div>
-        <div className="flex gap-2">
+      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Link to Purchase Order (Optional)</div>
+        <div className="flex gap-4 items-center">
           <input value={poSearch} onChange={e => setPoSearch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && loadPo()}
-            placeholder="Enter PO number (e.g. PO-20240622-1234)" className={`flex-1 ${inputCls}`} />
+            placeholder="Enter PO number (e.g. PO-2024-0622-1234)" className={`flex-1 ${inputCls}`} />
           <button onClick={loadPo} disabled={poMutation.isPending}
-            className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-1.5">
-            <Search className="w-3.5 h-3.5" /> {poMutation.isPending ? 'Loading…' : 'Load PO'}
+            className="px-6 py-2.5 bg-[#2563eb] text-white text-sm font-semibold rounded-xl hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm">
+            <FileText className="w-4 h-4" /> {poMutation.isPending ? 'Loading…' : 'Load PO'}
           </button>
         </div>
         {po && (
-          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <div className="text-xs">
-              <span className="font-bold text-emerald-700">{po.poNumber}</span>
-              <span className="text-emerald-600 ml-2">· {po.supplier?.name} · {po.items?.length} item(s) · ₹{Number(po.totalAmount || 0).toLocaleString()}</span>
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 shadow-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <div className="text-sm">
+              <span className="font-bold text-emerald-800">{po.poNumber}</span>
+              <span className="text-emerald-600 ml-2 font-medium">· {po.supplier?.name} · {po.items?.length} item(s) · ₹{Number(po.totalAmount || 0).toLocaleString()}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Header Details */}
-      <div className="bg-white rounded-xl border border-slate-100 p-5">
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">GRN Header Details</div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <FormInput
-            type="select"
-            label="Supplier *"
-            value={selectedSupplierId}
-            onChange={e => setSelectedSupplierId(e.target.value)}
-            options={[
-              { value: '', label: 'Select supplier' },
-              ...suppliers.map(s => ({ value: s.id, label: s.name }))
-            ]}
-          />
-          <FormInput
-            label="Supplier Invoice No."
-            value={invoiceNumber}
-            onChange={e => setInvoiceNumber(e.target.value)}
-            placeholder="INV-2024-001"
-          />
-          <FormInput
-            type="date"
-            label="Invoice Date"
-            value={invoiceDate}
-            onChange={e => setInvoiceDate(e.target.value)}
-          />
-          <FormInput
-            label="Delivery Challan No."
-            value={challanNumber}
-            onChange={e => setChallanNumber(e.target.value)}
-            placeholder="DC-2024-001"
-          />
-          <FormInput
-            label="Vehicle Number"
-            value={vehicleNumber}
-            onChange={e => setVehicleNumber(e.target.value)}
-            placeholder="TN 01 AB 1234"
-          />
+      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5">GRN Header Details</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Supplier *</label>
+            <select className={inputCls} value={selectedSupplierId} onChange={e => setSelectedSupplierId(e.target.value)}>
+              <option value="">Select supplier</option>
+              {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Supplier Invoice No.</label>
+            <input className={inputCls} placeholder="INV-2024-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Invoice Date</label>
+            <input type="date" className={inputCls} value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Delivery Challan No.</label>
+            <input className={inputCls} placeholder="DC-2024-001" value={challanNumber} onChange={e => setChallanNumber(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Vehicle Number</label>
+            <input className={inputCls} placeholder="TN 01 AB 1234" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} />
+          </div>
         </div>
       </div>
 
       {/* Line Items */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Line Items</div>
-          <button onClick={addItem} className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700">
-            <Plus className="w-3.5 h-3.5" /> Add Item
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Line Items</div>
+          <button onClick={addItem} className="flex items-center gap-1.5 text-sm font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition-colors">
+            <Plus className="w-4 h-4" /> Add Item
           </button>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pb-4">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="border-b border-slate-100">
                 {['Medicine','Ordered Qty','Received Qty','Rejected Qty','Rejection Reason','Batch No.','Mfg Date','Expiry Date','MRP (₹)','Purchase Rate',''].map(h => (
-                  <th key={h} className="text-left px-3 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((item, idx) => (
-                <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50/50">
-                  <td className="px-3 py-2 min-w-[160px]">
-                    <div className="text-xs font-bold text-slate-700">{item.medicine?.name || (
-                      <span className="text-slate-300 italic">No medicine (set via PO)</span>
-                    )}</div>
-                    {item.medicine?.code && <div className="text-[10px] text-slate-400 font-mono">{item.medicine.code}</div>}
+                <tr key={idx} className="border-b border-slate-50/50 hover:bg-slate-50/30 transition-colors">
+                  <td className="px-4 py-4 min-w-[220px]">
+                    {po ? (
+                      <div>
+                        <div className="text-sm font-semibold text-slate-700">{item.medicine?.name || <span className="text-slate-300 italic">No medicine</span>}</div>
+                        {item.medicine?.code && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.medicine.code}</div>}
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                        <input type="text" placeholder="Search medicine" className={`${tableInputCls} pl-9 text-left`} 
+                          value={item.medicineName || ''} onChange={e => setItem(idx, 'medicineName', e.target.value)} />
+                      </div>
+                    )}
                   </td>
-                  <td className="px-3 py-2 text-xs text-center text-slate-500 font-bold">{item.orderedQuantity}</td>
-                  <td className="px-3 py-2">
-                    <input type="number" min="0" className={inputCls} style={{width:70}}
-                      value={item.receivedQuantity} onChange={e => setItem(idx, 'receivedQuantity', e.target.value)} />
+                  <td className="px-4 py-4 text-sm text-center text-slate-700 font-semibold">{item.orderedQuantity}</td>
+                  <td className="px-4 py-4">
+                    <input type="number" min="0" className={tableInputCls} style={{width: 80}}
+                      value={item.receivedQuantity} onChange={e => setItem(idx, 'receivedQuantity', e.target.value)} placeholder="0" />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="number" min="0" className={`${inputCls} border-amber-200 focus:border-amber-400`} style={{width:70}}
-                      value={item.rejectedQuantity} onChange={e => setItem(idx, 'rejectedQuantity', e.target.value)} />
+                  <td className="px-4 py-4">
+                    <input type="number" min="0" className={tableInputCls} style={{width: 80}}
+                      value={item.rejectedQuantity} onChange={e => setItem(idx, 'rejectedQuantity', e.target.value)} placeholder="0" />
                   </td>
-                  <td className="px-3 py-2">
-                    <select className={inputCls} style={{width:130}} value={item.rejectionReason}
+                  <td className="px-4 py-4 min-w-[140px]">
+                    <select className={tableSelectCls} value={item.rejectionReason}
                       onChange={e => setItem(idx, 'rejectionReason', e.target.value)}>
                       <option value="">None</option>
                       {REJECTION_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </td>
-                  <td className="px-3 py-2">
-                    <input className={inputCls} style={{width:100}} value={item.batchNumber}
+                  <td className="px-4 py-4">
+                    <input type="text" className={tableInputCls} style={{width: 110, textAlign: 'left'}} value={item.batchNumber}
                       onChange={e => setItem(idx, 'batchNumber', e.target.value)} placeholder="BTH001" />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="date" className={inputCls} style={{width:130}} value={item.manufacturingDate}
+                  <td className="px-4 py-4">
+                    <input type="date" className={tableDateCls} style={{width: 140}} value={item.manufacturingDate}
                       onChange={e => setItem(idx, 'manufacturingDate', e.target.value)} />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="date" className={`${inputCls} focus:border-red-400`} style={{width:130}} value={item.expiryDate}
+                  <td className="px-4 py-4">
+                    <input type="date" className={tableDateCls} style={{width: 140}} value={item.expiryDate}
                       onChange={e => setItem(idx, 'expiryDate', e.target.value)} />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="number" className={inputCls} style={{width:80}} value={item.mrp}
+                  <td className="px-4 py-4">
+                    <input type="number" className={tableInputCls} style={{width: 90}} value={item.mrp}
                       onChange={e => setItem(idx, 'mrp', e.target.value)} placeholder="0.00" />
                   </td>
-                  <td className="px-3 py-2">
-                    <input type="number" className={inputCls} style={{width:80}} value={item.purchaseRate}
+                  <td className="px-4 py-4">
+                    <input type="number" className={tableInputCls} style={{width: 90}} value={item.purchaseRate}
                       onChange={e => setItem(idx, 'purchaseRate', e.target.value)} placeholder="0.00" />
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4">
                     {items.length > 1 && (
-                      <button onClick={() => removeItem(idx)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
-                        <Trash2 className="w-3.5 h-3.5" />
+                      <button onClick={() => removeItem(idx)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </td>
@@ -283,16 +281,16 @@ export default function GRNEntry({ onBack }) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 justify-end">
-        <button onClick={onBack} className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all">
+      <div className="flex gap-4 justify-end pt-2">
+        <button onClick={onBack} className="px-6 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
           Cancel
         </button>
         <button onClick={() => handleSave(false)} disabled={saveMutation.isPending}
-          className="px-5 py-2.5 border border-blue-200 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-50 transition-all flex items-center gap-2 disabled:opacity-50">
+          className="px-6 py-2.5 border border-[#2563eb]/30 text-[#2563eb] text-sm font-semibold rounded-xl hover:bg-[#2563eb]/5 transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm">
           <Save className="w-4 h-4" /> Save as Draft
         </button>
         <button onClick={() => handleSave(true)} disabled={saveMutation.isPending}
-          className="px-6 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm">
+          className="px-6 py-2.5 bg-[#10b981] text-white text-sm font-semibold rounded-xl hover:bg-emerald-600 transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm">
           <CheckCircle2 className="w-4 h-4" /> Confirm GRN & Update Stock
         </button>
       </div>

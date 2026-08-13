@@ -8,20 +8,20 @@ export const DashboardShell = ({
   children
 }) => {
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#F3F6FF] font-sans text-slate-700">
+    <div className="flex flex-col h-full overflow-hidden font-sans text-slate-700">
       {/* ── Quick Actions Row ── */}
       {quickActions.length > 0 && (
-        <div className="flex items-center gap-2.5 overflow-x-auto px-4 py-2 border-b border-slate-200/60 bg-slate-50/50 shrink-0 no-scrollbar">
+        <div className="flex items-center gap-4 overflow-x-auto pb-4 shrink-0 no-scrollbar">
           {quickActions.map((btn, i) => {
             const Icon = btn.icon;
             return (
               <button 
                 key={i} 
                 onClick={btn.action}
-                className="flex flex-col items-center justify-center min-w-[100px] h-[68px] px-3 py-2 bg-white border border-slate-100 rounded-xl shadow-2xs hover:shadow-xs transition-all text-[10px] font-bold text-slate-800 shrink-0"
+                className="flex flex-col items-center justify-center min-w-[110px] h-[80px] px-3 py-3 bg-white border border-slate-100 rounded-2xl shadow-[0_4px_16px_-4px_rgba(0,0,0,0.04)] hover:shadow-md hover:-translate-y-0.5 transition-all text-[11px] font-bold text-slate-700 shrink-0"
               >
-                <span className={`${btn.bg || 'bg-indigo-50'} ${btn.color || 'text-indigo-600'} p-1 rounded-md mb-1`}>
-                  <Icon size={16} />
+                <span className={`${btn.bg || 'bg-indigo-50'} ${btn.color || 'text-indigo-600'} p-2 rounded-[10px] mb-2`}>
+                  <Icon size={18} strokeWidth={2.5} />
                 </span>
                 <span className="leading-tight text-center whitespace-pre-line">{btn.label}</span>
               </button>
@@ -55,7 +55,7 @@ export const DashboardShell = ({
       )}
 
       {/* ── Dashboard Content Container (Fills viewport without root scroll) ── */}
-      <div className="flex-1 overflow-hidden p-3 md:p-4 flex flex-col gap-3 min-height-0">
+      <div className="flex-1 overflow-hidden flex flex-col gap-3 min-height-0">
         {children}
       </div>
     </div>

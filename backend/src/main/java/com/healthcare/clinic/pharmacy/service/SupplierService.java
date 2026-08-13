@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @Service("pharmacySupplierService")
 public class SupplierService {
@@ -30,7 +32,7 @@ public class SupplierService {
 
     public Supplier getById(Long id) {
         return supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found: " + id));
     }
 
     @Transactional
@@ -51,7 +53,7 @@ public class SupplierService {
     @Transactional
     public Supplier updateSupplier(Long id, Supplier supplierDetails) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found with id: " + id));
 
         supplier.setName(supplierDetails.getName());
         supplier.setContact(supplierDetails.getContact());
@@ -86,7 +88,7 @@ public class SupplierService {
     @Transactional
     public void deleteSupplier(Long id) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found with id: " + id));
         supplier.setDeleted(true);
         supplierRepository.save(supplier);
     }
@@ -98,7 +100,7 @@ public class SupplierService {
     @Transactional
     public SupplierPerformance savePerformanceScore(Long supplierId, SupplierPerformance performance) {
         Supplier supplier = supplierRepository.findById(supplierId)
-                .orElseThrow(() -> new RuntimeException("Supplier not found: " + supplierId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found: " + supplierId));
         performance.setSupplier(supplier);
 
         // Calculate weighted overall score

@@ -10,7 +10,7 @@ A monolithic clinic management platform with a Spring Boot backend and a React/V
 | Framework | **Spring Boot 4.1.0** |
 | Persistence | Spring Data JPA + Flyway migrations |
 | Auth | Spring Security — JWT (JJWT 0.11.5) |
-| Database | PostgreSQL (hosted on Supabase) |
+| Database | PostgreSQL (Clinic Module) & MySQL/TiDB (Pharmacy Module) |
 | Frontend | React 19 + Vite 8 |
 
 ## Project Structure
@@ -54,10 +54,10 @@ cp .env.example .env
 
 > ⚠️ **Never commit `.env`** — it is listed in `.gitignore`.
 
-### 2. Start the database
+### 2. Start the databases
 
 ```bash
-docker-compose up -d postgres
+docker-compose up -d postgres mysql
 ```
 
 ### 3. Start the backend

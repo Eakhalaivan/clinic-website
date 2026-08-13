@@ -18,7 +18,7 @@ import com.healthcare.clinic.common.dto.ApiResponse;
 import java.time.LocalDateTime;
 
 @RestController("pharmacyBillingController")
-@RequestMapping("/api/bills")
+@RequestMapping("/api/pharmacy/bills")
 public class BillingController {
 
     private final PharmacyBillRepository billRepository;

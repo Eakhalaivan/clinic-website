@@ -1,5 +1,6 @@
 package com.healthcare.clinic.billing.controller;
 
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 import com.healthcare.clinic.billing.dto.*;
 import com.healthcare.clinic.billing.service.BillingService;
 import jakarta.validation.Valid;
@@ -26,12 +27,14 @@ public class BillingController {
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("(hasAuthority('ROLE_PATIENT') and @securityUtils.isSameUser(#patientId)) " +
                   "or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ACCOUNTANT')")
+    @AuditableAction(module = "BILLING", action = "VIEW", resourceType = "Invoice", sensitivityLevel = "NORMAL")
     public ResponseEntity<List<InvoiceResponse>> getPatientInvoices(@PathVariable Long patientId) {
         return ResponseEntity.ok(billingService.getInvoicesForPatient(patientId));
     }
 
     @PutMapping("/{id}/pay")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
+    @AuditableAction(module = "BILLING", action = "PAYMENT", resourceType = "Invoice", sensitivityLevel = "HIGH")
     public ResponseEntity<InvoiceResponse> payInvoice(@PathVariable Long id) {
         InvoiceResponse response = billingService.getInvoice(id);
         assertCanAccessInvoice(response.getPatientId());
@@ -76,6 +79,7 @@ public class BillingController {
 
     @PatchMapping("/invoices/{id}/mark-paid")
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ACCOUNTANT') or hasAuthority('ROLE_SUPER_ADMIN')")
+    @AuditableAction(module = "BILLING", action = "MARK_PAID", resourceType = "Invoice", sensitivityLevel = "HIGH")
     public ResponseEntity<InvoiceResponse> markPaid(@PathVariable Long id,
                                                      @RequestParam String paymentMethod) {
         return ResponseEntity.ok(billingService.markPaid(id, paymentMethod));
@@ -86,6 +90,7 @@ public class BillingController {
     @GetMapping("/invoices/{id}/pdf")
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ACCOUNTANT') " +
                   "or hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_SUPER_ADMIN')")
+    @AuditableAction(module = "BILLING", action = "DOWNLOAD_PDF", resourceType = "Invoice", sensitivityLevel = "HIGH")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable Long id) {
         InvoiceResponse response = billingService.getInvoice(id);
         assertCanAccessInvoice(response.getPatientId());

@@ -58,8 +58,8 @@
   --shadow-elevated: 0 20px 60px rgba(15, 42, 74, 0.12);
 
   /* Typography Base */
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Inter", -apple-system, sans-serif;
+  --font-display: "Poppins", "Inter", -apple-system, sans-serif;
+  --font-body: "Poppins", "Inter", -apple-system, sans-serif;
 
   /* Type Scale */
   --text-xs: 0.75rem;

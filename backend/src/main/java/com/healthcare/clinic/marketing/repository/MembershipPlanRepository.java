@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface MembershipPlanRepository extends JpaRepository<MembershipPlan, Long> {
     List<MembershipPlan> findByStatus(String status);
+    
+    default List<MembershipPlan> findByActiveTrue() {
+        return findByStatus("ACTIVE");
+    }
 }

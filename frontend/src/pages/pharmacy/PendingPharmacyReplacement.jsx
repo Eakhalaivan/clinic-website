@@ -19,10 +19,11 @@ export default function PendingPharmacyReplacement() {
   const fetchReplacements = async () => {
     setLoading(true);
     try {
-      const res = await pharmacyService.api.get('/returns/pending-replacements');
-      setReplacements(res.data?.data || []);
+      const res = await pharmacyService.getPendingWardReplacements();
+      setReplacements(res.data || res || []);
     } catch (err) {
       logger.error('Failed to load pending replacements', err);
+      toast.error('Failed to load replacements');
     } finally {
       setLoading(false);
     }
@@ -80,24 +81,25 @@ export default function PendingPharmacyReplacement() {
 
   const addRow = () => setRequestItems([...requestItems, { id: Date.now(), name: '', qty: 1, stock: 0 }]);
 
-  const saveRequest = () => {
+  const saveRequest = async () => {
     if (!requester) { toast.error('Please enter requester name'); return; }
     if (requestItems.some(i => !i.name)) { toast.error('Select medicines for all rows'); return; }
 
-    const newReq = {
-      id: Date.now(),
-      reqNo: `REQ-${4400 + replacements.length + 1}`,
-      ward: ward,
-      requestedBy: requester,
-      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      items: requestItems.length,
-      status: 'Pending'
-    };
-
-    setReplacements([newReq, ...replacements]);
-    toast.success('Replacement request submitted successfully!');
-    setIsModalOpen(false);
-    resetForm();
+    try {
+       const payload = {
+         ward,
+         requestedBy: requester,
+         items: requestItems.map(i => ({ medicineName: i.name, qty: i.qty, availableStock: i.stock })),
+       };
+       const res = await pharmacyService.createWardReplacement(payload);
+       setReplacements([res.data || res, ...replacements]);
+       toast.success('Replacement request submitted successfully!');
+       setIsModalOpen(false);
+       resetForm();
+    } catch (e) {
+       logger.error('Failed to submit replacement request', e);
+       toast.error('Failed to submit request');
+    }
   };
 
   const resetForm = () => {
@@ -106,11 +108,18 @@ export default function PendingPharmacyReplacement() {
     setRequestItems([{ id: Date.now(), name: '', qty: 1, stock: 0 }]);
   };
 
-  const confirmDelete = () => {
-    setReplacements(replacements.filter(r => r.id !== requestToDelete));
-    toast.success('Request cancelled successfully');
-    setIsDeleteModalOpen(false);
-    setRequestToDelete(null);
+  const confirmDelete = async () => {
+    try {
+      await pharmacyService.rejectWardReplacement(requestToDelete);
+      toast.success('Request cancelled successfully');
+      fetchReplacements();
+    } catch (e) {
+      logger.error(e);
+      toast.error('Failed to cancel request');
+    } finally {
+      setIsDeleteModalOpen(false);
+      setRequestToDelete(null);
+    }
   };
 
   const columns = [
@@ -118,8 +127,8 @@ export default function PendingPharmacyReplacement() {
     { header: 'Request No', accessor: 'reqNo' },
     { header: 'Ward/Department', accessor: 'ward' },
     { header: 'Requested By', accessor: 'requestedBy' },
-    { header: 'Request Date', accessor: 'date' },
-    { header: 'Items Count', accessor: 'items' },
+    { header: 'Request Date', render: (row) => new Date(row.requestDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
+    { header: 'Items Count', render: (row) => row.items?.length || 0 },
     { header: 'Status', render: (row) => (
       <Badge variant={row.status === 'Pending' ? 'warning' : 'success'}>{row.status}</Badge>
     )},
@@ -136,9 +145,15 @@ export default function PendingPharmacyReplacement() {
           <>
             <button 
               title="Approve & Send" 
-              onClick={() => {
-                setReplacements(replacements.map(r => r.id === row.id ? { ...r, status: 'Approved' } : r));
-                toast.success('Items approved and sent to ward');
+              onClick={async () => {
+                try {
+                   await pharmacyService.approveWardReplacement(row.id);
+                   toast.success('Items approved and sent to ward');
+                   fetchReplacements();
+                } catch (e) {
+                   logger.error(e);
+                   toast.error('Failed to approve request');
+                }
               }}
               className="p-1.5 text-success hover:bg-green-50 rounded-lg transition-colors"
             >
@@ -164,7 +179,7 @@ export default function PendingPharmacyReplacement() {
       r.ward.toLowerCase().includes(s) || 
       r.requestedBy.toLowerCase().includes(s);
 
-    const reqDate = new Date(r.date);
+    const reqDate = new Date(r.requestDate);
     const normalizedReqDate = new Date(reqDate.getFullYear(), reqDate.getMonth(), reqDate.getDate()).getTime();
     
     const matchesFrom = !dateRange.from || normalizedReqDate >= new Date(dateRange.from.getFullYear(), dateRange.from.getMonth(), dateRange.from.getDate()).getTime();

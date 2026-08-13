@@ -18,7 +18,7 @@ import com.healthcare.clinic.pharmacy.dto.common.PageResponse;
 import java.util.List;
 
 @RestController("pharmacyInsuranceClaimController")
-@RequestMapping("/api/insurance-claims")
+@RequestMapping("/api/pharmacy/insurance-claims")
 public class PharmacyInsuranceClaimController {
 
     private final PharmacyInsuranceClaimService service;

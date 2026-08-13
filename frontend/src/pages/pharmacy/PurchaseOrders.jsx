@@ -247,7 +247,7 @@ export default function PurchaseOrders() {
         </select>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 shadow-md shadow-primary/20 transition-all"
+          className="px-4 py-2 bg-[#2563EB] text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-blue-700 shadow-md shadow-blue-200/50 transition-all"
         >
           <Plus className="w-4 h-4" /> New PO
         </button>

@@ -43,10 +43,13 @@ public class ClinicDatabaseConfig {
 
     @Primary
     @Bean(name = "clinicEntityManagerFactory")
+    @org.springframework.context.annotation.DependsOn("clinicFlyway")
     public LocalContainerEntityManagerFactoryBean clinicEntityManagerFactory(
-            @Qualifier("clinicDataSource") DataSource dataSource) {
+            @Qualifier("clinicDataSource") DataSource dataSource,
+            org.springframework.core.env.Environment env) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
+        em.setPersistenceUnitName("clinic");
         em.setPackagesToScan(
                 "com.healthcare.clinic.identity",
                 "com.healthcare.clinic.patient",

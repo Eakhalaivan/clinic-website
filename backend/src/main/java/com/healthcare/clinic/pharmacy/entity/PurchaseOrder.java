@@ -34,7 +34,7 @@ public class PurchaseOrder {
     private LocalDate poDate = LocalDate.now();
 
     @Column(name = "expected_delivery_date", nullable = false)
-    private LocalDate expectedDeliveryDate;
+    private LocalDate expectedDeliveryDate = LocalDate.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false)
@@ -58,12 +58,13 @@ public class PurchaseOrder {
     @Column(length = 30)
     private String status = "draft";
 
+    @Column(nullable = false)
     private BigDecimal subtotal = BigDecimal.ZERO;
 
-    @Column(name = "gst_amount")
+    @Column(name = "gst_amount", nullable = false)
     private BigDecimal gstAmount = BigDecimal.ZERO;
 
-    @Column(name = "total_value")
+    @Column(name = "total_value", nullable = false)
     private BigDecimal totalValue = BigDecimal.ZERO;
 
     @Column(name = "terms_and_conditions", columnDefinition = "TEXT")

@@ -5,6 +5,9 @@ server:
 spring:
   application:
     name: clinic-app
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   datasource:
     clinic:
       jdbc-url: ${DB_URL}
@@ -39,8 +42,8 @@ spring:
       mail.smtp.starttls.enable: true
 
 jwt:
-  secret: ${JWT_SECRET:?JWT_SECRET environment variable must be set}
-  access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes (dev default; override via JWT_EXPIRATION_MS env var in production)
+  secret: ${JWT_SECRET:default_secret_key_that_is_long_enough_for_hs256_algorithm_12345}
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes
 
 cors:
   # In production (Render), override via the ALLOWED_ORIGINS environment variable.

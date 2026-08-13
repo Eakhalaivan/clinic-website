@@ -1,5 +1,6 @@
 package com.healthcare.clinic.laboratory.controller;
 
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.identity.repository.UserRepository;
 import com.healthcare.clinic.laboratory.entity.LabResult;
@@ -13,6 +14,7 @@ import com.healthcare.clinic.notification.event.LabResultReleasedEvent;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
 import com.healthcare.clinic.security.SecurityUtils;
+import com.healthcare.clinic.laboratory.service.LabPdfService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,7 @@ public class LabController {
     private final com.healthcare.clinic.laboratory.service.LabResultService resultService;
     private final com.healthcare.clinic.laboratory.service.LabReportVerificationService verificationService;
     private final com.healthcare.clinic.laboratory.service.LabReportPdfGenerator pdfGenerator;
+    private final LabPdfService labPdfService;
 
     // ─── Patient: own lab reports ─────────────────────────────────────────────
 
@@ -49,6 +52,7 @@ public class LabController {
      */
     @GetMapping("/patient/lab-reports")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
+    @AuditableAction(module = "LABORATORY", action = "VIEW", resourceType = "LabReport", sensitivityLevel = "NORMAL")
     public ResponseEntity<List<LabTestRequest>> getMyLabReports() {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -69,6 +73,7 @@ public class LabController {
      */
     @GetMapping("/doctor/my-requests")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "VIEW", resourceType = "LabTestRequest", sensitivityLevel = "NORMAL")
     public ResponseEntity<List<LabTestRequest>> getMyDoctorLabRequests() {
         Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) {
@@ -87,6 +92,7 @@ public class LabController {
 
     @PostMapping("/requests")
     @PreAuthorize("hasRole('DOCTOR') or hasRole('SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "CREATE", resourceType = "LabTestRequest", sensitivityLevel = "NORMAL")
     public ResponseEntity<LabTestRequest> createRequest(@RequestBody LabTestRequest request) {
         request.setStatus("REQUESTED");
         request.setRequestedAt(ZonedDateTime.now());
@@ -101,6 +107,7 @@ public class LabController {
 
     @PutMapping("/requests/{requestId}/status")
     @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "EDIT_STATUS", resourceType = "LabTestRequest", sensitivityLevel = "HIGH")
     public ResponseEntity<LabTestRequest> updateRequestStatus(@PathVariable Long requestId, @RequestParam String status) {
         LabTestRequest request = requestRepository.findById(requestId).orElseThrow();
         request.setStatus(status);
@@ -130,6 +137,7 @@ public class LabController {
 
     @PostMapping(value = "/requests/{requestId}/result", consumes = {"multipart/form-data", "application/json"})
     @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "ENTER_RESULT", resourceType = "LabResult", sensitivityLevel = "HIGH")
     public ResponseEntity<LabResult> addResult(
             @PathVariable Long requestId,
             @RequestPart("result") LabResult result,
@@ -187,5 +195,33 @@ public class LabController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(pdfBytes);
+    }
+
+    @PutMapping("/requests/{requestId}/verify")
+    @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "VERIFY_RESULT", resourceType = "LabResult", sensitivityLevel = "HIGH")
+    public ResponseEntity<LabResult> verifyResult(@PathVariable Long requestId, @AuthenticationPrincipal User verifier) {
+        LabTestRequest request = requestRepository.findById(requestId).orElseThrow();
+        LabResult result = resultRepository.findByRequestId(requestId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Result not found"));
+        
+        result.setVerifiedAt(ZonedDateTime.now());
+        result.setVerifiedBy(verifier);
+        LabResult savedResult = resultRepository.save(result);
+        
+        request.setStatus("VERIFIED");
+        requestRepository.save(request);
+        
+        return ResponseEntity.ok(savedResult);
+    }
+
+    @GetMapping("/results/{resultId}/pdf")
+    @AuditableAction(module = "LABORATORY", action = "DOWNLOAD_PDF", resourceType = "LabResult", sensitivityLevel = "HIGH")
+    public ResponseEntity<byte[]> downloadLabResultPdf(@PathVariable Long resultId) {
+        byte[] pdf = labPdfService.generateLabResultPdf(resultId);
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "lab_result_" + resultId + ".pdf");
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }

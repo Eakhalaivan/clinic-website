@@ -15,7 +15,10 @@ export default function DataTable({
   overflowVisible = false,
   containerHeight = "600px",
   rowHeight = 52,
-  onRowClick
+  onRowClick,
+  emptyStateTitle,
+  emptyStateDesc,
+  emptyStateIcon
 }) {
   const parentRef = useRef(null);
 
@@ -44,18 +47,18 @@ export default function DataTable({
     >
       <table className="w-full text-sm text-left border-collapse">
         <thead className={cn(
-          "text-xs text-white uppercase bg-indigo-900 border-b border-indigo-800",
+          "text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200",
           stickyHeader && "sticky top-0 z-10"
         )}>
           <tr>
             {columns.map((col, i) => (
-              <th key={i} className="px-6 py-4 font-bold tracking-wider whitespace-nowrap">
+              <th key={i} className="px-6 py-3.5 whitespace-nowrap">
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-slate-100">
           {loading ? (
             // Skeleton Loading State
             [...Array(5)].map((_, i) => (
@@ -70,15 +73,34 @@ export default function DataTable({
           ) : data.length === 0 ? (
             // Empty State
             <tr>
-              <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-400">
+              <td colSpan={columns.length} className="px-6 py-16 text-center">
                 <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
+                  <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[#eff6ff] rounded-2xl rotate-3"></div>
+                    <div className="absolute inset-0 bg-[#dbeafe] rounded-2xl -rotate-3"></div>
+                    <div className="relative bg-white border border-[#dbeafe] rounded-xl w-12 h-12 flex items-center justify-center shadow-sm">
+                      {emptyStateIcon ? emptyStateIcon : (
+                        <>
+                          <svg className="w-6 h-6 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <div className="absolute -bottom-1 -right-1 bg-[#2563EB] text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm font-medium">No records found</p>
-                  <p className="text-xs text-gray-400 mt-1">Try adjusting your filters or search term</p>
+                  <h3 className="text-[17px] font-bold text-slate-900 mb-1">{emptyStateTitle || 'No records found'}</h3>
+                  <p className="text-[13px] text-slate-500 mb-6">{emptyStateDesc || 'Try adjusting your filters or search term'}</p>
+                  <button className="flex items-center gap-2 px-5 py-2 rounded-lg border border-[#bfdbfe] bg-[#eff6ff] text-[#2563EB] text-[13px] font-bold hover:bg-[#dbeafe] transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Reset Filters
+                  </button>
                 </div>
               </td>
             </tr>

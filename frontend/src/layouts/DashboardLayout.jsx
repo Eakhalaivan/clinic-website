@@ -83,6 +83,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
             </Link>
           </div>
 
+
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl mx-12 hidden md:block">
             <div className="relative">

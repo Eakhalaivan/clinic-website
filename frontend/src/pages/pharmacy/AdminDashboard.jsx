@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
+import { Cardio } from 'ldrs/react';
+import 'ldrs/react/Cardio.css';
 import { useQuery } from '@tanstack/react-query';
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +23,7 @@ const ROLE_CONFIG = {
     greeting: 'System Admin',
     subtitle: 'Operational dashboard and real-time pharmacy metrics overview.',
     kpiKeys: ['totalSkus', 'todayRevenue', 'lowStockAlerts', 'expiringIn30Days', 'activePatientsToday'],
-    chartType: 'bar',
+    chartType: 'area',
     chartLabel: '7-Day Sales Revenue',
     quickActions: [
       { label: 'New Sale', icon: Plus, path: '/sales' },
@@ -186,6 +188,7 @@ function AdminKpiWrapper({ kpiKey, value, delta, deltaType }) {
       title={meta.label}
       value={displayValue}
       icon={meta.icon}
+      iconColor={meta.color}
       subtext={subtext}
       trend={deltaType === 'up' ? 'up' : deltaType === 'down' ? 'down' : 'neutral'}
     />
@@ -209,30 +212,31 @@ const getRelativeTime = (isoStr) => {
 };
 
 function AlertRow({ alert }) {
-  const style = SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.INFO;
-  const Icon = style.icon;
   const relTime = getRelativeTime(alert.createdAt);
+  
+  let bgClass = 'bg-blue-50/70 border-blue-100';
+  let iconClass = 'text-blue-600';
+  let Icon = Activity;
+  
+  if (alert.severity === 'CRITICAL') {
+    bgClass = 'bg-rose-50/70 border-rose-100';
+    iconClass = 'text-rose-600';
+    Icon = ShieldAlert;
+  } else if (alert.severity === 'WARNING') {
+    bgClass = 'bg-amber-50/70 border-amber-100';
+    iconClass = 'text-amber-600';
+    Icon = AlertTriangle;
+  }
 
   return (
-    <div className="flex gap-3 py-3 border-b border-gray-50 last:border-0">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-        ${alert.severity === 'CRITICAL' ? 'bg-red-50' :
-          alert.severity === 'WARNING' ? 'bg-amber-50' : 'bg-blue-50'}`}>
-        <Icon className={`w-4 h-4 
-          ${alert.severity === 'CRITICAL' ? 'text-red-500' :
-            alert.severity === 'WARNING' ? 'text-amber-500' : 'text-blue-500'}`} />
-      </div>
+    <div className={`flex gap-3.5 p-4 rounded-xl border mb-3 last:mb-0 ${bgClass}`}>
+      <Icon className={`w-5 h-5 mt-0.5 shrink-0 ${iconClass}`} />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="text-sm font-semibold text-gray-800 truncate">{alert.title}</span>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-gray-400">{relTime}</span>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
-              {alert.severity}
-            </span>
-          </div>
+        <div className="flex justify-between items-start mb-1">
+          <span className="text-[13px] font-bold text-gray-900">{alert.title}</span>
+          <span className="text-[11px] font-medium text-gray-500 whitespace-nowrap ml-2">{relTime}</span>
         </div>
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{alert.description}</p>
+        <p className="text-[12px] font-medium text-gray-600 leading-relaxed line-clamp-2">{alert.description}</p>
       </div>
     </div>
   );
@@ -270,6 +274,21 @@ function DashboardChart({ chartType, data, label }) {
           <Bar dataKey="value" name="Sales Revenue" fill={CHART_COLOR} radius={[6, 6, 0, 0]}
             activeBar={{ fill: '#1D4ED8' }} />
         </BarChart>
+      ) : chartType === 'area' ? (
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={CHART_COLOR} stopOpacity={0.2}/>
+              <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false}
+            tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`} />
+          <Tooltip content={<CustomTooltip />} />
+          <Area type="monotone" dataKey="value" name="Sales Revenue" stroke={CHART_COLOR} strokeWidth={2.5} fillOpacity={1} fill="url(#colorValue)" dot={{ r: 4, fill: '#fff', stroke: CHART_COLOR, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+        </AreaChart>
       ) : chartType === 'line' ? (
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
@@ -351,8 +370,8 @@ export default function AdminDashboard() {
   const mappedQuickActions = config.quickActions.map(action => ({
     label: action.label,
     icon: action.icon,
-    color: 'text-[#5244F2]',
-    bg: 'bg-[#5244F2]/10',
+    color: 'text-[#2563eb]',
+    bg: 'bg-[#2563eb]/10',
     action: () => action.path ? navigate(action.path) : handleAction(action.action)
   }));
 
@@ -361,29 +380,29 @@ export default function AdminDashboard() {
       quickActions={mappedQuickActions}
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 mt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">
-            {getGreeting()},{' '}
-            <span className="text-[var(--color-primary)]">{config.greeting}</span>
+          <h1 className="text-[28px] font-extrabold text-slate-900 m-0 tracking-tight">
+            {getGreeting()}, {config.greeting}.
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">{config.subtitle}</p>
+          <p className="text-[14px] font-medium text-slate-500 m-0 mt-1.5">{config.subtitle}</p>
         </div>
-        <div className="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
-          <div className="flex items-center gap-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] 
-                          rounded-lg px-3 py-2 shadow-sm">
-            <Clock className="w-4 h-4 text-[var(--color-text-muted)]" />
-            <span className="font-medium text-[var(--color-navy-900)]">{getFormattedDate()}</span>
+        <div className="flex items-center gap-3 text-[13px] font-semibold text-slate-700">
+          <div className="flex items-center gap-2.5 bg-white border border-slate-200 
+                          rounded-full px-4 py-2 shadow-sm">
+            <Calendar className="w-4 h-4 text-slate-500" />
+            <span>{getFormattedDate()}</span>
           </div>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-2 
-                          shadow-sm font-semibold text-[var(--color-navy-900)]">
-            {user?.branch || 'Main Branch'}
+          <div className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full px-4 py-2 
+                          shadow-sm">
+            <svg className="w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+            <span className="truncate">{user?.branch || 'Main Branch'}</span>
           </div>
         </div>
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
         {config.kpiKeys.map(key => (
           <AdminKpiWrapper
             key={key}
@@ -398,12 +417,17 @@ export default function AdminDashboard() {
       {/* Chart + Alerts */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         {/* Chart (3/5 width) */}
-        <div className="xl:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-gray-800">{config.chartLabel}</h3>
-            <button className="text-xs text-blue-500 font-semibold hover:underline">
-              Operational breakdown
-            </button>
+        <div className="xl:col-span-3 bg-white rounded-[24px] border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[15px] font-bold text-gray-900">{config.chartLabel}</h3>
+            <div className="flex items-center gap-3">
+              <button className="text-[13px] text-blue-600 font-semibold hover:text-blue-700">
+                Operational breakdown
+              </button>
+              <button className="text-gray-400 hover:text-gray-600">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+              </button>
+            </div>
           </div>
           {chartData?.length ? (
             <DashboardChart chartType={config.chartType} data={chartData} label={config.chartLabel} />
@@ -413,45 +437,66 @@ export default function AdminDashboard() {
                               rounded-full animate-spin" />
             </div>
           )}
+          {config.chartType === 'area' && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+              <span className="text-[12px] font-semibold text-slate-700">Sales Revenue (₹)</span>
+            </div>
+          )}
         </div>
 
         {/* Alerts panel (2/5 width) */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-gray-800">Active System Alerts</h3>
-            <span className="text-xs text-gray-400 font-medium">
-              {alerts?.length ?? 0} sources monitored
-            </span>
+        <div className="xl:col-span-2 bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[15px] font-bold text-gray-900">Active System Alerts</h3>
+            <div className="flex items-center gap-3">
+              <span className="text-[12px] text-gray-500 font-medium">
+                {alerts?.length ?? 0} sources monitored
+              </span>
+              <button className="text-gray-400 hover:text-gray-600">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+              </button>
+            </div>
           </div>
-          <div className="space-y-0 overflow-y-auto max-h-[260px] pr-1">
+          <div className="space-y-0 overflow-y-auto flex-1 pr-1 min-h-[220px]">
             {alerts?.length ? (
               alerts.slice(0, 6).map(alert => <AlertRow key={alert.id} alert={alert} />)
             ) : (
               <p className="text-sm text-gray-400 text-center py-8">No active alerts</p>
             )}
           </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+            <button className="text-[13px] font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1">
+              View all alerts
+            </button>
+            <button className="text-blue-700 hover:text-blue-800">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Revenue Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { label: "TODAY'S REVENUE", key: 'todayRevenue' },
-          { label: "THIS WEEK'S REVENUE", key: 'weekRevenue' },
-          { label: "THIS MONTH'S REVENUE", key: 'monthRevenue' },
-        ].map(({ label, key }) => (
-          <div key={key} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              {label}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">
-              {revenueStrip?.[key] != null
-                ? `₹${Number(revenueStrip[key]).toLocaleString('en-IN')}`
-                : <span className="inline-block h-8 w-28 bg-gray-100 rounded animate-pulse" />}
-            </p>
-          </div>
-        ))}
-      </div>
+      {activeRole !== 'SYSTEM_ADMIN' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          {[
+            { label: "TODAY'S REVENUE", key: 'todayRevenue' },
+            { label: "THIS WEEK'S REVENUE", key: 'weekRevenue' },
+            { label: "THIS MONTH'S REVENUE", key: 'monthRevenue' },
+          ].map(({ label, key }) => (
+            <div key={key} className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                {label}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 tabular-nums">
+                {revenueStrip?.[key] != null
+                  ? `₹${Number(revenueStrip[key]).toLocaleString('en-IN')}`
+                  : <span className="inline-block h-8 w-28 bg-gray-100 rounded animate-pulse" />}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </DashboardShell>
   );
 }

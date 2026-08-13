@@ -15,6 +15,9 @@ public class MedicationAdministrationRecord {
     private Long patientId;
     private Long prescriptionItemId;
     
+    @Column(name = "admission_id")
+    private Long admissionId;
+    
     private String patientName;
     private String bedNumber;
     private String medicationName;

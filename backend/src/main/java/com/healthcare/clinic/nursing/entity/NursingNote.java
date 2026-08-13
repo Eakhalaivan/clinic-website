@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import com.healthcare.clinic.inpatient.entity.Admission;
 
 @Entity
 @Table(name = "nursing_notes")
@@ -23,6 +24,10 @@ public class NursingNote {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private PatientProfile patient;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admission_id")
+    private Admission admission;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nurse_id", nullable = false)

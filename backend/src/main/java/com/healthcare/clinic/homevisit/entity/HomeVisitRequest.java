@@ -7,6 +7,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Filter;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import com.healthcare.clinic.patient.entity.PatientProfile;
 
 @Entity
 @Table(name = "home_visit_requests")
@@ -16,6 +18,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class HomeVisitRequest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,17 +26,28 @@ public class HomeVisitRequest {
     @Column(name = "tenant_id")
     private Long tenantId;
 
-    @Column(nullable = false)
-    private Long patientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private PatientProfile patient;
 
     @ManyToOne
     @JoinColumn(name = "address_id")
     private PatientAddress address;
+    
+    @Column(columnDefinition = "TEXT")
+    private String addressText; // From naveen's string address
 
     private String serviceType; // DOCTOR, NURSE, PHLEBOTOMIST
     private String symptoms;
     
+    @Column(columnDefinition = "TEXT")
+    private String notes; // From naveen
+
     private LocalDateTime preferredDate;
+    
+    @Column(name = "request_date")
+    private ZonedDateTime requestDate; // From naveen
+    
     private String status; // REQUESTED, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED
 
     private BigDecimal travelFee;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Thermometer, RefreshCw, AlertTriangle, CheckCircle, Plus, Sparkles, Save } from 'lucide-react';
+import { Thermometer, RefreshCw, AlertTriangle, CheckCircle, Plus, Sparkles, Save, Snowflake, Refrigerator, ClipboardList } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useTemperatureStore } from '../../store/useTemperatureStore';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -151,17 +151,22 @@ export default function TemperatureLogs() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Cold Chain & Temperature Logs</h2>
-          <p className="text-sm text-slate-400">Track and monitor storage unit conditions, safe thermal bounds, and corrective action histories.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
+            <Snowflake className="w-7 h-7 text-blue-500" />
+          </div>
+          <div>
+            <h2 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">Cold Chain & Temperature Logs</h2>
+            <p className="text-sm text-slate-500 font-medium">Track and monitor storage unit conditions, safe thermal bounds, and corrective action histories.</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowUnitForm(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-            <Plus className="w-3.5 h-3.5" /> Storage Unit
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowUnitForm(true)} className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm">
+            <Plus className="w-4 h-4" /> Storage Unit
           </button>
-          <button onClick={fetchAll} disabled={loading} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
-            <RefreshCw className={`w-4 h-4 text-slate-600 ${loading ? 'animate-spin' : ''}`} />
+          <button onClick={fetchAll} disabled={loading} className="p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+            <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -170,37 +175,54 @@ export default function TemperatureLogs() {
         {/* Main Grid: Storage Units & Entry */}
         <div className="lg:col-span-2 space-y-6">
           {/* Storage Units */}
-          <div className="bg-white border border-slate-100 rounded-xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-700">Cold Chain Storage Units</h3>
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-6 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900">Cold Chain Storage Units</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {units.map(unit => (
-                <div key={unit.unitId} className="p-4 border border-slate-200 rounded-xl flex items-center justify-between">
+                <div key={unit.unitId} className="p-4 border border-slate-200 rounded-2xl flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                   <div className="space-y-1">
-                    <div className="font-bold text-slate-800 text-xs">{unit.unitName}</div>
-                    <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{unit.location}</div>
-                    <div className="text-[10px] text-slate-500 font-bold bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full inline-block">
+                    <div className="font-bold text-slate-800 text-sm">{unit.unitName}</div>
+                    <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">{unit.location}</div>
+                    <div className="text-[11px] text-slate-500 font-bold bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full inline-block mt-1">
                       Safe: {unit.minThreshold}°C to {unit.maxThreshold}°C
                     </div>
                   </div>
-                  <Thermometer className="w-8 h-8 text-blue-500 bg-blue-50 p-1.5 rounded-lg" />
+                  <Thermometer className="w-10 h-10 text-blue-500 bg-blue-50 p-2 rounded-xl" />
                 </div>
               ))}
               {units.length === 0 && (
-                <div className="md:col-span-2 text-center py-8 text-slate-400 text-xs">No storage units defined.</div>
+                <div className="md:col-span-2 flex flex-col items-center justify-center py-10 text-center">
+                  <div className="relative mb-6">
+                    <Refrigerator className="w-16 h-16 text-blue-200" strokeWidth={1.5} />
+                    <div className="absolute -bottom-2 -right-2 p-1 bg-white rounded-full">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Snowflake className="w-5 h-5 text-blue-500" strokeWidth={2.5} />
+                      </div>
+                    </div>
+                    {/* Plus decorative stars */}
+                    <div className="absolute -top-2 -left-2 text-blue-100 text-xl font-bold">+</div>
+                    <div className="absolute top-2 -right-4 text-blue-100 text-lg font-bold">+</div>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-1">No storage units defined.</h4>
+                  <p className="text-sm text-slate-500 mb-6">Add a storage unit to start monitoring temperatures.</p>
+                  <button onClick={() => setShowUnitForm(true)} className="px-5 py-2.5 border border-[#2563eb]/30 text-[#2563eb] hover:bg-[#2563eb]/5 text-sm font-semibold rounded-xl transition-colors flex items-center gap-2">
+                    <Plus className="w-4 h-4" /> Add Storage Unit
+                  </button>
+                </div>
               )}
             </div>
           </div>
 
           {/* Record Reading Form */}
-          <div className="bg-white border border-slate-100 rounded-xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-700">Log Temperature Check</h3>
-            <form onSubmit={handleRecordTemperature} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-6 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900">Log Temperature Check</h3>
+            <form onSubmit={handleRecordTemperature} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Storage Unit *</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Storage Unit <span className="text-red-500">*</span></label>
                 <select
                   value={selectedUnitId}
                   onChange={e => setSelectedUnitId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                  className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-colors"
                   required
                 >
                   <option value="">Select storage unit</option>
@@ -208,24 +230,24 @@ export default function TemperatureLogs() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Reading (°C) *</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Reading (°C) <span className="text-red-500">*</span></label>
                 <input
                   type="number"
                   step="0.1"
                   value={tempReading}
                   onChange={e => setTempReading(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                  className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-colors"
                   placeholder="e.g. 4.2"
                   required
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Logged By (Staff Name) *</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Logged By (Staff Name) <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={loggedBy}
                   onChange={e => setLoggedBy(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                  className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-colors"
                   placeholder="e.g. Staff Pharmacist"
                   required
                 />
@@ -234,9 +256,9 @@ export default function TemperatureLogs() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+                  className="w-full py-3.5 bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 mt-2"
                 >
-                  <Save className="w-3.5 h-3.5" /> Submit Log Check
+                  <CheckCircle className="w-5 h-5" /> Submit Log Check
                 </button>
               </div>
             </form>
@@ -246,31 +268,31 @@ export default function TemperatureLogs() {
         {/* Right Sidebar: Active Breaches / Corrective Actions */}
         <div className="space-y-6">
           {/* Active Breaches list */}
-          <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" /> Thermal Breaches
+          <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" strokeWidth={2.5} /> Thermal Breaches
               </h3>
             </div>
-            <div className="divide-y divide-slate-50 max-h-[300px] overflow-auto">
+            <div className="divide-y divide-slate-50 flex-1 flex flex-col max-h-[600px] overflow-auto">
               {breaches.map((b, index) => (
-                <div key={b.logId || index} className="p-4 text-xs space-y-2 bg-red-50/10">
+                <div key={b.logId || index} className="p-5 text-sm space-y-2 bg-red-50/30 hover:bg-red-50/60 transition-colors">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-800">{b.storageUnitName || `Unit #${b.storageUnitId}`}</span>
-                    <span className="font-mono text-slate-400">{b.loggedAt}</span>
+                    <span className="font-mono text-slate-400 text-xs">{b.loggedAt}</span>
                   </div>
-                  <div>
+                  <div className="text-slate-600">
                     Reading was <span className="font-bold text-red-600">{b.recordedTemperature}°C</span> (Safe: {b.minThreshold} - {b.maxThreshold}°C)
                   </div>
                   {b.correctiveAction ? (
-                    <div className="p-2 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded text-[10px] space-y-0.5">
+                    <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-lg text-xs space-y-1">
                       <div className="font-bold">Corrective Action Taken:</div>
                       <div>"{b.correctiveAction}"</div>
                     </div>
                   ) : (
                     <button
                       onClick={() => setCorrectiveActionLogId(b.id)}
-                      className="px-2.5 py-1 bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 font-bold rounded text-[9px] transition-colors"
+                      className="px-3 py-1.5 bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 font-bold rounded-lg text-xs transition-colors mt-1 inline-block"
                     >
                       Resolve Breach
                     </button>
@@ -278,7 +300,21 @@ export default function TemperatureLogs() {
                 </div>
               ))}
               {breaches.length === 0 && (
-                <div className="p-4 text-center text-slate-400 text-xs">No active temperature breaches.</div>
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="relative mb-6">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+                      <Thermometer className="w-8 h-8 text-red-500" strokeWidth={2.5} />
+                    </div>
+                    {/* Plus decorative stars */}
+                    <div className="absolute -top-1 -left-2 text-red-100 text-xl font-bold">+</div>
+                    <div className="absolute top-4 -right-4 text-red-100 text-lg font-bold">+</div>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-1">No active temperature breaches.</h4>
+                  <p className="text-sm text-slate-500 mb-6">You'll see alerts here when a breach occurs.</p>
+                  <button className="px-5 py-2.5 border border-[#2563eb]/30 text-[#2563eb] hover:bg-[#2563eb]/5 text-sm font-semibold rounded-xl transition-colors">
+                    View Breach History
+                  </button>
+                </div>
               )}
             </div>
           </div>

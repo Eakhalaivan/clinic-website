@@ -3,11 +3,14 @@ import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { ArrowLeft, Loader2, Plus, RefreshCw, FileText } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 export default function SupplierReturns({ onBack }) {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchReturns = async () => {
     setLoading(true);
@@ -53,7 +56,13 @@ export default function SupplierReturns({ onBack }) {
           <button onClick={fetchReturns} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2">
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+          <button 
+            onClick={() => {
+              toast('Please select a specific batch to return from the Stock Registry.', { icon: '📦' });
+              navigate('/pharmacy/medicine-stock');
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          >
             <Plus className="w-4 h-4" /> New Return
           </button>
         </div>

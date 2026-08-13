@@ -12,12 +12,12 @@ import { axiosPrivate } from '../../api/axios';
 import { format } from 'date-fns';
 
 const fetchClearances = async () => {
-  const response = await axiosPrivate.get('/api/v1/pharmacy/clearances');
+  const response = await axiosPrivate.get('/v1/pharmacy/clearances');
   return response.data;
 };
 
 const clearPatient = async (id) => {
-  const response = await axiosPrivate.post(`/api/v1/pharmacy/clearances/${id}/clear`);
+  const response = await axiosPrivate.post(`/v1/pharmacy/clearances/${id}/clear`);
   return response.data;
 };
 

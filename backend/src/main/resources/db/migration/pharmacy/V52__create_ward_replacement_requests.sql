@@ -1,0 +1,23 @@
+CREATE TABLE pharmacy_ward_replacement_requests (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    request_number VARCHAR(50) NOT NULL UNIQUE,
+    ward VARCHAR(100) NOT NULL,
+    requested_by VARCHAR(150) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING, APPROVED, REJECTED
+    request_date DATETIME(6) NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+);
+
+CREATE TABLE pharmacy_ward_replacement_request_items (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    request_id BIGINT NOT NULL,
+    medicine_name VARCHAR(200) NOT NULL,
+    requested_qty INT NOT NULL,
+    available_stock_at_request INT,
+    CONSTRAINT fk_ward_repl_req_item_request
+        FOREIGN KEY (request_id) REFERENCES pharmacy_ward_replacement_requests(id)
+);
+
+CREATE INDEX idx_ward_repl_status ON pharmacy_ward_replacement_requests(status);

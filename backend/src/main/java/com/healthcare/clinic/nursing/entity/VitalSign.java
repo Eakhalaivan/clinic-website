@@ -3,6 +3,9 @@ package com.healthcare.clinic.nursing.entity;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.appointment.entity.Appointment;
+import com.healthcare.clinic.inpatient.entity.Admission;
+import com.healthcare.clinic.surgery.entity.SurgeryBooking;
+import com.healthcare.clinic.emergency.entity.EmergencyEncounter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,6 +38,19 @@ public class VitalSign {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admission_id")
+    private Admission admission;
+
+    // These don't exist yet but we add columns to support them when they are created later.
+    // To avoid compilation errors, we can map them by just column ID for now if needed.
+    // Let me add them as Longs if the entities don't exist yet, or I can just create the entities now.
+    @Column(name = "emergency_encounter_id")
+    private Long emergencyEncounterId;
+
+    @Column(name = "surgery_booking_id")
+    private Long surgeryBookingId;
 
     @Column(precision = 5, scale = 2)
     private BigDecimal temperature;

@@ -1,347 +1,306 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import {
-  DollarSign, CreditCard, Plus, Receipt, ArrowLeft, CheckCircle2,
-  Loader2, FileText
-} from 'lucide-react';
+import { Receipt, Search, FileText, Download, Plus, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Badge from '../../components/ui/Badge';
-import EmptyState from '../../components/ui/EmptyState';
-import { staggerChildren, fadeIn } from '../../components/ui/motion';
-
-const PAYMENT_METHODS = ['CASH', 'CARD', 'INSURANCE', 'ONLINE'];
+import FormField from '../../components/ui/FormField';
+import { fadeIn } from '../../components/ui/motion';
+import { useDebounce } from 'use-debounce';
 
 const ReceptionBilling = () => {
   const queryClient = useQueryClient();
-  const [patientId, setPatientId] = useState('');
-  const [searchedPatientId, setSearchedPatientId] = useState(null);
-  const [selectedBill, setSelectedBill] = useState(null);
-  const [paymentForm, setPaymentForm] = useState({
-    amount: '',
-    paymentMethod: 'CASH',
-    referenceNumber: ''
-  });
-  const [billItems, setBillItems] = useState([{ description: '', amount: '', department: 'GENERAL' }]);
-  const [showCreateBill, setShowCreateBill] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery] = useDebounce(searchQuery, 300);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
-  const { data: bills = [], isLoading: billsLoading } = useQuery({
-    queryKey: ['patientBills', searchedPatientId],
+  const [newInvoice, setNewInvoice] = useState({ description: '', dueDate: '', items: [{ description: '', unitPrice: 0, quantity: 1 }] });
+  const [isCreating, setIsCreating] = useState(false);
+
+  const { data: searchResults = [], isLoading: isSearching } = useQuery({
+    queryKey: ['patient-search', debouncedQuery],
     queryFn: async () => {
-      const res = await axiosPrivate.get(`/reception/billing/patient/${searchedPatientId}/bills`);
+      if (!debouncedQuery || debouncedQuery.length < 2) return [];
+      const res = await axiosPrivate.get(`/patients/search?query=${encodeURIComponent(debouncedQuery)}`);
       return res.data;
     },
-    enabled: !!searchedPatientId
+    enabled: debouncedQuery.length >= 2 && !selectedPatient,
   });
 
-  const createBill = useMutation({
-    mutationFn: async () => {
-      const items = billItems
-        .filter(i => i.description && i.amount)
-        .map(i => ({ ...i, amount: parseFloat(i.amount) }));
-      const res = await axiosPrivate.post('/reception/billing/bills', {
-        patientId: searchedPatientId,
-        items
-      });
+  const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ['patient-invoices', selectedPatient?.id],
+    queryFn: async () => {
+      if (!selectedPatient) return [];
+      const res = await axiosPrivate.get(`/billing/patient/${selectedPatient.id}`);
       return res.data;
     },
-    onSuccess: () => {
-      toast.success('Bill created successfully');
-      queryClient.invalidateQueries(['patientBills', searchedPatientId]);
-      setShowCreateBill(false);
-      setBillItems([{ description: '', amount: '', department: 'GENERAL' }]);
-    },
-    onError: () => toast.error('Failed to create bill')
+    enabled: !!selectedPatient,
   });
 
-  const recordPayment = useMutation({
-    mutationFn: async (billId) => {
-      const res = await axiosPrivate.post(`/reception/billing/bills/${billId}/payments`, {
-        amount: parseFloat(paymentForm.amount),
-        paymentMethod: paymentForm.paymentMethod,
-        referenceNumber: paymentForm.referenceNumber || null
-      });
+  const createInvoice = useMutation({
+    mutationFn: async (data) => {
+      const payload = {
+        patientId: selectedPatient.id,
+        description: data.description,
+        dueDate: data.dueDate ? data.dueDate + 'T23:59:59' : new Date().toISOString(),
+        items: data.items
+      };
+      // The backend expects InvoiceRequest with items or without. If it fails, we might need to send items separately.
+      // Assuming InvoiceRequest accepts items per the DTO:
+      const res = await axiosPrivate.post('/billing/invoices', payload);
       return res.data;
     },
     onSuccess: () => {
-      toast.success('Payment recorded successfully');
-      queryClient.invalidateQueries(['patientBills', searchedPatientId]);
-      setSelectedBill(null);
-      setPaymentForm({ amount: '', paymentMethod: 'CASH', referenceNumber: '' });
+      toast.success('Invoice created successfully');
+      setIsCreating(false);
+      setNewInvoice({ description: '', dueDate: '', items: [{ description: '', unitPrice: 0, quantity: 1 }] });
+      queryClient.invalidateQueries({ queryKey: ['patient-invoices', selectedPatient?.id] });
     },
-    onError: () => toast.error('Failed to record payment')
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to create invoice');
+    }
   });
 
-  const addBillItem = () => setBillItems(prev => [...prev, { description: '', amount: '', department: 'GENERAL' }]);
-  const removeBillItem = (idx) => setBillItems(prev => prev.filter((_, i) => i !== idx));
-  const updateBillItem = (idx, field, value) => {
-    setBillItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+  const handleDownloadPdf = async (id) => {
+    try {
+      const res = await axiosPrivate.get(`/billing/invoices/${id}/pdf`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toast.error('Failed to download PDF');
+    }
   };
 
-  const statusVariant = (status) => {
-    if (status === 'PAID') return 'success';
-    if (status === 'CANCELLED') return 'danger';
-    return 'warning';
+  const handleCreateSubmit = (e) => {
+    e.preventDefault();
+    if (!newInvoice.description) {
+      toast.error('Invoice description is required');
+      return;
+    }
+    createInvoice.mutate(newInvoice);
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={staggerChildren}
+    <motion.div 
+      initial="hidden" 
+      animate="visible" 
+      variants={fadeIn}
       className="max-w-5xl mx-auto space-y-6"
     >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <Link to="/reception" className="inline-flex items-center text-xs font-semibold text-[var(--color-navy-600)] hover:underline mb-2 gap-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Reception Desk
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] flex items-center gap-2">
-            <DollarSign className="w-7 h-7 text-[var(--color-navy-800)]" />
-            Billing & Payments
+          <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0 flex items-center gap-2">
+            <Receipt className="w-7 h-7 text-[var(--color-navy-800)]" />
+            Billing & Invoicing
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
-            Create bills, collect payments, and issue receipts for patients.
+          <p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">
+            Create invoices and manage front-desk payments for patients.
           </p>
         </div>
       </div>
 
-      {/* Patient Search */}
-      <Card>
-        <Card.Header>
-          <h2 className="font-display font-bold text-base text-[var(--color-navy-900)]">Search Patient</h2>
-        </Card.Header>
-        <Card.Body>
-          <div className="flex gap-3">
-            <Input
-              placeholder="Enter Patient ID..."
-              value={patientId}
-              onChange={e => setPatientId(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              variant="primary"
-              onClick={() => setSearchedPatientId(patientId || null)}
-              disabled={!patientId}
-            >
-              Search
+      {!selectedPatient ? (
+        <Card>
+          <Card.Header>
+            <h2 className="text-lg font-bold text-[var(--color-navy-900)]">Select Patient</h2>
+          </Card.Header>
+          <Card.Body>
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
+              <input
+                type="text"
+                placeholder="Search patient to bill..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] focus:outline-none focus:ring-2 focus:ring-[var(--color-navy-500)]"
+                autoFocus
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {isSearching && <p className="text-sm text-[var(--color-text-muted)]">Searching...</p>}
+              {searchResults.map(p => (
+                <div 
+                  key={p.id} 
+                  className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-alt)] cursor-pointer"
+                  onClick={() => { setSelectedPatient(p); setSearchQuery(''); }}
+                >
+                  <p className="font-bold text-[var(--color-navy-900)]">{p.name}</p>
+                  <p className="text-xs text-[var(--color-text-muted)]">ID: {p.id} • {p.phone}</p>
+                </div>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-navy-50)] border border-[var(--color-navy-200)] rounded-xl">
+            <div>
+              <p className="text-xs font-bold text-[var(--color-navy-600)] uppercase tracking-wider mb-1">Selected Patient</p>
+              <h2 className="text-lg font-bold text-[var(--color-navy-900)]">{selectedPatient.name}</h2>
+              <p className="text-sm text-[var(--color-navy-700)]">ID: {selectedPatient.id} • {selectedPatient.phone}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => { setSelectedPatient(null); setIsCreating(false); }}>
+              Change Patient
             </Button>
           </div>
-        </Card.Body>
-      </Card>
 
-      {searchedPatientId && (
-        <>
-          {/* Bills List */}
-          <Card>
-            <Card.Header>
-              <div className="flex items-center justify-between w-full">
-                <h2 className="font-display font-bold text-lg text-[var(--color-navy-900)] flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Bills for Patient #{searchedPatientId}
-                </h2>
-                <Button variant="primary" size="sm" icon={Plus} onClick={() => setShowCreateBill(true)}>
-                  New Bill
+          {!isCreating ? (
+            <Card>
+              <Card.Header className="flex justify-between items-center">
+                <h2 className="text-lg font-bold text-[var(--color-navy-900)]">Invoices</h2>
+                <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsCreating(true)}>
+                  New Invoice
                 </Button>
-              </div>
-            </Card.Header>
-            <Card.Body>
-              {billsLoading ? (
-                <div className="flex justify-center py-6">
-                  <Loader2 className="w-6 h-6 animate-spin text-[var(--color-navy-600)]" />
-                </div>
-              ) : bills.length === 0 ? (
-                <EmptyState
-                  icon={Receipt}
-                  title="No Bills Found"
-                  description="No bills exist for this patient. Create one to get started."
-                />
-              ) : (
-                <div className="space-y-3">
-                  {bills.map(bill => (
-                    <motion.div
-                      key={bill.id}
-                      variants={fadeIn}
-                      className="flex items-center justify-between p-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 hover:bg-[var(--color-surface-alt)] transition-colors"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-[var(--color-navy-900)]">
-                            Bill #{bill.id}
-                          </span>
-                          <Badge variant={statusVariant(bill.status)} size="sm">{bill.status}</Badge>
+              </Card.Header>
+              <Card.Body className="p-0">
+                {isLoadingInvoices ? (
+                  <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">Loading invoices...</div>
+                ) : invoices.length === 0 ? (
+                  <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">No invoices found for this patient.</div>
+                ) : (
+                  <ul className="divide-y divide-[var(--color-border)]">
+                    {invoices.map(inv => (
+                      <li key={inv.id} className="p-4 flex items-center justify-between hover:bg-[var(--color-surface-alt)]">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-[var(--color-navy-900)] text-sm">
+                              {inv.description || 'Consultation / Service'}
+                            </p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                              #{inv.invoiceNumber} • {new Date(inv.issueDate).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                          Net: ₹{bill.netAmount?.toFixed(2)} | Items: {bill.items?.length || 0}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {bill.status === 'PENDING' && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            icon={CreditCard}
-                            onClick={() => {
-                              setSelectedBill(bill);
-                              setPaymentForm(f => ({ ...f, amount: bill.netAmount?.toString() || '' }));
-                            }}
-                          >
-                            Pay
-                          </Button>
-                        )}
-                        {bill.status === 'PAID' && (
-                          <Button variant="outline" size="sm" icon={Receipt} onClick={() => window.print()}>
-                            Receipt
-                          </Button>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-
-          {/* Create Bill Inline Form */}
-          {showCreateBill && (
-            <motion.div variants={fadeIn}>
-              <Card>
-                <Card.Header>
-                  <h2 className="font-display font-bold text-lg text-[var(--color-navy-900)]">Create New Bill</h2>
-                </Card.Header>
-                <Card.Body className="space-y-4">
-                  {billItems.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-3 items-end">
-                      <div className="col-span-5">
-                        <Input
-                          label={idx === 0 ? 'Description' : ''}
-                          placeholder="e.g. Consultation fee"
-                          value={item.description}
-                          onChange={e => updateBillItem(idx, 'description', e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          label={idx === 0 ? 'Amount (₹)' : ''}
-                          type="number"
-                          placeholder="0.00"
-                          value={item.amount}
-                          onChange={e => updateBillItem(idx, 'amount', e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        {idx === 0 && (
-                          <label className="block text-sm font-semibold text-[var(--color-navy-900)] mb-1">
-                            Department
-                          </label>
-                        )}
-                        <select
-                          className="w-full h-10 px-3 py-2 bg-transparent border border-[var(--color-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
-                          value={item.department}
-                          onChange={e => updateBillItem(idx, 'department', e.target.value)}
-                        >
-                          {['GENERAL', 'LAB', 'RADIOLOGY', 'PHARMACY', 'NURSING', 'CONSULTATION'].map(d => (
-                            <option key={d} value={d}>{d}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="col-span-1 flex items-end pb-0.5">
-                        {billItems.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeBillItem(idx)}
-                            className="w-9 h-9 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50 border border-red-200 text-xs font-bold"
-                          >
-                            ✕
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="font-bold text-[var(--color-navy-900)]">${inv.totalAmount?.toFixed(2)}</p>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${inv.status === 'PAID' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                              {inv.status}
+                            </span>
+                          </div>
+                          <button onClick={() => handleDownloadPdf(inv.id)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                            <Download size={18} />
                           </button>
-                        )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Card.Body>
+            </Card>
+          ) : (
+            <Card>
+              <Card.Header>
+                <h2 className="text-lg font-bold text-[var(--color-navy-900)]">Create New Invoice</h2>
+              </Card.Header>
+              <Card.Body>
+                <form onSubmit={handleCreateSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField label="Description" required id="description">
+                      <input 
+                        id="description"
+                        type="text"
+                        value={newInvoice.description} 
+                        onChange={e => setNewInvoice({ ...newInvoice, description: e.target.value })} 
+                        placeholder="e.g. OP Consultation" 
+                        className="input-field" 
+                        required
+                      />
+                    </FormField>
+                    <FormField label="Due Date" id="dueDate">
+                      <input 
+                        id="dueDate"
+                        type="date"
+                        value={newInvoice.dueDate} 
+                        onChange={e => setNewInvoice({ ...newInvoice, dueDate: e.target.value })} 
+                        className="input-field" 
+                      />
+                    </FormField>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-[var(--color-navy-800)]">Invoice Items</h3>
+                    {newInvoice.items.map((item, idx) => (
+                      <div key={idx} className="flex gap-3 items-start">
+                        <div className="flex-1">
+                          <input 
+                            type="text" 
+                            placeholder="Item description" 
+                            value={item.description}
+                            onChange={e => {
+                              const newItems = [...newInvoice.items];
+                              newItems[idx].description = e.target.value;
+                              setNewInvoice({ ...newInvoice, items: newItems });
+                            }}
+                            className="input-field py-2 text-sm"
+                            required
+                          />
+                        </div>
+                        <div className="w-24">
+                          <input 
+                            type="number" 
+                            placeholder="Qty" 
+                            value={item.quantity}
+                            onChange={e => {
+                              const newItems = [...newInvoice.items];
+                              newItems[idx].quantity = Number(e.target.value);
+                              setNewInvoice({ ...newInvoice, items: newItems });
+                            }}
+                            className="input-field py-2 text-sm"
+                            required min="1"
+                          />
+                        </div>
+                        <div className="w-32">
+                          <input 
+                            type="number" 
+                            placeholder="Unit Price" 
+                            value={item.unitPrice}
+                            onChange={e => {
+                              const newItems = [...newInvoice.items];
+                              newItems[idx].unitPrice = Number(e.target.value);
+                              setNewInvoice({ ...newInvoice, items: newItems });
+                            }}
+                            className="input-field py-2 text-sm"
+                            required min="0" step="0.01"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
-                    <Button variant="outline" size="sm" icon={Plus} onClick={addBillItem}>Add Item</Button>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setShowCreateBill(false)}>Cancel</Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        icon={CheckCircle2}
-                        isLoading={createBill.isPending}
-                        onClick={() => createBill.mutate()}
-                        disabled={billItems.every(i => !i.description || !i.amount)}
-                      >
-                        Create Bill
-                      </Button>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Payment Modal/Card */}
-          {selectedBill && (
-            <motion.div variants={fadeIn}>
-              <Card>
-                <Card.Header>
-                  <h2 className="font-display font-bold text-lg text-[var(--color-navy-900)] flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Collect Payment — Bill #{selectedBill.id}
-                  </h2>
-                </Card.Header>
-                <Card.Body className="space-y-4">
-                  <div className="p-3 rounded-md bg-[var(--color-surface-alt)] border border-[var(--color-border)]">
-                    <p className="text-sm font-semibold text-[var(--color-navy-900)]">
-                      Net Amount Due: <span className="text-[var(--color-primary)] text-lg">₹{selectedBill.netAmount?.toFixed(2)}</span>
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Input
-                      label="Amount (₹)"
-                      type="number"
-                      value={paymentForm.amount}
-                      onChange={e => setPaymentForm(f => ({ ...f, amount: e.target.value }))}
-                    />
-                    <div className="space-y-1">
-                      <label className="text-sm font-semibold text-[var(--color-navy-900)]">Payment Method</label>
-                      <select
-                        className="w-full h-10 px-3 py-2 bg-transparent border border-[var(--color-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
-                        value={paymentForm.paymentMethod}
-                        onChange={e => setPaymentForm(f => ({ ...f, paymentMethod: e.target.value }))}
-                      >
-                        {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                    </div>
-                    <Input
-                      label="Reference No. (optional)"
-                      placeholder="TXN / Cheque No."
-                      value={paymentForm.referenceNumber}
-                      onChange={e => setPaymentForm(f => ({ ...f, referenceNumber: e.target.value }))}
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <Button variant="ghost" onClick={() => setSelectedBill(null)}>Cancel</Button>
-                    <Button
-                      variant="success"
-                      icon={CheckCircle2}
-                      isLoading={recordPayment.isPending}
-                      onClick={() => recordPayment.mutate(selectedBill.id)}
-                      disabled={!paymentForm.amount}
+                    ))}
+                    <button 
+                      type="button" 
+                      onClick={() => setNewInvoice({ ...newInvoice, items: [...newInvoice.items, { description: '', unitPrice: 0, quantity: 1 }] })}
+                      className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
                     >
-                      Confirm Payment
+                      + Add Item
+                    </button>
+                  </div>
+
+                  <div className="pt-4 border-t border-[var(--color-border)] flex items-center justify-end gap-3">
+                    <Button variant="secondary" onClick={() => setIsCreating(false)}>Cancel</Button>
+                    <Button type="submit" variant="primary" isLoading={createInvoice.isPending}>
+                      Save Invoice
                     </Button>
                   </div>
-                </Card.Body>
-              </Card>
-            </motion.div>
+                </form>
+              </Card.Body>
+            </Card>
           )}
-        </>
+        </div>
       )}
     </motion.div>
   );

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useShallow } from 'zustand/react/shallow';
 import { useLocation } from 'react-router-dom';
-import { Search, Plus, Eye, Printer, RotateCcw, CheckCircle } from 'lucide-react';
-import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
+import { Search, Plus, Eye, Printer, RotateCcw, CheckCircle, Ticket, FileText, IndianRupee, Wallet, Users, Filter, X, ClipboardList } from 'lucide-react';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
 import AppModal from '../../components/pharmacy/ui/AppModal';
@@ -138,22 +137,140 @@ export default function MedicineReturns() {
     )}
   ];
 
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+  const returnsToday = returnsList.filter(r => new Date(r.returnDate) >= startOfDay).length;
+  const returnsThisMonth = returnsList.filter(r => new Date(r.returnDate) >= startOfMonth).length;
+  const returnsThisYear = returnsList.filter(r => new Date(r.returnDate) >= startOfYear).length;
+  const totalCreditIssued = returnsList.filter(r => r.status === 'APPROVED').reduce((sum, r) => sum + r.totalReturnAmount, 0);
+  const creditIssuedCount = returnsList.filter(r => r.status === 'APPROVED').length;
+  const pendingReturns = returnsList.filter(r => r.status === 'PENDING').length;
+  const pendingReturnsAmount = returnsList.filter(r => r.status === 'PENDING').reduce((sum, r) => sum + r.totalReturnAmount, 0);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Medicine Returns List</h2>
-        <p className="text-sm text-gray-500 font-medium">Manage returns and issue credit notes</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Medicine Returns List</h2>
+          <p className="text-sm text-gray-500 font-medium">Manage returns and issue credit notes</p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-5 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" /> New Return
+        </button>
       </div>
 
-      <ModuleFilterBar searchPlaceholder="Search..." 
-        onSearch={setSearchTerm}
-        searchValue={searchTerm}
-        dateRange={dateRange}
-        onDateChange={(type, val) => setDateRange(prev => ({ ...prev, [type]: val }))}
-        actions={[
-          { label: 'New Return', icon: Plus, variant: 'primary', onClick: () => setIsModalOpen(true) }
-        ]}
-      />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Card 1 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-[#2563eb]/10 flex items-center justify-center shrink-0">
+              <Ticket className="w-5 h-5 text-[#2563eb]" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Returns (Today)</p>
+              <h3 className="text-2xl font-bold text-slate-900">{returnsToday}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-[#2563eb]">₹0.00</p>
+        </div>
+        {/* Card 2 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <FileText className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Returns (This Month)</p>
+              <h3 className="text-2xl font-bold text-slate-900">{returnsThisMonth}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-blue-500">₹0.00</p>
+        </div>
+        {/* Card 3 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+              <IndianRupee className="w-5 h-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Returns (This Year)</p>
+              <h3 className="text-2xl font-bold text-slate-900">{returnsThisYear}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-green-500">₹0.00</p>
+        </div>
+        {/* Card 4 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+              <Wallet className="w-5 h-5 text-orange-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Total Credit Issued</p>
+              <h3 className="text-2xl font-bold text-slate-900">₹{totalCreditIssued.toFixed(2)}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-orange-500">{creditIssuedCount} Returns</p>
+        </div>
+        {/* Card 5 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500">Pending Returns</p>
+              <h3 className="text-2xl font-bold text-slate-900">{pendingReturns}</h3>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-red-500">₹{pendingReturnsAmount.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Inline Filter Bar */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+            value={dateRange.from || ''}
+            onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+          />
+          <span className="text-sm font-bold text-slate-400">to</span>
+          <input
+            type="date"
+            className="px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none focus:border-[#2563eb]"
+            value={dateRange.to || ''}
+            onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+          />
+        </div>
+        <div className="relative flex-1 min-w-[300px]">
+          <Search className="absolute left-4 top-2.5 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by return ID, bill no, patient name..."
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm outline-none focus:border-[#2563eb] text-slate-600"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-5 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-semibold flex items-center gap-2 hover:bg-blue-50 transition-colors">
+            <Filter className="w-4 h-4" /> Filters
+          </button>
+          <button className="px-6 py-2 bg-[#2563eb] text-white rounded-full text-sm font-semibold shadow-sm hover:bg-[#1d4ed8] transition-colors flex items-center gap-2">
+            <Search className="w-4 h-4" /> Apply
+          </button>
+        </div>
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
@@ -171,8 +288,8 @@ export default function MedicineReturns() {
                     row.originalBill?.patientName?.toLowerCase().includes(searchLower);
                   
                   const returnDate = new Date(row.returnDate);
-                  const matchesFrom = !dateRange.from || returnDate >= dateRange.from;
-                  const matchesTo = !dateRange.to || returnDate <= dateRange.to;
+                  const matchesFrom = !dateRange.from || returnDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || returnDate <= new Date(dateRange.to);
                   
                   return matchesSearch && matchesFrom && matchesTo;
                 });
@@ -180,6 +297,9 @@ export default function MedicineReturns() {
               })()} 
               hover 
               striped 
+              emptyStateTitle="No returns found"
+              emptyStateDesc="Try adjusting your filters or search term"
+              emptyStateIcon={<ClipboardList className="w-6 h-6 text-[#7c3aed]" />}
             />
             <Pagination totalRecords={returnsList.filter(row => {
                   const searchLower = debouncedSearch.toLowerCase();
@@ -189,8 +309,8 @@ export default function MedicineReturns() {
                     row.originalBill?.patientName?.toLowerCase().includes(searchLower);
                   
                   const returnDate = new Date(row.returnDate);
-                  const matchesFrom = !dateRange.from || returnDate >= dateRange.from;
-                  const matchesTo = !dateRange.to || returnDate <= dateRange.to;
+                  const matchesFrom = !dateRange.from || returnDate >= new Date(dateRange.from);
+                  const matchesTo = !dateRange.to || returnDate <= new Date(dateRange.to);
                   
                   return matchesSearch && matchesFrom && matchesTo;
                 }).length} currentPage={currentPage} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ShieldAlert, RefreshCw, ClipboardList, CheckCircle2, Lock, Unlock, Search, Save } from 'lucide-react';
+import { ShieldAlert, RefreshCw, ClipboardList, CheckCircle2, Lock, Unlock, Search, Save, ShieldCheck, Users, FileText, Clock, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
@@ -113,16 +113,71 @@ export default function Narcotics() {
 
   if (!isVerified) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <Lock className="w-12 h-12 text-purple-700 bg-purple-50 p-2.5 border border-purple-100 rounded-2xl" />
-        <h3 className="text-base font-bold text-slate-800">Controlled Substance NDPS Access Gated</h3>
-        <p className="text-xs text-slate-400 text-center max-w-sm">Access to Narcotic and Psychotropic registers requires verified two-factor authentication.</p>
-        <button
-          onClick={() => setShowOtpModal(true)}
-          className="px-5 py-2.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
-        >
-          Verify 2FA Credential
-        </button>
+      <div className="flex flex-col items-center justify-center min-h-[75vh] py-10">
+        <div className="flex flex-col items-center text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="w-[88px] h-[88px] bg-[#DBEAFE] rounded-full flex items-center justify-center text-[#2563EB] mb-6 shadow-sm border border-[#BFDBFE]">
+            <Lock className="w-10 h-10" strokeWidth={2} />
+          </div>
+          <h2 className="text-[32px] font-bold font-serif text-[#0F172A] mb-3 tracking-tight">Controlled Substance NDPS Access Gated</h2>
+          <p className="text-[16px] font-medium text-[#64748B] max-w-md leading-relaxed mb-8">
+            Access to Narcotic and Psychotropic registers requires verified two-factor authentication.
+          </p>
+          <button
+            onClick={() => setShowOtpModal(true)}
+            className="px-8 py-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[16px] font-bold rounded-full transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5 duration-200"
+          >
+            <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
+            Verify 2FA Credential
+          </button>
+        </div>
+
+        <div className="w-full max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 fill-mode-both">
+          {/* Feature Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: ShieldCheck, title: "Secured Access", desc: "Protected by two-factor authentication" },
+              { icon: Users, title: "Authorized Users Only", desc: "Restricted to NDPS authorized personnel" },
+              { icon: FileText, title: "Regulatory Compliance", desc: "Meets NDPS Act and state regulatory requirements" },
+              { icon: Clock, title: "Session Protection", desc: "Auto logout after period of inactivity" }
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white rounded-[16px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] border border-[#F1F5F9] p-5 flex flex-col sm:flex-row items-start gap-4 hover:border-[#E2E8F0] transition-colors">
+                <div className="w-10 h-10 rounded-full bg-[#DBEAFE] text-[#2563EB] flex items-center justify-center shrink-0">
+                  <feature.icon className="w-5 h-5" strokeWidth={2.2} />
+                </div>
+                <div>
+                  <h4 className="text-[14px] font-bold text-[#0F172A] mb-1">{feature.title}</h4>
+                  <p className="text-[13px] font-medium text-[#64748B] leading-snug">{feature.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Info Banner */}
+          <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-[16px] p-6 flex flex-col sm:flex-row items-start gap-5">
+            <div className="w-12 h-12 rounded-full bg-[#DBEAFE] text-[#1D4ED8] flex items-center justify-center shrink-0">
+              <Info className="w-6 h-6" strokeWidth={2} />
+            </div>
+            <div>
+              <h4 className="text-[15px] font-bold text-[#1E3A8A] mb-1.5">About NDPS Controlled Access</h4>
+              <p className="text-[14px] font-medium text-[#1e40af] leading-relaxed">
+                The Narcotic Drugs and Psychotropic Substances (NDPS) Act, 1985 mandates strict control and monitoring of narcotic and psychotropic substances. This area is protected to ensure data security, integrity, and legal compliance.
+              </p>
+            </div>
+          </div>
+
+          {/* Footer Notes */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4 text-[14px] font-medium text-[#64748B]">
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              Your session is secure and monitored
+            </div>
+            <div className="hidden sm:block w-[1px] h-4 bg-[#CBD5E1]"></div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              All access attempts are logged
+            </div>
+          </div>
+        </div>
 
         <OTPVerificationModal
           isOpen={showOtpModal}
@@ -157,7 +212,7 @@ export default function Narcotics() {
         <select
           value={selectedMedId}
           onChange={e => setSelectedMedId(e.target.value)}
-          className="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 bg-white"
+          className="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
         >
           <option value="">Select narcotic medicine</option>
           {medicines.map(med => (
@@ -224,7 +279,7 @@ export default function Narcotics() {
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-100 p-5 space-y-4">
               <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-purple-700" /> Monthly Reconciliation
+                <ShieldAlert className="w-4 h-4 text-blue-700" /> Monthly Reconciliation
               </h3>
               
               <div className="grid grid-cols-2 gap-2">
@@ -254,9 +309,9 @@ export default function Narcotics() {
               </div>
 
               {reconciliation ? (
-                <div className="p-3 bg-purple-50 border border-purple-100 text-purple-800 rounded-xl space-y-1.5 text-xs">
+                <div className="p-3 bg-blue-50 border border-blue-100 text-blue-800 rounded-xl space-y-1.5 text-xs">
                   <div className="flex items-center gap-1.5 font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-purple-700" /> Reconciliation Logged
+                    <CheckCircle2 className="w-4 h-4 text-blue-700" /> Reconciliation Logged
                   </div>
                   <div>System Book Balance: <span className="font-bold">{reconciliation.systemStock || reconciliation.systemCount || 0} units</span></div>
                   <div>Physical Inventory: <span className="font-bold">{reconciliation.physicalCount} units</span></div>
@@ -277,7 +332,7 @@ export default function Narcotics() {
                       value={physicalCount}
                       onChange={e => setPhysicalCount(e.target.value)}
                       required
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-500/20 bg-white"
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 bg-white"
                       placeholder="Enter count"
                     />
                   </div>
@@ -287,14 +342,14 @@ export default function Narcotics() {
                       rows="3"
                       value={discrepancyReason}
                       onChange={e => setDiscrepancyReason(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-500/20 bg-white resize-none"
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 bg-white resize-none"
                       placeholder="e.g. Discharged patient excess returns..."
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={reconcileMutation.isPending}
-                    className="w-full py-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+                    className="w-full py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
                   >
                     <Lock className="w-3.5 h-3.5" /> Submit Audit Reconciliation
                   </button>

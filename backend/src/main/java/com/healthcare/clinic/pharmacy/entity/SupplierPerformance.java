@@ -17,6 +17,7 @@ public class SupplierPerformance extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Supplier supplier;
 
     @Column(name = "period_start")

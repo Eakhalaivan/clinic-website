@@ -12,4 +12,8 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
     List<AppointmentSlot> findByDoctorUserIdAndStartTimeBetweenAndIsBookedFalse(Long userId, ZonedDateTime start, ZonedDateTime end);
     List<AppointmentSlot> findByDoctorUserIdAndStartTimeBetween(Long userId, ZonedDateTime start, ZonedDateTime end);
     void deleteByDoctorUserIdAndStartTimeBetweenAndIsBookedFalse(Long userId, ZonedDateTime start, ZonedDateTime end);
+    
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM AppointmentSlot s WHERE s.id = :id")
+    java.util.Optional<AppointmentSlot> findByIdWithLock(@org.springframework.data.repository.query.Param("id") Long id);
 }

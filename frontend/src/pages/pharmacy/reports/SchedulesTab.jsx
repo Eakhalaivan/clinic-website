@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Cardio } from 'ldrs/react';
+import 'ldrs/react/Cardio.css';
 import { Bell, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from "../../../utils/pharmacy/pharmacyService";
@@ -56,7 +58,7 @@ export default function SchedulesTab() {
   if (loading) {
     return (
       <div className="flex justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+                <Cardio size="50" stroke="4" speed="2" color="#3b82f6" />
       </div>
     );
   }
