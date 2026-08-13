@@ -60,18 +60,18 @@ public class MembershipController {
         MembershipPlan plan = planRepository.findById(request.getPlanId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
 
-        if (!plan.getActive()) {
+        if (!"ACTIVE".equals(plan.getStatus())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Plan is not active");
         }
         
         // Mock payment process here...
 
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime endDate = "YEARLY".equalsIgnoreCase(request.getBillingCycle()) ? now.plusYears(1) : now.plusMonths(1);
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.LocalDate endDate = "YEARLY".equalsIgnoreCase(request.getBillingCycle()) ? now.plusYears(1) : now.plusMonths(1);
 
         PatientMembership membership = PatientMembership.builder()
-                .patient(profile)
-                .plan(plan)
+                .patientId(profile.getId())
+                .planId(plan.getId())
                 .startDate(now)
                 .endDate(endDate)
                 .status("ACTIVE")

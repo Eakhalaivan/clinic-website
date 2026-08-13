@@ -62,7 +62,7 @@ public class HomeVisitController {
                 .patient(profile)
                 .requestDate(dto.getRequestDate() != null ? dto.getRequestDate() : ZonedDateTime.now())
                 .status("PENDING")
-                .address(dto.getAddress())
+                .addressText(dto.getAddress())
                 .notes(dto.getNotes())
                 .build();
 
