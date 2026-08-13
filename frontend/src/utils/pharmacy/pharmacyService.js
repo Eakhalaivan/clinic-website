@@ -9,7 +9,7 @@ const pharmacyService = {
     return response.data;
   },
   getSaleByNumber: async (billNumber) => {
-    const response = await api.get(`//sales/number/${billNumber}`);
+    const response = await api.get(`/sales/number/${billNumber}`);
     return response.data;
   },
   createSale: async (saleData) => {
@@ -17,7 +17,7 @@ const pharmacyService = {
     return response.data;
   },
   deleteSale: async (id) => {
-    const response = await api.delete(`//sales/${id}`);
+    const response = await api.delete(`/sales/${id}`);
     return response.data;
   },
 
@@ -49,13 +49,13 @@ const pharmacyService = {
     return response.data;
   },
   addCreditPayment: async (id, amount, mode, reference) => {
-    const response = await api.post(`//credit-bills/${id}/payment?amount=${amount}&mode=${mode}&reference=${reference || ''}`);
+    const response = await api.post(`/credit-bills/${id}/payment?amount=${amount}&mode=${mode}&reference=${reference || ''}`);
     return response.data;
   },
 
   // Search
   searchStocks: async (name) => {
-    const response = await api.get(`//stocks/search?name=${name}`);
+    const response = await api.get(`/stocks/search?name=${name}`);
     return response.data;
   },
   getAllStocks: async () => {
@@ -78,11 +78,11 @@ const pharmacyService = {
     return response.data;
   },
   getStockByBarcode: async (barcode) => {
-    const response = await api.get(`//stocks/barcode/${barcode}`);
+    const response = await api.get(`/stocks/barcode/${barcode}`);
     return response.data;
   },
   searchPatients: async (query) => {
-    const response = await api.get(`//patients/search?query=${query}`);
+    const response = await api.get(`/patients/search?query=${query}`);
     return response.data;
   },
   
@@ -92,7 +92,7 @@ const pharmacyService = {
     return response.data;
   },
   addAdvance: async (patientName, amount, patientId) => {
-    const response = await api.post(`//advances?patientName=${patientName}&amount=${amount}${patientId ? `&patientId=${patientId}` : ''}`);
+    const response = await api.post(`/advances?patientName=${patientName}&amount=${amount}${patientId ? `&patientId=${patientId}` : ''}`);
     return response.data;
   },
 
@@ -111,11 +111,11 @@ const pharmacyService = {
     return response.data;
   },
   updateMedicine: async (id, medicineData) => {
-    const response = await api.put(`//medicines/${id}`, medicineData);
+    const response = await api.put(`/medicines/${id}`, medicineData);
     return response.data;
   },
   deleteMedicine: async (id) => {
-    const response = await api.delete(`//medicines/${id}`);
+    const response = await api.delete(`/medicines/${id}`);
     return response.data;
   },
 
@@ -139,23 +139,23 @@ const pharmacyService = {
     return response.data;
   },
   updateSupplier: async (id, data) => {
-    const response = await api.put(`//suppliers/${id}`, data);
+    const response = await api.put(`/suppliers/${id}`, data);
     return response.data;
   },
   deleteSupplier: async (id) => {
-    const response = await api.delete(`//suppliers/${id}`);
+    const response = await api.delete(`/suppliers/${id}`);
     return response.data;
   },
   getSupplier: async (id) => {
-    const response = await api.get(`//suppliers/${id}`);
+    const response = await api.get(`/suppliers/${id}`);
     return response.data;
   },
   getSupplierPerformance: async (id) => {
-    const response = await api.get(`//suppliers/${id}/performance`);
+    const response = await api.get(`/suppliers/${id}/performance`);
     return response.data;
   },
   saveSupplierPerformance: async (id, data) => {
-    const response = await api.post(`//suppliers/${id}/performance`, data);
+    const response = await api.post(`/suppliers/${id}/performance`, data);
     return response.data;
   },
 
@@ -165,15 +165,15 @@ const pharmacyService = {
     return response.data;
   },
   getGrnsBySupplier: async (supplierId) => {
-    const response = await api.get(`//grns/supplier/${supplierId}`);
+    const response = await api.get(`/grns/supplier/${supplierId}`);
     return response.data;
   },
   getGrnsByPo: async (poId) => {
-    const response = await api.get(`//grns/po/${poId}`);
+    const response = await api.get(`/grns/po/${poId}`);
     return response.data;
   },
   getGrn: async (id) => {
-    const response = await api.get(`//grns/${id}`);
+    const response = await api.get(`/grns/${id}`);
     return response.data;
   },
   createGrn: async (data) => {
@@ -181,7 +181,7 @@ const pharmacyService = {
     return response.data;
   },
   confirmGrn: async (id) => {
-    const response = await api.post(`//grns/${id}/confirm`);
+    const response = await api.post(`/grns/${id}/confirm`);
     return response.data;
   },
 
@@ -191,11 +191,11 @@ const pharmacyService = {
     return response.data;
   },
   getSupplierInvoicesBySupplier: async (supplierId) => {
-    const response = await api.get(`//supplier-invoices/supplier/${supplierId}`);
+    const response = await api.get(`/supplier-invoices/supplier/${supplierId}`);
     return response.data;
   },
   getSupplierInvoice: async (id) => {
-    const response = await api.get(`//supplier-invoices/${id}`);
+    const response = await api.get(`/supplier-invoices/${id}`);
     return response.data;
   },
   createSupplierInvoice: async (data) => {
@@ -203,15 +203,15 @@ const pharmacyService = {
     return response.data;
   },
   matchSupplierInvoice: async (id) => {
-    const response = await api.post(`//supplier-invoices/${id}/match`);
+    const response = await api.post(`/supplier-invoices/${id}/match`);
     return response.data;
   },
   updateSupplierInvoiceStatus: async (id, status) => {
-    const response = await api.put(`//supplier-invoices/${id}/status?status=${status}`);
+    const response = await api.put(`/supplier-invoices/${id}/status?status=${status}`);
     return response.data;
   },
   getOutstandingBalance: async (supplierId) => {
-    const response = await api.get(`//supplier-invoices/supplier/${supplierId}/outstanding`);
+    const response = await api.get(`/supplier-invoices/supplier/${supplierId}/outstanding`);
     return response.data;
   },
 
@@ -221,7 +221,7 @@ const pharmacyService = {
     return response.data;
   },
   getSupplierReturnsBySupplier: async (supplierId) => {
-    const response = await api.get(`//supplier-returns/supplier/${supplierId}`);
+    const response = await api.get(`/supplier-returns/supplier/${supplierId}`);
     return response.data;
   },
   createSupplierReturn: async (data) => {
@@ -236,6 +236,38 @@ const pharmacyService = {
     return response.data;
   },
 
+  // Ward Replacements
+  getPendingWardReplacements: async () => {
+    const response = await api.get('/ward-replacements/pending');
+    return response.data;
+  },
+  createWardReplacement: async (data) => {
+    const response = await api.post('/ward-replacements', data);
+    return response.data;
+  },
+  approveWardReplacement: async (id) => {
+    const response = await api.post(`/ward-replacements/${id}/approve`);
+    return response.data;
+  },
+  rejectWardReplacement: async (id) => {
+    const response = await api.post(`/ward-replacements/${id}/reject`);
+    return response.data;
+  },
+
+  // Ward Replacement Returns
+  getPendingWardReplacementReturns: async () => {
+    const response = await api.get('/ward-replacement-returns/pending');
+    return response.data;
+  },
+  approveWardReplacementReturn: async (id) => {
+    const response = await api.post(`/ward-replacement-returns/${id}/approve`);
+    return response.data;
+  },
+  rejectWardReplacementReturn: async (id) => {
+    const response = await api.post(`/ward-replacement-returns/${id}/reject`);
+    return response.data;
+  },
+
   // Patients
   getPatients: async () => {
     const response = await api.get('/patients');
@@ -246,46 +278,46 @@ const pharmacyService = {
     return response.data;
   },
   updatePatient: async (id, data) => {
-    const response = await api.put(`//patients/${id}`, data);
+    const response = await api.put(`/patients/${id}`, data);
     return response.data;
   },
   deletePatient: async (id) => {
-    const response = await api.delete(`//patients/${id}`);
+    const response = await api.delete(`/patients/${id}`);
     return response.data;
   },
 
   // Reports
   // Reports
   getSalesReport: async (from, to) => {
-    const response = await api.get(`//reports/sales?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales?from=${from}&to=${to}`);
     return response.data;
   },
   getDailySalesSummary: async (from, to) => {
-    const response = await api.get(`//reports/sales/summary?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales/summary?from=${from}&to=${to}`);
     return response.data;
   },
   getItemisedSalesRegister: async (from, to) => {
-    const response = await api.get(`//reports/sales/itemised?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales/itemised?from=${from}&to=${to}`);
     return response.data;
   },
   getMedicineWiseSales: async (from, to) => {
-    const response = await api.get(`//reports/sales/medicine-wise?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales/medicine-wise?from=${from}&to=${to}`);
     return response.data;
   },
   getCreditSalesReport: async (from, to) => {
-    const response = await api.get(`//reports/sales/credit?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales/credit?from=${from}&to=${to}`);
     return response.data;
   },
   getCancelledBillsReport: async (from, to) => {
-    const response = await api.get(`//reports/sales/cancelled?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/sales/cancelled?from=${from}&to=${to}`);
     return response.data;
   },
   getTaxReport: async (from, to) => {
-    const response = await api.get(`//reports/tax?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/tax?from=${from}&to=${to}`);
     return response.data;
   },
   getGstSalesRegister: async (from, to) => {
-    const response = await api.get(`//reports/gst/sales?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/gst/sales?from=${from}&to=${to}`);
     return response.data;
   },
   getStockReport: async () => {
@@ -293,15 +325,15 @@ const pharmacyService = {
     return response.data;
   },
   getExpiryReport: async (days) => {
-    const response = await api.get(`//reports/stock/expiry?days=${days}`);
+    const response = await api.get(`/reports/stock/expiry?days=${days}`);
     return response.data;
   },
   getSlowMovingReport: async (from, to, threshold = 5) => {
-    const response = await api.get(`//reports/stock/slow-moving?from=${from}&to=${to}&threshold=${threshold}`);
+    const response = await api.get(`/reports/stock/slow-moving?from=${from}&to=${to}&threshold=${threshold}`);
     return response.data;
   },
   getPurchaseRegister: async (from, to) => {
-    const response = await api.get(`//reports/purchase/register?from=${from}&to=${to}`);
+    const response = await api.get(`/reports/purchase/register?from=${from}&to=${to}`);
     return response.data;
   },
   getOutstandingPayables: async () => {
@@ -323,11 +355,11 @@ const pharmacyService = {
     return response.data;
   },
   updateReportSchedule: async (id, data) => {
-    const response = await api.put(`//report-schedules/${id}`, data);
+    const response = await api.put(`/report-schedules/${id}`, data);
     return response.data;
   },
   toggleReportSchedule: async (id) => {
-    const response = await api.patch(`//report-schedules/${id}/toggle`);
+    const response = await api.patch(`/report-schedules/${id}/toggle`);
     return response.data;
   },
   // OTP
@@ -342,7 +374,7 @@ const pharmacyService = {
 
   // Narcotic Register
   getNarcoticRegister: async (medicineId, from, to) => {
-    const response = await api.get(`//narcotic-register?medicineId=${medicineId}&from=${from}&to=${to}`);
+    const response = await api.get(`/narcotic-register?medicineId=${medicineId}&from=${from}&to=${to}`);
     return response.data;
   },
   createNarcoticEntry: async (data) => {
@@ -350,7 +382,7 @@ const pharmacyService = {
     return response.data;
   },
   getNarcoticMonthlyReconciliation: async (medicineId, month, year) => {
-    const response = await api.get(`//narcotic-register/monthly-reconciliation?medicineId=${medicineId}&month=${month}&year=${year}`);
+    const response = await api.get(`/narcotic-register/monthly-reconciliation?medicineId=${medicineId}&month=${month}&year=${year}`);
     return response.data;
   },
   // Expiry & Batch Tracker
@@ -381,19 +413,19 @@ const pharmacyService = {
     return response.data;
   },
   submitPO: async (id) => {
-    const response = await api.put(`//purchase-orders/${id}/submit`);
+    const response = await api.put(`/purchase-orders/${id}/submit`);
     return response.data;
   },
   approvePO: async (id, userId) => {
-    const response = await api.put(`//purchase-orders/${id}/approve?userId=${userId}`);
+    const response = await api.put(`/purchase-orders/${id}/approve?userId=${userId}`);
     return response.data;
   },
   sendPO: async (id) => {
-    const response = await api.put(`//purchase-orders/${id}/send`);
+    const response = await api.put(`/purchase-orders/${id}/send`);
     return response.data;
   },
   cancelPO: async (id, reason, userId) => {
-    const response = await api.put(`//purchase-orders/${id}/cancel?reason=${reason}&userId=${userId}`);
+    const response = await api.put(`/purchase-orders/${id}/cancel?reason=${reason}&userId=${userId}`);
     return response.data;
   },
   getPOSummary: async () => {
@@ -415,7 +447,7 @@ const pharmacyService = {
     return response.data;
   },
   recordCorrectiveAction: async (id, action, userId) => {
-    const response = await api.post(`//temperature-logs/${id}/resolve?action=${action}&userId=${userId}`);
+    const response = await api.post(`/temperature-logs/${id}/resolve?action=${action}&userId=${userId}`);
     return response.data;
   },
   getTemperatureBreaches: async () => {
@@ -423,7 +455,7 @@ const pharmacyService = {
     return response.data;
   },
   getTemperatureChart: async (unitId) => {
-    const response = await api.get(`//temperature-logs/chart/${unitId}`);
+    const response = await api.get(`/temperature-logs/chart/${unitId}`);
     return response.data;
   },
 
@@ -439,7 +471,7 @@ const pharmacyService = {
 
   // Barcode
   scanBarcode: async (barcodeValue, scanModule, userId) => {
-    const response = await api.post(`//barcode/scan?userId=${userId}`, { barcodeValue, scanModule });
+    const response = await api.post(`/barcode/scan?userId=${userId}`, { barcodeValue, scanModule });
     return response.data;
   },
 

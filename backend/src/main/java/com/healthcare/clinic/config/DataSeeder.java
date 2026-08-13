@@ -147,6 +147,8 @@ public class DataSeeder implements CommandLineRunner {
         nurse.setRoles(nurseRoles);
         userRepository.save(nurse);
         log.info("DataSeeder: synced nurse@clinic.com credentials and roles.");
+
+        // Seeding Pharmacy User is now handled by PharmacyDataSeeder
     }
 
     private void validateSeedPassword(String envVarName, String value) {

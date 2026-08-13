@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default function DispenseWorklists() {
   const queryClient = useQueryClient();
-  const { items: filteredPrescriptions = [], isLoading: loading } = usePageData('dispense-worklists', '/pharmacy/prescriptions/dispense-worklists');
+  const { items: filteredPrescriptions = [], isLoading: loading } = usePageData('dispense-worklists', '/pharmacy/prescriptions/pending');
 
   // Local filter states
   const [searchTerm, setSearchTerm] = useState('');

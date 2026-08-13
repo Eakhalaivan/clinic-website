@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtUtils {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:default_dev_secret_key_that_is_long_enough_for_hs256_algorithm_12345}")
     private String jwtSecret;
 
-    @Value("${jwt.access-token-expiration-ms}")
+    @Value("${jwt.access-token-expiration-ms:86400000}")
     private int jwtExpirationMs;
 
     private Key key() {

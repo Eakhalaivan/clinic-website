@@ -32,18 +32,18 @@ public class AnalyticsService {
     private final MedicineStockRepository stockRepository;
     private final MedicineRepository medicineRepository;
     private final MedicineReturnRepository returnRepository;
-    private final EntityManager entityManager;
+    
+    @jakarta.persistence.PersistenceContext(unitName = "pharmacy")
+    private EntityManager entityManager;
 
     public AnalyticsService(PharmacyBillRepository billRepository, 
                             MedicineStockRepository stockRepository,
                             MedicineRepository medicineRepository,
-                            MedicineReturnRepository returnRepository,
-                            EntityManager entityManager) {
+                            MedicineReturnRepository returnRepository) {
         this.billRepository = billRepository;
         this.stockRepository = stockRepository;
         this.medicineRepository = medicineRepository;
         this.returnRepository = returnRepository;
-        this.entityManager = entityManager;
     }
 
     public AnalyticsDashboardDTO getDashboardSummary(LocalDateTime startDate, LocalDateTime endDate) {
@@ -130,7 +130,7 @@ public class AnalyticsService {
     }
 
     private BigDecimal getPurchases(LocalDateTime start, LocalDateTime end) {
-        String sql = "SELECT SUM(i.received_quantity * i.purchase_rate) FROM goods_receipt_note_items i JOIN goods_receipt_notes g ON i.grn_id = g.id WHERE g.status = 'CONFIRMED' AND g.received_date BETWEEN :start AND :end AND g.is_deleted = false";
+        String sql = "SELECT SUM(i.received_quantity * i.purchase_rate) FROM pharmacy_goods_receipt_note_items i JOIN pharmacy_goods_receipt_notes g ON i.grn_id = g.id WHERE g.status = 'CONFIRMED' AND g.received_date BETWEEN :start AND :end AND g.is_deleted = false";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("start", start);
         query.setParameter("end", end);
@@ -139,7 +139,7 @@ public class AnalyticsService {
     }
 
     private BigDecimal getCogs(LocalDateTime start, LocalDateTime end) {
-        String sql = "SELECT SUM(i.quantity * s.purchase_rate) FROM sales_line_items i JOIN sales_bills b ON i.bill_id = b.id JOIN medicine_stocks s ON i.stock_id = s.id WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false";
+        String sql = "SELECT SUM(i.quantity * s.purchase_rate) FROM pharmacy_sales_line_items i JOIN pharmacy_sales_bills b ON i.bill_id = b.id JOIN pharmacy_medicine_stocks s ON i.stock_id = s.id WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("start", start);
         query.setParameter("end", end);
@@ -158,7 +158,7 @@ public class AnalyticsService {
     }
 
     private long getUnitsDispensed(LocalDateTime start, LocalDateTime end) {
-        String sql = "SELECT SUM(i.quantity) FROM sales_line_items i JOIN sales_bills b ON i.bill_id = b.id WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false";
+        String sql = "SELECT SUM(i.quantity) FROM pharmacy_sales_line_items i JOIN pharmacy_sales_bills b ON i.bill_id = b.id WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("start", start);
         query.setParameter("end", end);
@@ -188,10 +188,10 @@ public class AnalyticsService {
     public List<MedicineStatsDTO> getFastMovingMedicines(LocalDateTime start, LocalDateTime end, int limit) {
         String sql = """
             SELECT m.id, m.name, m.drug_class, SUM(i.quantity) as totalUnits, SUM(i.net_amount) as totalSales, COUNT(DISTINCT b.id) as txns, m.purchase_price 
-            FROM sales_line_items i 
-            JOIN sales_bills b ON i.bill_id = b.id 
-            JOIN medicine_stocks s ON i.stock_id = s.id
-            JOIN medicines m ON s.medicine_id = m.id
+            FROM pharmacy_sales_line_items i 
+            JOIN pharmacy_sales_bills b ON i.bill_id = b.id 
+            JOIN pharmacy_medicine_stocks s ON i.stock_id = s.id
+            JOIN pharmacy_medicines m ON s.medicine_id = m.id
             WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false 
             GROUP BY m.id, m.name, m.drug_class, m.purchase_price 
             ORDER BY totalUnits DESC 
@@ -267,10 +267,10 @@ public class AnalyticsService {
             SELECT m.id, m.name, m.drug_class, 
                    COALESCE(SUM(i.quantity), 0) as totalUnits, 
                    MAX(b.bill_date) as lastDispensed, m.purchase_price 
-            FROM medicines m 
-            LEFT JOIN medicine_stocks s ON m.id = s.medicine_id
-            LEFT JOIN sales_line_items i ON s.id = i.stock_id 
-            LEFT JOIN sales_bills b ON i.bill_id = b.id AND b.bill_date BETWEEN :start AND :end AND b.is_deleted = false 
+            FROM pharmacy_medicines m 
+            LEFT JOIN pharmacy_medicine_stocks s ON m.id = s.medicine_id
+            LEFT JOIN pharmacy_sales_line_items i ON s.id = i.stock_id 
+            LEFT JOIN pharmacy_sales_bills b ON i.bill_id = b.id AND b.bill_date BETWEEN :start AND :end AND b.is_deleted = false 
             WHERE m.is_deleted = false 
             GROUP BY m.id, m.name, m.drug_class, m.purchase_price 
             ORDER BY totalUnits ASC 
@@ -327,8 +327,8 @@ public class AnalyticsService {
         // Group by Date
         String sql = """
             SELECT DATE(b.bill_date) as t_date, SUM(b.net_amount) as rev, SUM(i.quantity) as units 
-            FROM sales_bills b 
-            LEFT JOIN sales_line_items i ON b.id = i.bill_id 
+            FROM pharmacy_sales_bills b 
+            LEFT JOIN pharmacy_sales_line_items i ON b.id = i.bill_id 
             WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false 
             GROUP BY DATE(b.bill_date) 
             ORDER BY t_date ASC
@@ -367,10 +367,10 @@ public class AnalyticsService {
         // Step 1: Calculate revenue for all medicines in the period
         String sql = """
             SELECT m.id, m.name, SUM(i.net_amount) as rev, SUM(i.quantity) as units 
-            FROM sales_line_items i 
-            JOIN sales_bills b ON i.bill_id = b.id 
-            JOIN medicine_stocks s ON i.stock_id = s.id
-            JOIN medicines m ON s.medicine_id = m.id
+            FROM pharmacy_sales_line_items i 
+            JOIN pharmacy_sales_bills b ON i.bill_id = b.id 
+            JOIN pharmacy_medicine_stocks s ON i.stock_id = s.id
+            JOIN pharmacy_medicines m ON s.medicine_id = m.id
             WHERE b.bill_date BETWEEN :start AND :end AND b.is_deleted = false 
             GROUP BY m.id, m.name 
             ORDER BY rev DESC

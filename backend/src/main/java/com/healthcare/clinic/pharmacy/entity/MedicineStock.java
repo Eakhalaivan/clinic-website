@@ -16,7 +16,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "pharmacy_medicine_stocks")
-@SQLDelete(sql = "UPDATE medicine_stocks SET is_deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE pharmacy_medicine_stocks SET is_deleted = true WHERE id=?")
 @SQLRestriction("is_deleted=false")
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchId", type = Long.class))
 @Filter(name = "branchFilter", condition = "branch_id = :branchId")

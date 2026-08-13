@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Printer, XCircle, Trash2, PlusCircle, Barcode, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Plus, Eye, Printer, XCircle, Trash2, PlusCircle, Barcode, CheckCircle, ShoppingCart, BarChart, IndianRupee, Receipt, Users, Filter, Calendar, ClipboardList } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
@@ -14,6 +14,7 @@ import { useShallow } from 'zustand/react/shallow';
 import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
 import ErrorBanner from '../../components/pharmacy/ui/ErrorBanner';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function PharmacySales() {
   const {
@@ -56,10 +57,6 @@ export default function PharmacySales() {
     updateQty: state.updateQty
   })));
 
-  useEffect(() => {
-    fetchSales();
-  }, []);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -67,6 +64,26 @@ export default function PharmacySales() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [barcodeInput, setBarcodeInput] = useState('');
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const locationStateProcessed = useRef(false);
+
+  useEffect(() => {
+    if (location.state?.openModal && !locationStateProcessed.current) {
+      locationStateProcessed.current = true;
+      setIsModalOpen(true);
+      if (location.state?.paymentType) {
+        posStore.setField('paymentType', location.state.paymentType);
+      }
+      // Clean up the state so it doesn't reopen on refresh or state change
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
 
   const handleBarcodeScan = async (e) => {
     if (e.key === 'Enter' && barcodeInput) {
@@ -213,22 +230,106 @@ export default function PharmacySales() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pharmacy Sales List</h2>
-        <p className="text-sm text-gray-500 font-medium">Manage and review all patient medicine bills</p>
+      <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Pharmacy Sales List</h2>
+          <p className="text-sm text-slate-500 font-normal">Manage and review all patient medicine bills</p>
+        </div>
+        <button onClick={() => setIsModalOpen(true)} className="px-5 py-2.5 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors shadow-sm">
+          <Plus className="w-4 h-4" /> New Sale
+        </button>
       </div>
 
-      <ModuleFilterBar searchPlaceholder="Search..."
-        onSearch={setSalesSearch}
-        searchValue={searchTerm}
-        dateRange={dateRange}
-        onDateChange={(type, val) => setSalesDateRange({ ...dateRange, [type]: val })}
-        actions={[
-          { label: 'New Sale', icon: Plus, variant: 'primary', onClick: () => setIsModalOpen(true) }
-        ]}
-      />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-500 shrink-0">
+            <ShoppingCart className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Sales (Today)</p>
+            <p className="text-xl font-bold text-slate-900 leading-none mb-1">0</p>
+            <p className="text-xs font-semibold text-indigo-500">₹0.00</p>
+          </div>
+        </div>
+        
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-blue-50 rounded-2xl text-blue-500 shrink-0">
+            <BarChart className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Sales (This Month)</p>
+            <p className="text-xl font-bold text-slate-900 leading-none mb-1">0</p>
+            <p className="text-xs font-semibold text-blue-500">₹0.00</p>
+          </div>
+        </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-500 shrink-0">
+            <IndianRupee className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Sales (This Year)</p>
+            <p className="text-xl font-bold text-slate-900 leading-none mb-1">0</p>
+            <p className="text-xs font-semibold text-emerald-500">₹0.00</p>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-orange-50 rounded-2xl text-orange-500 shrink-0">
+            <Receipt className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Average Sale Value</p>
+            <p className="text-xl font-bold text-slate-900 leading-none mb-1">0</p>
+            <p className="text-xs font-semibold text-orange-500">₹0.00</p>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-rose-50 rounded-2xl text-rose-500 shrink-0">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Customers</p>
+            <p className="text-xl font-bold text-slate-900 leading-none mb-1">0</p>
+            <p className="text-xs font-semibold text-rose-500">0</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Section */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap gap-4 items-center shadow-sm">
+        <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+          <Calendar className="w-4 h-4 text-slate-400" />
+          <input type="date" className="bg-transparent border-none outline-none text-sm text-slate-600" value={dateRange.startDate} onChange={(e) => setSalesDateRange({ ...dateRange, startDate: e.target.value })} />
+          <span className="text-slate-400 text-sm mx-1">to</span>
+          <Calendar className="w-4 h-4 text-slate-400" />
+          <input type="date" className="bg-transparent border-none outline-none text-sm text-slate-600" value={dateRange.endDate} onChange={(e) => setSalesDateRange({ ...dateRange, endDate: e.target.value })} />
+        </div>
+        
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search by invoice no., patient name, medicine..." 
+            value={searchTerm}
+            onChange={(e) => setSalesSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#2563eb] focus:bg-white transition-colors"
+          />
+        </div>
+        
+        <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
+        
+        <button className="px-4 py-2 border border-slate-200 text-blue-600 rounded-lg text-sm font-semibold hover:bg-slate-50 flex items-center gap-2 transition-colors">
+          <Filter className="w-4 h-4" /> Filters
+        </button>
+        <button className="px-5 py-2 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors">
+          <Search className="w-4 h-4" /> Apply
+        </button>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[400px]">
         {isError ? (
           <div className="p-6">
             <ErrorBanner onRetry={fetchSales} />
@@ -236,7 +337,21 @@ export default function PharmacySales() {
         ) : isLoading ? (
           <TableSkeleton rows={5} columns={8} />
         ) : !isLoading && !isError && salesList.length === 0 ? (
-          <div className="p-10 text-center text-slate-500 font-semibold">No records found</div>
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center h-full">
+            <div className="relative mb-6">
+              <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center">
+                <ClipboardList className="w-10 h-10 text-indigo-400" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -bottom-1 -right-1 p-1.5 bg-[#2563eb] rounded-full text-white shadow-md border-4 border-white">
+                <XCircle className="w-5 h-5" strokeWidth={2.5} />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No sales records found</h3>
+            <p className="text-slate-500 text-sm mb-6 max-w-sm">It looks like there are no pharmacy sales yet.<br />Create a new sale to get started.</p>
+            <button onClick={() => setIsModalOpen(true)} className="px-6 py-2.5 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors shadow-sm">
+              <Plus className="w-4 h-4" /> New Sale
+            </button>
+          </div>
         ) : (
           <>
             <DataTable columns={columns} data={salesList} hover striped />
@@ -399,7 +514,7 @@ export default function PharmacySales() {
                       placeholder="Search Doctor..." 
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none" 
                     />
-                    {posStore.doctorSearchResults.length > 0 && (
+                    {posStore.doctorSearchResults?.length > 0 && (
                       <div className="absolute z-[60] left-0 top-full mt-1 w-full bg-white shadow-2xl border border-blue-100 rounded-xl overflow-hidden">
                         {posStore.doctorSearchResults.map(d => (
                           <div key={d.id} onClick={() => posStore.selectDoctor(d)} className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b">
@@ -571,6 +686,7 @@ export default function PharmacySales() {
                 <option value="CARD">Card</option>
                 <option value="UPI">UPI</option>
                 <option value="ADVANCE">Advance Adjust</option>
+                <option value="CREDIT">Credit Bill</option>
               </select>
 
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mt-4">Discount Applied</label>

@@ -36,11 +36,16 @@ public class PharmacyDatabaseConfig {
     }
 
     @Bean(name = "pharmacyEntityManagerFactory")
+    @org.springframework.context.annotation.DependsOn("pharmacyFlyway")
     public LocalContainerEntityManagerFactoryBean pharmacyEntityManagerFactory(
-            @Qualifier("pharmacyDataSource") DataSource dataSource) {
+            @Qualifier("pharmacyDataSource") DataSource dataSource,
+            org.springframework.core.env.Environment env) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan("com.healthcare.clinic.pharmacy");
+        em.setPersistenceUnitName("pharmacy");
+        em.setPackagesToScan(
+                "com.healthcare.clinic.pharmacy"
+        );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);

@@ -1,7 +1,8 @@
 package com.healthcare.clinic.inventory.controller;
 
+import com.healthcare.clinic.superadmin.entity.SystemConfiguration;
+import com.healthcare.clinic.superadmin.repository.SystemConfigurationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,36 +13,36 @@ import java.util.Map;
 
 @RestController("pharmacyConfigController")
 @RequestMapping("/api/pharmacy/config")
-@org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
 public class ConfigController {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private SystemConfigurationRepository configRepository;
 
     @GetMapping("/public")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_SUPER_ADMIN','ROLE_PHARMACIST','ROLE_DOCTOR')")
     public Map<String, Object> getPublicConfiguration() {
-        String query = "SELECT config_key, config_value, config_type FROM app_configuration";
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(query);
-        
+        List<SystemConfiguration> configs = configRepository.findAll();
+
         Map<String, Object> configMap = new HashMap<>();
-        for (Map<String, Object> row : rows) {
-            String key = (String) row.get("config_key");
-            String value = (String) row.get("config_value");
-            String type = (String) row.get("config_type");
-            
-            // Basic type casting based on config_type
-            if ("integer".equals(type)) {
-                configMap.put(key, Integer.parseInt(value));
-            } else if ("boolean".equals(type)) {
-                configMap.put(key, Boolean.parseBoolean(value));
-            } else if ("decimal".equals(type)) {
-                configMap.put(key, Double.parseDouble(value));
+        for (SystemConfiguration config : configs) {
+            String key = config.getConfigKey();
+            String value = config.getConfigVal();
+
+            if (value != null) {
+                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                    configMap.put(key, Boolean.parseBoolean(value));
+                } else if (value.matches("-?\\d+")) {
+                    configMap.put(key, Integer.parseInt(value));
+                } else if (value.matches("-?\\d+\\.\\d+")) {
+                    configMap.put(key, Double.parseDouble(value));
+                } else {
+                    configMap.put(key, value);
+                }
             } else {
-                configMap.put(key, value);
+                configMap.put(key, null);
             }
         }
-        
+
         return configMap;
     }
 }
+

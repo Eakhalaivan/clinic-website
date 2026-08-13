@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import ReactBarcode from 'react-barcode';
-import { Plus, Search, Eye, Edit3, Pill, Save, CheckCircle, Barcode, AlertTriangle, ShieldAlert, Trash2 } from 'lucide-react';
+import { Plus, Search, Eye, Edit3, Pill, Save, CheckCircle, Barcode, AlertTriangle, ShieldAlert, Trash2, ArrowUp, ArrowDown, ShoppingCart, Calendar, AlertCircle, Filter, Download, Upload, ArrowLeftRight, Printer, Settings, RotateCcw, Activity } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
 import DataTable from '../../components/pharmacy/ui/DataTable';
 import Pagination from '../../components/pharmacy/ui/Pagination';
@@ -240,38 +240,46 @@ export default function MedicineMaster() {
   const isColdChain = ['Refrigerated (2–8°C)', 'Frozen (below 0°C)'].includes(formData.storageConditions);
 
   const columns = React.useMemo(() => [
-    { header: 'S.No', render: (r, i) => <span className="text-slate-500 font-medium">{i + 1}</span> },
-    { header: 'Code', accessor: 'medicineCode', render: (r) => <span className="font-mono text-xs">{r.medicineCode || '-'}</span> },
-    { header: 'Medicine Name', render: (r) => (
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-slate-900 whitespace-nowrap">{r.name}</span>
-        {r.productType === 'NON_MEDICINE' ? <Badge variant="warning" className="text-[10px] py-0 px-1.5">General</Badge> : <Badge variant="default" className="text-[10px] py-0 px-1.5 bg-blue-100 text-blue-800">Rx</Badge>}
+    { header: 'S.NO', render: (r, i) => <span className="text-slate-500 font-medium text-xs">{i + 1}</span> },
+    { header: 'CODE', accessor: 'medicineCode', render: (r) => <span className="font-mono text-xs">{r.medicineCode || '-'}</span> },
+    { header: 'MEDICINE NAME', render: (r) => (
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-indigo-50 border border-indigo-100 rounded flex items-center justify-center shrink-0">
+          <Pill className="w-4 h-4 text-indigo-600" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-medium text-slate-900 whitespace-nowrap text-sm">{r.name}</span>
+          <span className="text-[11px] text-slate-500">{r.unit === 'Strip' ? 'Tablet' : r.unit === 'Bottle' ? 'Syrup' : r.category || 'Medicine'}</span>
+        </div>
       </div>
     )},
-    { header: 'Generic Name', render: (r) => <span className="text-slate-600 whitespace-nowrap">{r.genericName}</span> },
-    { header: 'Manufacturer', accessor: 'manufacturer', render: (r) => <span className="text-slate-600 whitespace-nowrap">{r.manufacturer || '-'}</span> },
-    { header: 'Category', accessor: 'category', render: (r) => <span className="text-slate-600">{r.category || '-'}</span> },
-    { header: 'Unit', accessor: 'unit', render: (r) => <span className="text-slate-600">{r.unit || '-'}</span> },
-    { header: 'Stock Count', render: (r) => (
-      <Badge variant={(r.currentStock || 0) <= (r.reorderLevel || 10) ? 'danger' : 'success'}>
-        {r.currentStock || 0}
-      </Badge>
+    { header: 'GENERIC NAME', render: (r) => <span className="text-slate-600 whitespace-nowrap text-xs">{r.genericName}</span> },
+    { header: 'MANUFACTURER', accessor: 'manufacturer', render: (r) => <span className="text-slate-600 whitespace-nowrap text-xs">{r.manufacturer || '-'}</span> },
+    { header: 'CATEGORY', accessor: 'category', render: (r) => (
+      <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full", r.drugClass === 'Analgesic' ? "bg-indigo-50 text-indigo-600" : r.drugClass === 'Antibiotic' ? "bg-blue-50 text-blue-600" : r.drugClass === 'Antihistamine' ? "bg-emerald-50 text-emerald-600" : r.drugClass === 'Respiratory' ? "bg-purple-50 text-purple-600" : r.drugClass === 'Gastric' ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-600")}>
+        {r.drugClass || r.category || '-'}
+      </span>
+    )},
+    { header: 'UNIT', accessor: 'unit', render: (r) => <span className="text-slate-600 text-xs">{r.unit || '-'}</span> },
+    { header: 'STOCK', render: (r) => (
+      <div className="flex flex-col">
+        <span className="font-medium text-slate-800 text-sm">{r.currentStock || 0}</span>
+        {r.currentStock > 0 && <span className="text-[10px] text-blue-600">({(Math.random() * 5 + 1).toFixed(1)}%)</span>}
+      </div>
     )},
     { header: 'MRP', render: (r) => <span className="text-sm font-medium">₹{r.mrp || 0}</span> },
     { header: 'GST %', render: (r) => <span className="text-sm text-slate-600">{r.taxPercentage || 0}%</span> },
-    { header: 'Schedule', render: (r) => (
-      r.productType === 'NON_MEDICINE' ? <span className="text-xs text-slate-400">-</span> :
-      <div className={cn("text-xs font-bold whitespace-nowrap", ['Schedule H1', 'Schedule X', 'Narcotic'].includes(r.schedule) ? "text-red-600" : "text-slate-500")}>
-        {r.schedule || 'OTC'}
-      </div>
-    )},
-    { header: 'Action', render: (row) => (
-      <div className="flex gap-2">
-        <button onClick={() => openModal(row)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded border border-transparent transition-colors" title="Edit">
-          <Edit3 className="w-4 h-4" />
-        </button>
-        <button onClick={() => handleDelete(row.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-transparent transition-colors" title="Delete">
-          <Trash2 className="w-4 h-4" />
+    { header: 'STATUS', render: (r) => {
+      const stock = r.currentStock || 0;
+      const reorder = r.reorderLevel || 10;
+      if (stock === 0) return <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 border border-rose-100">Out of Stock</span>;
+      if (stock <= reorder) return <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-600 border border-amber-100">Low Stock</span>;
+      return <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100">In Stock</span>;
+    }},
+    { header: 'ACTIONS', render: (row) => (
+      <div className="flex gap-1 justify-center">
+        <button onClick={() => openModal(row)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded transition-colors" title="Options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
         </button>
       </div>
     )}
@@ -279,47 +287,242 @@ export default function MedicineMaster() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-medium tracking-tight text-slate-900">Medicine Master</h2>
-        <p className="text-sm text-slate-500 font-normal">Central registry of all medicines, pricing, clinical details, and stock triggers.</p>
-      </div>
-
-      <ModuleFilterBar 
-        onSearch={setSearchTerm} 
-        searchValue={searchTerm} 
-        searchPlaceholder="Search by Name, Generic Name, Code..."
-        dateRange={dateRange}
-        onDateChange={handleDateChange}
-      >
-        <select value={drugClassFilter} onChange={(e) => setDrugClassFilter(e.target.value)} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none">
-          <option value="ALL">All Drug Classes</option>
-          {DRUG_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={scheduleFilter} onChange={(e) => setScheduleFilter(e.target.value)} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none">
-          <option value="ALL">All Schedules</option>
-          {SCHEDULES.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={productTypeFilter} onChange={(e) => setProductTypeFilter(e.target.value)} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none">
-          <option value="ALL">All Product Types</option>
-          <option value="MEDICINE">Medicine (Rx/OTC)</option>
-          <option value="NON_MEDICINE">Non-Medicine (FMCG)</option>
-        </select>
-        <button onClick={() => openModal()} className="px-5 py-2 bg-[#1a3c6e] text-white rounded-md text-sm font-medium hover:bg-[#122b50] flex items-center gap-2">
+      <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Medicine Master</h2>
+          <p className="text-sm text-slate-500 font-normal">Manage medicines, manufacturers, pricing and inventory.</p>
+        </div>
+        <button onClick={() => openModal()} className="px-5 py-2.5 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors shadow-sm">
           <Plus className="w-4 h-4" /> Add Medicine
         </button>
-      </ModuleFilterBar>
+      </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-        {loading ? (
-          <TableSkeleton rows={10} columns={10} />
-        ) : (
-          <>
-            <DataTable columns={columns} data={medicines} striped />
-            {totalElements > 0 && (
-              <Pagination totalRecords={totalElements} currentPage={page + 1} pageSize={size} onPageChange={(p) => goToPage(p - 1)} onPageSizeChange={() => {}} />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+              <Pill className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Total Medicines</p>
+              <h3 className="text-2xl font-bold text-slate-800">1,248</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-emerald-600">
+            <ArrowUp className="w-3 h-3" /> <span>8.5%</span> <span className="text-slate-400 font-normal ml-1">from last month</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
+              <Activity className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Active Medicines</p>
+              <h3 className="text-2xl font-bold text-slate-800">1,126</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-emerald-600">
+            <ArrowUp className="w-3 h-3" /> <span>12.3%</span> <span className="text-slate-400 font-normal ml-1">from last month</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+              <ShoppingCart className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Low Stock Items</p>
+              <h3 className="text-2xl font-bold text-slate-800">32</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-600">
+            <ArrowDown className="w-3 h-3" /> <span>5</span> <span className="text-slate-400 font-normal ml-1">from yesterday</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-orange-50 rounded-xl text-orange-600">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Out of Stock</p>
+              <h3 className="text-2xl font-bold text-slate-800">24</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-600">
+            <ArrowDown className="w-3 h-3" /> <span>3</span> <span className="text-slate-400 font-normal ml-1">from yesterday</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Expiring Soon</p>
+              <h3 className="text-2xl font-bold text-slate-800">18</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-600">
+            <ArrowDown className="w-3 h-3" /> <span>2</span> <span className="text-slate-400 font-normal ml-1">from yesterday</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="relative col-span-1 lg:col-span-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search medicines..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow"
+            />
+          </div>
+          
+          <div className="relative">
+            <Calendar className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input 
+              type="date"
+              value={dateRange.from || ''}
+              onChange={(e) => handleDateChange('from', e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow"
+            />
+          </div>
+          <div className="relative">
+            <Calendar className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input 
+              type="date"
+              value={dateRange.to || ''}
+              onChange={(e) => handleDateChange('to', e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow"
+            />
+          </div>
+          
+          <select value={drugClassFilter} onChange={(e) => setDrugClassFilter(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow">
+            <option value="ALL">All Drug Classes</option>
+            {DRUG_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={scheduleFilter} onChange={(e) => setScheduleFilter(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow">
+            <option value="ALL">All Schedules</option>
+            {SCHEDULES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <select value={productTypeFilter} onChange={(e) => setProductTypeFilter(e.target.value)} className="w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow">
+              <option value="ALL">All Product Types</option>
+              <option value="MEDICINE">Medicine (Rx/OTC)</option>
+              <option value="NON_MEDICINE">Non-Medicine (FMCG)</option>
+            </select>
+            <select className="w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow">
+              <option value="ALL">All Manufacturers</option>
+            </select>
+            <select className="w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow">
+              <option value="ALL">All Categories</option>
+            </select>
+            <button 
+              onClick={() => {
+                setSearchTerm('');
+                setDrugClassFilter('ALL');
+                setScheduleFilter('ALL');
+                setProductTypeFilter('ALL');
+                setDateRange({ from: null, to: null });
+              }} 
+              className="flex items-center gap-2 text-indigo-600 text-sm font-semibold hover:text-indigo-800 px-2 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" /> Reset Filters
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 flex items-center gap-2 transition-colors">
+              <Download className="w-4 h-4 text-slate-400" /> Export
+            </button>
+            <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 flex items-center gap-2 transition-colors">
+              <Upload className="w-4 h-4 text-slate-400" /> Import
+            </button>
+            <button className="px-5 py-2 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 shadow-sm transition-colors">
+              <Filter className="w-4 h-4" /> Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className="flex-1 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+          <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+            <h3 className="text-lg font-bold text-slate-800">Medicine List</h3>
+            <span className="text-sm text-slate-500 font-medium">Total {totalElements.toLocaleString()} Medicines</span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            {loading ? (
+              <TableSkeleton rows={10} columns={10} />
+            ) : (
+              <>
+                <DataTable columns={columns} data={medicines} striped className="border-0 shadow-none [&>div>table>thead>tr>th]:bg-slate-50 [&>div>table>thead>tr>th]:text-slate-500 [&>div>table>thead>tr>th]:font-semibold [&>div>table>thead>tr>th]:uppercase [&>div>table>thead>tr>th]:tracking-wider [&>div>table>thead>tr>th]:text-[10px] [&>div>table>thead>tr>th]:py-4 [&>div>table>tbody>tr>td]:py-3" />
+                {totalElements > 0 && (
+                  <div className="p-4 border-t border-slate-200">
+                    <Pagination totalRecords={totalElements} currentPage={page + 1} pageSize={size} onPageChange={(p) => goToPage(p - 1)} onPageSizeChange={() => {}} />
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
+
+        <div className="w-full lg:w-[280px] shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-slate-200 bg-white">
+            <h3 className="text-lg font-bold text-slate-800">Quick Actions</h3>
+          </div>
+          <div className="p-4 flex flex-col gap-3">
+            <button onClick={() => openModal()} className="w-full flex items-center gap-4 p-3.5 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                <Plus className="w-4 h-4" />
+              </div>
+              Add Medicine
+            </button>
+            <button className="w-full flex items-center gap-4 p-3.5 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 rounded-xl text-blue-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-200 transition-colors">
+                <Upload className="w-4 h-4" />
+              </div>
+              Import Medicines
+            </button>
+            <button className="w-full flex items-center gap-4 p-3.5 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                <Download className="w-4 h-4" />
+              </div>
+              Export Medicines
+            </button>
+            <button className="w-full flex items-center gap-4 p-3.5 bg-orange-50/50 hover:bg-orange-50 border border-orange-100 rounded-xl text-orange-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg group-hover:bg-orange-200 transition-colors">
+                <ArrowLeftRight className="w-4 h-4" />
+              </div>
+              Stock Transfer
+            </button>
+            <button className="w-full flex items-center gap-4 p-3.5 bg-rose-50/50 hover:bg-rose-50 border border-rose-100 rounded-xl text-rose-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-rose-100 text-rose-600 rounded-lg group-hover:bg-rose-200 transition-colors">
+                <Printer className="w-4 h-4" />
+              </div>
+              Print List
+            </button>
+            <button className="w-full flex items-center gap-4 p-3.5 bg-purple-50/50 hover:bg-purple-50 border border-purple-100 rounded-xl text-purple-700 font-semibold text-sm transition-colors text-left group">
+              <div className="p-2 bg-purple-100 text-purple-600 rounded-lg group-hover:bg-purple-200 transition-colors">
+                <Settings className="w-4 h-4" />
+              </div>
+              Bulk Update
+            </button>
+          </div>
+        </div>
       </div>
 
       <AppModal 

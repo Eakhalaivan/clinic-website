@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import com.healthcare.clinic.pharmacy.dto.common.PageResponse;
 
 @Service("pharmacyPurchaseOrderService")
+@Transactional(transactionManager = "pharmacyTransactionManager")
 public class PurchaseOrderService {
 
     private final PurchaseOrderRepository poRepository;
@@ -41,7 +42,7 @@ public class PurchaseOrderService {
                 .orElseThrow(() -> new RuntimeException("PO not found: " + id));
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PurchaseOrder createPO(PurchaseOrder po) {
         po.setPoId(UUID.randomUUID().toString());
         po.setPoNumber("PO-" + LocalDate.now().toString().replace("-","") + "-" + (System.currentTimeMillis() % 10000));
@@ -67,7 +68,7 @@ public class PurchaseOrderService {
         return poRepository.save(po);
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PurchaseOrder submitForApproval(String poId) {
         PurchaseOrder po = getPoById(poId);
         po.setStatus("submitted");
@@ -75,7 +76,7 @@ public class PurchaseOrderService {
         return poRepository.save(po);
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PurchaseOrder approvePO(String poId, Long approvedBy) {
         PurchaseOrder po = getPoById(poId);
         po.setStatus("approved");
@@ -84,7 +85,7 @@ public class PurchaseOrderService {
         return poRepository.save(po);
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PurchaseOrder sendToSupplier(String poId) {
         PurchaseOrder po = getPoById(poId);
         po.setStatus("sent");
@@ -92,7 +93,7 @@ public class PurchaseOrderService {
         return poRepository.save(po);
     }
 
-    @Transactional
+    @Transactional(transactionManager = "pharmacyTransactionManager")
     public PurchaseOrder cancelPO(String poId, String reason, Long user) {
         PurchaseOrder po = getPoById(poId);
         po.setStatus("cancelled");

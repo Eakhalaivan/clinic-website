@@ -15,6 +15,7 @@ public class TemperatureLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private StorageUnit storageUnit;
 
     @Column(name = "unit_name", nullable = false, length = 100)
@@ -35,7 +36,7 @@ public class TemperatureLog {
     @Column(name = "log_type", length = 30)
     private String logType = "manual";
 
-    @Column(name = "is_breach", insertable = false, updatable = false)
+    @Column(name = "is_breach")
     private boolean breach;
 
     @Column(name = "breach_severity", length = 20)
@@ -88,6 +89,7 @@ public class TemperatureLog {
     public void setLogType(String logType) { this.logType = logType; }
 
     public boolean isBreach() { return breach; }
+    public void setBreach(boolean breach) { this.breach = breach; }
 
     public String getBreachSeverity() { return breachSeverity; }
     public void setBreachSeverity(String breachSeverity) { this.breachSeverity = breachSeverity; }

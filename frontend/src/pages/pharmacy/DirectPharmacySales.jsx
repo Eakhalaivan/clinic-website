@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { Search, Plus, Eye, Printer, XCircle, Trash2, CheckCircle } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
 import DataTable from '../../components/pharmacy/ui/DataTable';

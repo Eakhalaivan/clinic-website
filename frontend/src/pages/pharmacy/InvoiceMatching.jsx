@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Cardio } from 'ldrs/react';
+import 'ldrs/react/Cardio.css';
 import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { FileText, Loader2, RefreshCw, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';

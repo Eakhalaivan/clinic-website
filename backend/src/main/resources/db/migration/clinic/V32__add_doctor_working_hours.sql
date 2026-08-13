@@ -7,8 +7,8 @@ CREATE TABLE doctor_working_hours (
     slot_duration_minutes INT NOT NULL DEFAULT 20,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     branch_id BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     CONSTRAINT chk_working_hours_valid CHECK (end_time > start_time),
     CONSTRAINT uq_doctor_day UNIQUE (doctor_id, day_of_week)
 );
@@ -24,6 +24,6 @@ CREATE TABLE doctor_schedule_overrides (
     end_time TIME,
     reason VARCHAR(255),
     branch_id BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     CONSTRAINT uq_doctor_override_date UNIQUE (doctor_id, override_date)
 );

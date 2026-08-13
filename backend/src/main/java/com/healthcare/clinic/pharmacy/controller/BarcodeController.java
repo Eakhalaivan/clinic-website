@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController("pharmacyBarcodeController")
-@RequestMapping("/api/barcode")
+@RequestMapping("/api/pharmacy/barcode")
 @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_SUPER_ADMIN','ROLE_PHARMACIST')")
 public class BarcodeController {
 

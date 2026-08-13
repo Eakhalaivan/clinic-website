@@ -1,5 +1,6 @@
 package com.healthcare.clinic.patient.controller;
 
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 import com.healthcare.clinic.patient.dto.PatientProfileRequest;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
@@ -22,6 +23,7 @@ public class PatientController {
 
     @GetMapping("/profile/{userId}")
     @PreAuthorize("hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "VIEW", resourceType = "PatientProfile", sensitivityLevel = "NORMAL")
     public ResponseEntity<PatientProfile> getPatientProfile(@PathVariable Long userId) {
         com.healthcare.clinic.security.SecurityUtils.assertOwnerOrAdmin(userId);
         return patientRepository.findByUserId(userId)
@@ -31,6 +33,7 @@ public class PatientController {
 
     @GetMapping("/{patientId}")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "VIEW", resourceType = "PatientProfile", sensitivityLevel = "NORMAL")
     public ResponseEntity<PatientProfile> getPatientById(@PathVariable Long patientId) {
         return patientRepository.findById(patientId)
                 .map(ResponseEntity::ok)
@@ -45,6 +48,7 @@ public class PatientController {
 
     @PostMapping("/profile")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
+    @AuditableAction(module = "PATIENT", action = "EDIT", resourceType = "PatientProfile", sensitivityLevel = "NORMAL")
     public ResponseEntity<PatientProfile> createOrUpdateProfile(@jakarta.validation.Valid @RequestBody PatientProfileRequest request) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         Optional<PatientProfile> existing = patientRepository.findByUserId(currentUserId);
@@ -74,6 +78,7 @@ public class PatientController {
 
     @PutMapping("/{patientId}")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "EDIT", resourceType = "PatientProfile", sensitivityLevel = "HIGH")
     public ResponseEntity<PatientProfile> updatePatientByDoctor(
             @PathVariable Long patientId,
             @RequestBody PatientProfileRequest request) {
@@ -101,6 +106,7 @@ public class PatientController {
 
     @GetMapping("/search")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "SEARCH", resourceType = "PatientList", sensitivityLevel = "NORMAL")
     public ResponseEntity<java.util.List<java.util.Map<String, Object>>> searchPatients(@RequestParam(required = false) String query) {
         if (query == null || query.trim().isEmpty()) {
             return ResponseEntity.ok(java.util.List.of());
@@ -134,6 +140,7 @@ public class PatientController {
 
     @GetMapping("/{patientId}/vitals/latest")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "VIEW", resourceType = "Vitals", sensitivityLevel = "HIGH")
     public ResponseEntity<com.healthcare.clinic.patient.entity.Vitals> getLatestVitals(@PathVariable Long patientId) {
         return vitalsRepository.findTopByPatientIdOrderByRecordedAtDesc(patientId)
                 .map(ResponseEntity::ok)
@@ -142,12 +149,14 @@ public class PatientController {
 
     @GetMapping("/{patientId}/vitals/history")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "VIEW", resourceType = "VitalsHistory", sensitivityLevel = "HIGH")
     public ResponseEntity<java.util.List<com.healthcare.clinic.patient.entity.Vitals>> getAllVitals(@PathVariable Long patientId) {
         return ResponseEntity.ok(vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId));
     }
 
     @PostMapping("/{patientId}/vitals/record")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE')")
+    @AuditableAction(module = "PATIENT", action = "CREATE", resourceType = "Vitals", sensitivityLevel = "HIGH")
     public ResponseEntity<com.healthcare.clinic.patient.entity.Vitals> recordVitals(
             @PathVariable Long patientId,
             @RequestBody com.healthcare.clinic.patient.entity.Vitals vitals) {

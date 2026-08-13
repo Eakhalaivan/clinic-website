@@ -1,192 +1,233 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { IndianRupee, Play, FileText, ChevronDown, ChevronRight, CheckCircle, Clock } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
-import dayjs from 'dayjs';
+import { toast } from 'react-hot-toast';
 
 const PayrollManagement = () => {
-  const [selectedRun, setSelectedRun] = useState(null);
   const queryClient = useQueryClient();
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    staffId: '',
+    monthYear: new Date().toISOString().slice(0, 7), // YYYY-MM
+    basicSalary: '',
+    allowances: '0',
+    deductions: '0'
+  });
 
-  // Fetch all payroll runs
-  const { data: runs = [], isLoading } = useQuery({
-    queryKey: ['payrollRuns'],
+  const { data: payrolls, isLoading } = useQuery({
+    queryKey: ['payrolls'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/hr/payroll/runs');
+      const res = await axiosPrivate.get('/api/hr/payroll');
       return res.data;
     }
   });
 
-  // Create a new run
-  const createRunMutation = useMutation({
-    mutationFn: async () => {
-      const currentMonth = dayjs().startOf('month').format('YYYY-MM-DD');
-      const res = await axiosPrivate.post('/hr/payroll/runs', {
-        periodStart: currentMonth,
-        periodEnd: dayjs().endOf('month').format('YYYY-MM-DD'),
-        status: 'DRAFT',
-        runDate: dayjs().format('YYYY-MM-DD')
-      });
+  const { data: staffList } = useQuery({
+    queryKey: ['staffList'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/api/users');
+      // For a real app we'd filter for staff roles only
+      return res.data;
+    }
+  });
+
+  const generateMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post('/api/hr/payroll/generate', data);
       return res.data;
     },
     onSuccess: () => {
-      toast.success("Payroll run created");
-      queryClient.invalidateQueries(['payrollRuns']);
+      queryClient.invalidateQueries(['payrolls']);
+      setShowGenerateModal(false);
+      setFormData({
+        staffId: '',
+        monthYear: new Date().toISOString().slice(0, 7),
+        basicSalary: '',
+        allowances: '0',
+        deductions: '0'
+      });
+      toast.success('Payroll generated successfully');
     },
     onError: (err) => {
-      toast.error("Failed to create run: " + err.message);
+      toast.error(err.response?.data?.message || 'Failed to generate payroll');
     }
   });
 
-  // Process a run
-  const processRunMutation = useMutation({
-    mutationFn: async (runId) => {
-      const res = await axiosPrivate.post(`/hr/payroll/runs/${runId}/process`);
+  const processMutation = useMutation({
+    mutationFn: async (payrollId) => {
+      const res = await axiosPrivate.put(`/api/hr/payroll/${payrollId}/process`);
       return res.data;
     },
     onSuccess: () => {
-      toast.success("Payroll run processed successfully");
-      queryClient.invalidateQueries(['payrollRuns']);
-      if (selectedRun) {
-        queryClient.invalidateQueries(['payslips', selectedRun.id]);
-      }
+      queryClient.invalidateQueries(['payrolls']);
+      toast.success('Payment processed');
+    },
+    onError: () => {
+      toast.error('Failed to process payment');
     }
   });
 
-  // Fetch payslips for selected run
-  const { data: payslips = [], isLoading: isLoadingPayslips } = useQuery({
-    queryKey: ['payslips', selectedRun?.id],
-    queryFn: async () => {
-      if (!selectedRun) return [];
-      const res = await axiosPrivate.get(`/hr/payroll/runs/${selectedRun.id}/payslips`);
-      return res.data;
-    },
-    enabled: !!selectedRun
-  });
+  const handleGenerate = (e) => {
+    e.preventDefault();
+    generateMutation.mutate({
+      staffId: parseInt(formData.staffId),
+      monthYear: formData.monthYear,
+      basicSalary: parseFloat(formData.basicSalary),
+      allowances: parseFloat(formData.allowances || 0),
+      deductions: parseFloat(formData.deductions || 0)
+    });
+  };
+
+  const getStatusColor = (status) => {
+    return status === 'PAID' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+  };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto font-sans text-slate-800">
-      <Toaster position="top-right" />
-      
+    <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Payroll Management</h1>
-          <p className="text-sm text-slate-500">Manage payroll runs, payslips, and salary components.</p>
-        </div>
-        <button 
-          onClick={() => createRunMutation.mutate()}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-sm text-sm font-semibold flex items-center gap-2 transition"
-          disabled={createRunMutation.isLoading}
+        <h1 className="text-2xl font-bold">Payroll Management</h1>
+        <button
+          onClick={() => setShowGenerateModal(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
         >
-          <IndianRupee size={16} /> {createRunMutation.isLoading ? 'Creating...' : 'New Payroll Run'}
+          Generate Payroll
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Left Col: Payroll Runs List */}
-        <div className="md:col-span-1 bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-100 bg-slate-50 font-semibold text-slate-700 flex justify-between items-center">
-            Recent Runs
-          </div>
-          <div className="flex-1 overflow-y-auto max-h-[600px] p-2 space-y-2">
-            {isLoading ? (
-              <div className="p-4 text-center text-slate-400 text-sm">Loading runs...</div>
-            ) : runs.length === 0 ? (
-              <div className="p-4 text-center text-slate-400 text-sm">No payroll runs found.</div>
-            ) : (
-              runs.sort((a,b) => b.id - a.id).map(run => (
-                <div 
-                  key={run.id}
-                  onClick={() => setSelectedRun(run)}
-                  className={`p-3 rounded border cursor-pointer transition ${
-                    selectedRun?.id === run.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-100 hover:border-indigo-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="font-bold text-sm text-slate-800">#{run.id} - {dayjs(run.periodStart).format('MMM YYYY')}</div>
-                    {run.status === 'DRAFT' && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">DRAFT</span>}
-                    {run.status === 'PROCESSING' && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">PROCESSING</span>}
-                    {run.status === 'REVIEW' && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">REVIEW</span>}
-                    {run.status === 'COMPLETED' && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">COMPLETED</span>}
-                  </div>
-                  <div className="text-xs text-slate-500 flex items-center gap-1">
-                    <Clock size={12} /> {dayjs(run.periodStart).format('DD MMM')} - {dayjs(run.periodEnd).format('DD MMM YYYY')}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        {isLoading ? (
+          <div className="p-6">Loading payroll data...</div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Staff ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Basic</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Salary</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {payrolls?.map((p) => (
+                <tr key={p.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.staff.id} ({p.staff.firstName} {p.staff.lastName})</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.monthYear}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.basicSalary.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${p.netSalary.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(p.status)}`}>
+                      {p.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {p.status === 'PENDING' && (
+                      <button
+                        onClick={() => processMutation.mutate(p.id)}
+                        disabled={processMutation.isPending}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Process Payment
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {payrolls?.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No payroll records found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
 
-        {/* Right Col: Details & Payslips */}
-        <div className="md:col-span-2 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
-          {selectedRun ? (
-            <>
-              <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <div>
-                  <h2 className="font-bold text-lg text-slate-800">Run #{selectedRun.id} Details</h2>
-                  <p className="text-xs text-slate-500">Period: {dayjs(selectedRun.periodStart).format('DD MMM YYYY')} to {dayjs(selectedRun.periodEnd).format('DD MMM YYYY')}</p>
-                </div>
-                <div>
-                  {selectedRun.status === 'DRAFT' && (
-                    <button 
-                      onClick={() => processRunMutation.mutate(selectedRun.id)}
-                      disabled={processRunMutation.isLoading}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-semibold flex items-center gap-1 transition"
-                    >
-                      <Play size={14} /> {processRunMutation.isLoading ? 'Processing...' : 'Process Run'}
-                    </button>
-                  )}
-                  {selectedRun.status === 'REVIEW' && (
-                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-sm font-semibold flex items-center gap-1 transition">
-                      <CheckCircle size={14} /> Approve & Finalize
-                    </button>
-                  )}
-                </div>
+      {showGenerateModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h3 className="text-lg font-bold mb-4">Generate Payroll</h3>
+            <form onSubmit={handleGenerate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Staff</label>
+                <select 
+                  value={formData.staffId}
+                  onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 border p-2"
+                  required
+                >
+                  <option value="">Select Staff</option>
+                  {staffList?.map(user => (
+                    <option key={user.id} value={user.id}>{user.firstName} {user.lastName}</option>
+                  ))}
+                </select>
               </div>
               
-              <div className="flex-1 p-4 overflow-y-auto bg-slate-50/50">
-                <h3 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                  <FileText size={16} className="text-indigo-600" /> 
-                  Generated Payslips
-                </h3>
-                
-                {isLoadingPayslips ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">Loading payslips...</div>
-                ) : payslips.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 text-sm bg-white rounded border border-dashed border-slate-200">
-                    {selectedRun.status === 'DRAFT' ? 'Process this run to generate payslips.' : 'No payslips generated for this run.'}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {payslips.map(ps => (
-                      <div key={ps.id} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-slate-800 text-sm">{ps.employee?.user?.firstName} {ps.employee?.user?.lastName}</div>
-                          <div className="text-xs text-slate-500">{ps.employee?.designation} • {ps.employee?.department}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-emerald-600">₹{ps.netPay?.toLocaleString()}</div>
-                          <div className="text-[10px] text-slate-400 uppercase font-semibold mt-0.5 cursor-pointer hover:text-indigo-600 transition">
-                            View Breakdown
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Month/Year</label>
+                <input 
+                  type="month" 
+                  value={formData.monthYear}
+                  onChange={(e) => setFormData({ ...formData, monthYear: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 border p-2"
+                  required
+                />
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8">
-              <IndianRupee size={48} className="mb-4 opacity-20" />
-              <p className="text-sm font-medium">Select a payroll run from the left panel to view details.</p>
-            </div>
-          )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Basic Salary</label>
+                <input 
+                  type="number" step="0.01"
+                  value={formData.basicSalary}
+                  onChange={(e) => setFormData({ ...formData, basicSalary: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 border p-2"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Allowances</label>
+                  <input 
+                    type="number" step="0.01"
+                    value={formData.allowances}
+                    onChange={(e) => setFormData({ ...formData, allowances: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Deductions</label>
+                  <input 
+                    type="number" step="0.01"
+                    value={formData.deductions}
+                    onChange={(e) => setFormData({ ...formData, deductions: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 border p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-6">
+                <button 
+                  type="button"
+                  onClick={() => setShowGenerateModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={generateMutation.isPending}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Generate
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

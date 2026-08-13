@@ -77,104 +77,143 @@ export default function BillingDashboard() {
   const fmt = (val) => val != null ? Number(val).toLocaleString('en-IN') : '0';
 
   const quickActions = [
-    { label: 'New Sale', icon: FileText, action: () => navigate('/sales'), color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Credit Bills', icon: CreditCard, action: () => navigate('/credit-bills'), color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'Process Return', icon: RotateCcw, action: () => navigate('/returns'), color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { label: 'New Sale', icon: FileText, action: () => navigate('/sales'), color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Credit Bills', icon: CreditCard, action: () => navigate('/credit-bills'), color: 'text-orange-500', bg: 'bg-orange-50' },
+    { label: 'Process Return', icon: RotateCcw, action: () => navigate('/returns'), color: 'text-rose-500', bg: 'bg-rose-50' },
   ];
 
   return (
     <DashboardShell quickActions={quickActions}>
-      <div className="flex flex-col gap-1 mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">
+      <div className="flex flex-col gap-1 mb-8 mt-2">
+        <h2 className="text-[28px] font-extrabold text-slate-900 m-0 tracking-tight">
           {systemData?.greeting || 'Welcome'}, here's your Billing Dashboard
         </h2>
-        <p className="text-sm text-[var(--color-text-muted)] font-medium m-0 mt-1">
+        <p className="text-[14px] text-slate-500 font-medium m-0 mt-1.5">
           Financial overview and billing operations as of {new Date().toLocaleString('en-IN')}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <KPICard
           title="Today's Revenue"
           value={`${currencySymbol} ${fmt(kpis?.todays_sales_revenue)}`}
           icon={IndianRupee}
-          colorToken="success"
+          iconColor="blue"
+          subtext={`${kpis?.todays_sales_revenue_growth || '0%'} vs yesterday`}
+          trend={Number(kpis?.todays_sales_revenue_growth || 0) >= 0 ? 'up' : 'down'}
         />
         <KPICard
           title="Total Bills Today"
           value={`${fmt(kpis?.bills_today)}`}
-          icon={FileSpreadsheet}
-          colorToken="primary"
+          icon={FileText}
+          iconColor="blue"
+          subtext={`${kpis?.bills_today_growth || '0%'} vs yesterday`}
+          trend={Number(kpis?.bills_today_growth || 0) >= 0 ? 'up' : 'down'}
         />
         <KPICard
           title="This Week's Revenue"
           value={`${currencySymbol} ${fmt(revSummary?.this_weeks_total)}`}
           icon={IndianRupee}
-          colorToken="warning"
+          iconColor="blue"
+          subtext={`${revSummary?.this_weeks_total_growth || '0%'} vs last week`}
+          trend={Number(revSummary?.this_weeks_total_growth || 0) >= 0 ? 'up' : 'down'}
         />
       </div>
 
       <DashboardGrid
         left={
-          <Card className="h-full">
-            <Card.Header>
-              <h3 className="font-bold text-lg text-[var(--color-navy-900)] m-0">Sales Trend (Last 7 Days)</h3>
-            </Card.Header>
-            <Card.Body className="p-4">
-              <div className="w-full min-h-[300px]">
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={chartSales}>
-                    <defs>
-                      <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#5244F2" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#5244F2" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `₹${(val/1000).toFixed(0)}k`} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                    <Area type="monotone" dataKey="sales" stroke="#5244F2" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" name="Revenue" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </Card.Body>
-          </Card>
+          <div className="bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] p-6 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[15px] font-bold text-gray-900">Sales Trend (Last 7 Days)</h3>
+              <select className="text-[12px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500">
+                <option>Revenue (₹)</option>
+              </select>
+            </div>
+            <div className="w-full flex-1 min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartSales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11}} tickFormatter={(val) => `₹${(val/1000).toFixed(0)}k`} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                  <Area type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorSales)" name="Revenue (₹)" dot={{ r: 4, fill: '#fff', stroke: '#3B82F6', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+              <span className="text-[12px] font-semibold text-slate-700">Revenue (₹)</span>
+            </div>
+          </div>
         }
         center={
-          <Card className="h-full">
-            <Card.Header className="flex items-center justify-between">
-              <h3 className="font-bold text-lg text-[var(--color-navy-900)] m-0">Recent Transactions</h3>
-              <button onClick={() => navigate('/sales')} className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] text-sm font-medium flex items-center gap-1">
+          <div className="bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] flex flex-col h-full overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+              <h3 className="text-[15px] font-bold text-gray-900">Recent Transactions</h3>
+              <button onClick={() => navigate('/sales')} className="text-[13px] font-bold text-slate-500 hover:text-slate-700 flex items-center gap-1">
                 View All <ArrowRight className="w-4 h-4" />
               </button>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <DataTable
-                data={recentBills.slice(0, 6)}
-                columns={[
-                  { header: 'Bill No', accessor: 'billNumber' },
-                  { header: 'Patient', accessor: 'patientName' },
-                  { header: 'Amount', render: (row) => `₹ ${fmt(row.netAmount)}` },
-                  { header: 'Status', render: (row) => (
-                    <Badge variant={row.status === 'PAID' ? 'success' : 'warning'}>{row.status}</Badge>
-                  )},
-                  { header: 'Action', render: (row) => (
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => { setSelectedInvoice(row); setIsInvoiceModalOpen(true); }}
-                        className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => { setSelectedInvoice(row); setIsInvoiceModalOpen(true); }}
-                        className="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                        <Printer className="w-4 h-4" />
-                      </button>
-                    </div>
+            </div>
+            <div className="flex-1 overflow-auto bg-white">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">BILL NO</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">PATIENT</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">AMOUNT</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">STATUS</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentBills.slice(0, 5).map((row, idx) => (
+                    <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 text-[13px] font-semibold text-slate-700">{row.billNumber}</td>
+                      <td className="px-6 py-4 text-[13px] font-medium text-slate-600">{row.patientName}</td>
+                      <td className="px-6 py-4 text-[13px] font-bold text-slate-900">₹ {fmt(row.netAmount)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded text-[11px] font-bold ${
+                          row.status === 'PAID' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-500'
+                        }`}>
+                          {row.status === 'PAID' ? 'Paid' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button onClick={() => { setSelectedInvoice(row); setIsInvoiceModalOpen(true); }}
+                          className="p-1.5 border border-slate-200 text-slate-400 rounded-lg hover:bg-slate-50 hover:text-slate-600 transition-colors inline-flex">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {recentBills.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-[13px] text-gray-400">No recent transactions found</td>
+                    </tr>
                   )}
-                ]}
-              />
-            </Card.Body>
-          </Card>
+                </tbody>
+              </table>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-white text-[12px] font-medium text-slate-500 shrink-0">
+              <span>Showing {recentBills.length > 0 ? 1 : 0} to {Math.min(5, recentBills.length)} of {recentBills.length} records</span>
+              <div className="flex items-center gap-3">
+                <select className="border border-slate-200 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                  <option>10</option>
+                  <option>20</option>
+                </select>
+                <div className="flex items-center gap-1">
+                  <button className="p-1 border border-slate-200 rounded hover:bg-slate-50 text-slate-400"><ArrowRight className="w-3.5 h-3.5 rotate-180" /></button>
+                  <button className="p-1 border border-slate-200 rounded hover:bg-slate-50 text-slate-400"><ArrowRight className="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+            </div>
+          </div>
         }
       />
 

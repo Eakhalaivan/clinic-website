@@ -9,7 +9,7 @@ import Pagination from '../../components/pharmacy/ui/Pagination';
 import AppModal from '../../components/pharmacy/ui/AppModal';
 import Badge from '../../components/pharmacy/ui/Badge';
 import { toast } from 'react-hot-toast';
-import api from '../../utils/pharmacy/api';
+import pharmacyService from '../../utils/pharmacy/pharmacyService';
 
 export default function PendingReplacementReturns() {
   const location = useLocation();
@@ -27,8 +27,8 @@ export default function PendingReplacementReturns() {
   const [returns, setReturns] = useState([]);
 
   useEffect(() => {
-    api.get('/returns/pending-replacements')
-      .then(res => setReturns(res.data?.data || []))
+    pharmacyService.getPendingWardReplacementReturns()
+      .then(res => setReturns(res.data || res || []))
       .catch(err => logger.error('Failed to load replacement returns', err));
   }, [location.key]);
 
@@ -40,7 +40,7 @@ export default function PendingReplacementReturns() {
       row.ward.toLowerCase().includes(s) || 
       row.returnedBy.toLowerCase().includes(s);
 
-    const retDate = new Date(row.date);
+    const retDate = new Date(row.returnDate);
     const normalizedRetDate = new Date(retDate.getFullYear(), retDate.getMonth(), retDate.getDate()).getTime();
     
     const matchesFrom = !dateRange.from || normalizedRetDate >= new Date(dateRange.from.getFullYear(), dateRange.from.getMonth(), dateRange.from.getDate()).getTime();
@@ -49,21 +49,27 @@ export default function PendingReplacementReturns() {
     return matchesSearch && matchesFrom && matchesTo;
   });
 
-  const confirmDelete = () => {
-    setReturns(returns.filter(r => r.id !== returnToDelete));
-    toast.success('Return request rejected');
-    setIsDeleteModalOpen(false);
-    setReturnToDelete(null);
+  const confirmDelete = async () => {
+    try {
+      await pharmacyService.rejectWardReplacementReturn(returnToDelete);
+      toast.success('Return request rejected');
+      setIsDeleteModalOpen(false);
+      setReturnToDelete(null);
+      pharmacyService.getPendingWardReplacementReturns().then(res => setReturns(res.data || res || []));
+    } catch (e) {
+      logger.error('Failed to reject request', e);
+      toast.error('Failed to reject request');
+    }
   };
 
   const columns = [
     { header: 'S.No', render: (_, i) => i + 1 },
-    { header: 'Return No', accessor: 'retNo' },
-    { header: 'Original Request No', accessor: 'reqNo' },
+    { header: 'Return No', accessor: 'returnNumber' },
+    { header: 'Original Request No', accessor: 'requestNumber' },
     { header: 'Ward', accessor: 'ward' },
     { header: 'Returned By', accessor: 'returnedBy' },
-    { header: 'Return Date', accessor: 'date' },
-    { header: 'Items', accessor: 'items' },
+    { header: 'Return Date', render: (row) => new Date(row.returnDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
+    { header: 'Items', render: (row) => row.items?.length || 0 },
     { header: 'Status', render: (row) => (
       <Badge variant={row.status === 'Pending' ? 'warning' : 'success'}>{row.status}</Badge>
     )},
@@ -126,10 +132,16 @@ export default function PendingReplacementReturns() {
         footer={
           <div className="flex w-full gap-3">
              <button onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
-             <button onClick={() => { 
-                setReturns(returns.map(r => r.id === selectedReturn.id ? { ...r, status: 'Completed' } : r));
-                toast.success('Return accepted and stock updated!'); 
-                setIsModalOpen(false); 
+             <button onClick={async () => { 
+                try {
+                  await pharmacyService.approveWardReplacementReturn(selectedReturn.id);
+                  toast.success('Return accepted and stock updated!'); 
+                  setIsModalOpen(false); 
+                  pharmacyService.getPendingWardReplacementReturns().then(res => setReturns(res.data || res || []));
+                } catch (e) {
+                  logger.error('Failed to accept return', e);
+                  toast.error('Failed to accept return');
+                }
              }} className="flex-1 px-8 py-2.5 bg-success text-white rounded-xl text-sm font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all flex items-center justify-center gap-2">
                 <CheckCircle className="w-4 h-4"/> Confirm Accept
              </button>
@@ -141,7 +153,7 @@ export default function PendingReplacementReturns() {
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
                <div className="space-y-1">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Original Request</p>
-                  <p className="text-sm font-bold text-slate-800">{selectedReturn.reqNo}</p>
+                  <p className="text-sm font-bold text-slate-800">{selectedReturn.requestNumber}</p>
                </div>
                <div className="text-right space-y-1">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Returned By</p>
@@ -185,11 +197,11 @@ export default function PendingReplacementReturns() {
             <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
               <div>
                 <p className="text-xs text-slate-500 font-medium">Return No</p>
-                <p className="font-bold">{selectedReturn.retNo}</p>
+                <p className="font-bold">{selectedReturn.returnNumber}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500 font-medium">Request No</p>
-                <p className="font-bold">{selectedReturn.reqNo}</p>
+                <p className="font-bold">{selectedReturn.requestNumber}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 font-medium">Ward</p>

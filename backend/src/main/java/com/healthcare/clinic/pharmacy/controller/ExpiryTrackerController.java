@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController("pharmacyExpiryTrackerController")
-@RequestMapping("/api/expiry-tracker")
+@RequestMapping("/api/pharmacy/expiry-tracker")
 public class ExpiryTrackerController {
 
     private final ExpiryTrackerService service;

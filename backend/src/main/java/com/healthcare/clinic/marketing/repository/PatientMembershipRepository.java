@@ -14,4 +14,5 @@ public interface PatientMembershipRepository extends JpaRepository<PatientMember
     Optional<PatientMembership> findByPatientIdAndPlanIdAndStatus(Long patientId, Long planId, String status);
     List<PatientMembership> findByStatusAndEndDateBefore(String status, LocalDate date);
     long countByStatus(String status);
+    Optional<PatientMembership> findTopByPatientIdAndStatusOrderByEndDateDesc(Long patientId, String status);
 }

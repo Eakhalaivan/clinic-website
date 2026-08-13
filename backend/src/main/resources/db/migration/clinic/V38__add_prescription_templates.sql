@@ -10,6 +10,8 @@ CREATE TABLE doctor_prescription_templates (
 );
 CREATE INDEX idx_doc_template ON doctor_prescription_templates (doctor_id);
 
+CREATE INDEX idx_doc_template ON doctor_prescription_templates(doctor_id);
+
 CREATE TABLE doctor_prescription_template_items (
     id BIGSERIAL PRIMARY KEY,
     template_id BIGINT NOT NULL,

@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Cardio } from 'ldrs/react';
+import 'ldrs/react/Cardio.css';
 import { useShallow } from 'zustand/react/shallow';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft, CheckCircle, XCircle, PackageCheck, Loader2 } from 'lucide-react';

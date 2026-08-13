@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useShallow } from 'zustand/react/shallow';
-import { Search, ChevronDown, ChevronRight, AlertTriangle, ShieldAlert, Package, CheckCircle, Printer, Download, Plus, RotateCcw, Box } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, AlertTriangle, ShieldAlert, Package, CheckCircle, Printer, Download, Plus, RotateCcw, Box, Tag, TrendingUp, Target, CalendarX } from 'lucide-react';
 import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
 import Pagination from '../../components/pharmacy/ui/Pagination';
 import Badge from '../../components/pharmacy/ui/Badge';
@@ -52,7 +52,8 @@ export default function MedicineStock() {
 
   const { data: movementRes, isLoading: isMovementLoading } = useQuery({
     queryKey: ['stockMovement'],
-    queryFn: () => pharmacyService.getStockMovementInsights(),
+    queryFn: () => pharmacyService.getStockMovementInsights().catch(() => ({ data: {} })),
+    retry: false
   });
   const movementData = movementRes?.data || {};
 
@@ -162,65 +163,107 @@ export default function MedicineStock() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-center">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-medium tracking-tight text-slate-900">Stock Management</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Stock Management</h2>
           <p className="text-sm text-slate-500 font-normal">Batch-level inventory tracking, auto-replenishment, and expiry monitoring.</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => setIsAddStockModalOpen(true)} className="px-4 py-2 bg-[#1a3c6e] text-white rounded-md text-sm font-medium hover:bg-[#1a3c6e]/90 flex items-center gap-2">
+          <button onClick={() => setIsAddStockModalOpen(true)} className="px-5 py-2.5 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors shadow-sm">
             <Plus className="w-4 h-4" /> Add Stock
           </button>
-          <button onClick={runAutoPO} className="px-4 py-2 bg-slate-900 text-white rounded-md text-sm font-medium hover:bg-slate-800 flex items-center gap-2">
+          <button onClick={runAutoPO} className="px-5 py-2.5 bg-[#0f172a] text-white rounded-lg text-sm font-semibold hover:bg-slate-800 flex items-center gap-2 transition-colors shadow-sm">
             <Package className="w-4 h-4" /> Run Auto-Reorder Check
           </button>
         </div>
       </div>
 
       {/* VALUATION KPIs */}
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Total Stock Value (Cost)</p>
-          <p className="text-xl font-medium text-slate-900">₹{valuation?.totalPurchaseValue?.toLocaleString() || '0.00'}</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600 shrink-0">
+              <Box className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Total Stock Value<br/>(Cost)</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-purple-500 pb-2 self-start inline-block">₹{valuation?.totalPurchaseValue?.toLocaleString() || '0.00'}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1">Total Stock Value (MRP)</p>
-          <p className="text-xl font-medium text-slate-900">₹{valuation?.totalMrpValue?.toLocaleString() || '0.00'}</p>
+        
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shrink-0">
+              <Tag className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Total Stock Value<br/>(MRP)</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-blue-500 pb-2 self-start inline-block">₹{valuation?.totalMrpValue?.toLocaleString() || '0.00'}</p>
         </div>
-        <div className="bg-white border border-blue-200 bg-blue-50/30 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-blue-700 uppercase tracking-wider mb-1">Moving Stock Value</p>
-          <p className="text-xl font-medium text-blue-600">₹{movementData?.movingValue?.toLocaleString() || '0.00'}</p>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 shrink-0">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Moving Stock Value</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-emerald-500 pb-2 self-start inline-block">₹{movementData?.movingValue?.toLocaleString() || '0.00'}</p>
         </div>
-        <div className="bg-white border border-slate-300 bg-slate-50/50 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-slate-700 uppercase tracking-wider mb-1">Non-Moving Stock Value</p>
-          <p className="text-xl font-medium text-slate-600">₹{movementData?.nonMovingValue?.toLocaleString() || '0.00'}</p>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-slate-100 rounded-xl text-slate-600 shrink-0">
+              <Target className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Non-Moving Stock<br/>Value</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-slate-500 pb-2 self-start inline-block">₹{movementData?.nonMovingValue?.toLocaleString() || '0.00'}</p>
         </div>
-        <div className="bg-white border border-amber-200 bg-amber-50/30 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-amber-700 uppercase tracking-wider mb-1">Near Expiry Risk (&lt;30d)</p>
-          <p className="text-xl font-medium text-amber-600">₹{valuation?.nearExpiryValue?.toLocaleString() || '0.00'}</p>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-orange-50 rounded-xl text-orange-500 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Near Expiry Risk<br/>(&lt; 30D)</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-orange-400 pb-2 self-start inline-block">₹{valuation?.nearExpiryValue?.toLocaleString() || '0.00'}</p>
         </div>
-        <div className="bg-white border border-red-200 bg-red-50/30 rounded-lg p-4 shadow-sm">
-          <p className="text-[10px] font-medium text-red-700 uppercase tracking-wider mb-1">Expired Value (Write Off)</p>
-          <p className="text-xl font-medium text-red-600">₹{valuation?.expiredValue?.toLocaleString() || '0.00'}</p>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-rose-50 rounded-xl text-rose-500 shrink-0">
+              <CalendarX className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Expired Value<br/>(Write Off)</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900 border-b-2 border-rose-500 pb-2 self-start inline-block">₹{valuation?.expiredValue?.toLocaleString() || '0.00'}</p>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-center shadow-sm">
-        <div className="flex-1 max-w-sm">
-          <ModuleFilterBar searchPlaceholder="Search..." onSearch={setSearchTerm} searchValue={searchTerm} hideDateRange={true} />
+      <div className="bg-white p-4 rounded-xl border border-slate-200 flex gap-4 items-center shadow-sm">
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search by medicine, batch, manufacturer..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#2563eb] focus:bg-white transition-colors"
+          />
         </div>
-        <button className="px-4 py-2 border border-slate-200 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-50 flex items-center gap-2">
-          <Download className="w-4 h-4" /> Export Report
+        <button className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 flex items-center gap-2 transition-colors ml-auto">
+          <Download className="w-4 h-4 text-slate-400" /> Export Report
         </button>
       </div>
 
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-slate-200 mt-2">
         {['Total Stock', 'Top Moving Stock', 'Top Non-Moving Stock'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={cn("px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors outline-none", 
-              activeTab === tab ? "border-[#1a3c6e] text-[#1a3c6e]" : "border-transparent text-slate-500 hover:text-slate-800"
+            className={cn("px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors outline-none", 
+              activeTab === tab ? "border-[#2563eb] text-[#2563eb]" : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
             {tab}
@@ -237,16 +280,35 @@ export default function MedicineStock() {
           <div className="w-full overflow-x-auto">
             <div className="min-w-[1200px]">
             {/* Header */}
-            <div className="grid grid-cols-[auto_60px_2fr_1.5fr_1.5fr_2fr_1fr_1fr] gap-4 p-4 border-b border-slate-200 bg-white text-[11px] font-semibold text-slate-500 uppercase tracking-wider items-center min-w-[1200px]">
+            <div className="grid grid-cols-[auto_60px_2fr_1.5fr_1.5fr_2fr_1fr_1fr] gap-4 p-4 border-b border-slate-200 bg-white text-[11px] font-bold text-slate-500 uppercase tracking-wider items-center min-w-[1200px]">
               <div className="w-6"></div> {/* Chevron placeholder */}
-              <div className="text-center">S.No</div>
-              <div>Medicine Info</div>
-              <div>Drug Class</div>
-              <div className="text-center">Total Stock</div>
-              <div>Stock Health Status</div>
-              <div className="text-center">Reorder Point</div>
-              <div className="text-center">Actions</div>
+              <div className="text-center">S.NO</div>
+              <div>MEDICINE INFO</div>
+              <div>DRUG CLASS</div>
+              <div className="text-center">TOTAL STOCK</div>
+              <div>STOCK HEALTH STATUS</div>
+              <div className="text-center">REORDER POINT</div>
+              <div className="text-center">ACTIONS</div>
             </div>
+
+            {/* Empty State */}
+            {paginatedGroups.length === 0 && !loading && (
+              <div className="flex flex-col items-center justify-center py-20 px-4 text-center min-w-[1200px]">
+                <div className="relative mb-6">
+                  <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center">
+                    <Box className="w-8 h-8 text-indigo-400" strokeWidth={1.5} />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 p-1.5 bg-[#2563eb] rounded-full text-white shadow-md border-[3px] border-white">
+                    <Search className="w-4 h-4" strokeWidth={2.5} />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1.5">No stock data available</h3>
+                <p className="text-slate-500 text-sm mb-6 max-w-sm">No records found. Add stock or run auto-reorder check.</p>
+                <button onClick={() => setIsAddStockModalOpen(true)} className="px-5 py-2 bg-[#2563eb] text-white rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] flex items-center gap-2 transition-colors shadow-sm">
+                  <Plus className="w-4 h-4" /> Add Stock
+                </button>
+              </div>
+            )}
 
             {/* Rows */}
             {paginatedGroups.map(group => {
@@ -273,7 +335,11 @@ export default function MedicineStock() {
                     </div>
                     <div>
                       <div className="font-semibold text-slate-900">{med.name}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{med.medicineCode} - {med.category?.toLowerCase()} / {med.unit}</div>
+                      <div className="text-xs text-slate-500 mt-1 flex flex-col gap-0.5">
+                        <span><span className="font-semibold text-slate-600">SKU:</span> {med.medicineCode || 'N/A'}</span>
+                        <span><span className="font-semibold text-slate-600">Supplier:</span> {med.supplier?.name || med.supplierVendor || 'N/A'}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 mt-1">{med.category || 'No Category'} / {med.unit || 'No Unit'}</div>
                     </div>
                     <div className="text-sm text-slate-600">{med.drugClass || '-'}</div>
                     <div className="text-center flex flex-col items-center">
@@ -525,7 +591,7 @@ export default function MedicineStock() {
             <label className="text-sm font-medium text-slate-700">Select Product SKU <span className="text-amber-500">*</span></label>
             <select value={addStockForm.medicineId} onChange={e => setAddStockForm({...addStockForm, medicineId: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-md outline-none focus:border-[#1a3c6e]">
               <option value="">Choose a medicine from Master Registry...</option>
-              {medicines.map(m => (
+              {(Array.isArray(medicines) ? medicines : []).map(m => (
                 <option key={m.id} value={m.id}>{m.name} ({m.medicineCode})</option>
               ))}
             </select>
