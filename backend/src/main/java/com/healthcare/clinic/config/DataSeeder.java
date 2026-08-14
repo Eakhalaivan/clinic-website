@@ -8,6 +8,12 @@ import com.healthcare.clinic.doctor.entity.DoctorProfile;
 import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
 import com.healthcare.clinic.doctor.entity.DoctorWorkingHours;
 import com.healthcare.clinic.doctor.repository.DoctorWorkingHoursRepository;
+import com.healthcare.clinic.patient.entity.PatientProfile;
+import com.healthcare.clinic.patient.repository.PatientProfileRepository;
+import com.healthcare.clinic.tenant.entity.Tenant;
+import com.healthcare.clinic.tenant.repository.TenantRepository;
+import com.healthcare.clinic.branch.entity.Branch;
+import com.healthcare.clinic.branch.repository.BranchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +47,9 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorWorkingHoursRepository doctorWorkingHoursRepository;
+    private final PatientProfileRepository patientProfileRepository;
+    private final TenantRepository tenantRepository;
+    private final BranchRepository branchRepository;
 
     @Value("${SEED_ADMIN_PASSWORD:CHANGE_ME_ADMIN}")
     private String seedAdminPassword;
@@ -52,6 +61,31 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         validateSeedPassword("SEED_ADMIN_PASSWORD", seedAdminPassword);
         validateSeedPassword("SEED_DOCTOR_PASSWORD", seedDoctorPassword);
+
+        // Seed Default Tenant
+        Tenant defaultTenant = tenantRepository.findById(1L).orElseGet(() -> {
+            Tenant t = Tenant.builder()
+                .name("Default Clinic Tenant")
+                .status("ACTIVE")
+                .build();
+            return tenantRepository.save(t);
+        });
+
+        // Seed Default Branch
+        Branch defaultBranch = branchRepository.findById(1L).orElseGet(() -> {
+            Branch b = Branch.builder()
+                .tenant(defaultTenant)
+                .name("Main Branch")
+                .address("123 Main St")
+                .city("Metropolis")
+                .state("NY")
+                .country("USA")
+                .postalCode("10001")
+                .timezone("UTC")
+                .isActive(true)
+                .build();
+            return branchRepository.save(b);
+        });
 
         // Ensure all system roles exist in DB
         String[] allRoleNames = {
@@ -127,6 +161,8 @@ public class DataSeeder implements CommandLineRunner {
                         .slotDurationMinutes(20)
                         .isActive(true)
                         .branchId(savedProfile.getBranchId())
+                        .createdAt(java.time.Instant.now())
+                        .updatedAt(java.time.Instant.now())
                         .build();
                 doctorWorkingHoursRepository.save(hours);
             }
@@ -147,6 +183,34 @@ public class DataSeeder implements CommandLineRunner {
         nurse.setRoles(nurseRoles);
         userRepository.save(nurse);
         log.info("DataSeeder: synced nurse@clinic.com credentials and roles.");
+
+        // Seed / Reset Patient User
+        User patient = userRepository.findByEmail("patient@clinic.com").orElseGet(() -> 
+            User.builder().email("patient@clinic.com").firstName("Alice").lastName("Williams").build()
+        );
+        patient.setPasswordHash(passwordEncoder.encode(System.getenv().getOrDefault("SEED_PATIENT_PASSWORD", "CHANGE_ME_PATIENT")));
+        patient.setFailedLoginAttempts(0);
+        patient.setLockedUntil(null);
+        patient.setEnabled(true);
+
+        Set<Role> patientRoles = patient.getRoles() != null ? new HashSet<>(patient.getRoles()) : new HashSet<>();
+        roleRepository.findByName("ROLE_PATIENT").ifPresent(patientRoles::add);
+        patient.setRoles(patientRoles);
+        userRepository.save(patient);
+        log.info("DataSeeder: synced patient@clinic.com credentials and roles.");
+
+        if (patientProfileRepository.findByUserId(patient.getId()).isEmpty()) {
+            PatientProfile pProfile = PatientProfile.builder()
+                    .userId(patient.getId())
+                    .branchId(1L)
+                    .tenantId(1L)
+                    .gender("FEMALE")
+                    .bloodGroup("O+")
+                    .dateOfBirth(java.time.LocalDate.of(1990, 5, 21))
+                    .build();
+            patientProfileRepository.save(pProfile);
+            log.info("DataSeeder: created default PatientProfile for patient@clinic.com.");
+        }
 
         // Seeding Pharmacy User is now handled by PharmacyDataSeeder
     }

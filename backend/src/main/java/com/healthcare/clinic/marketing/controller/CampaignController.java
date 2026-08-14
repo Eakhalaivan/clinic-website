@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/marketing/campaigns")
+@RequestMapping("/api/marketing/legacy-campaigns")
 @RequiredArgsConstructor
 public class CampaignController {
 

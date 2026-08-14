@@ -3,6 +3,8 @@ server:
   forward-headers-strategy: NATIVE
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: clinic-app
   flyway:

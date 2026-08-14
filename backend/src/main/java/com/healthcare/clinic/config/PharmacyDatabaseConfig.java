@@ -50,8 +50,13 @@ public class PharmacyDatabaseConfig {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.dialect", env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.MySQLDialect"));
-        properties.put("hibernate.hbm2ddl.auto", env.getProperty("spring.jpa.hibernate.ddl-auto", "validate"));
+        String dialect = env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.MySQLDialect");
+        String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto", "validate");
+        if (dialect.contains("H2")) {
+            ddlAuto = "update";
+        }
+        properties.put("hibernate.dialect", dialect);
+        properties.put("hibernate.hbm2ddl.auto", ddlAuto);
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         em.setJpaPropertyMap(properties);
 

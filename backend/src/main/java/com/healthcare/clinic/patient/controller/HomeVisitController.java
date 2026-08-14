@@ -1,7 +1,7 @@
 package com.healthcare.clinic.patient.controller;
 
 import com.healthcare.clinic.identity.entity.User;
-import com.healthcare.clinic.patient.entity.HomeVisitRequest;
+import com.healthcare.clinic.homevisit.entity.HomeVisitRequest;
 import com.healthcare.clinic.patient.service.HomeVisitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

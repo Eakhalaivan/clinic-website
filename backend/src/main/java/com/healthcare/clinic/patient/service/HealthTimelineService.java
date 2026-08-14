@@ -4,10 +4,10 @@ import com.healthcare.clinic.appointment.entity.Appointment;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.patient.dto.TimelineEventDTO;
-import com.healthcare.clinic.patient.entity.HomeVisitRequest;
+import com.healthcare.clinic.homevisit.entity.HomeVisitRequest;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.entity.PatientDocument;
-import com.healthcare.clinic.patient.repository.HomeVisitRequestRepository;
+import com.healthcare.clinic.homevisit.repository.HomeVisitRequestRepository;
 import com.healthcare.clinic.patient.repository.PatientDocumentRepository;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestRequestRepository;
@@ -59,14 +59,16 @@ public class HealthTimelineService {
         // 2. Home Visits
         List<HomeVisitRequest> homeVisits = homeVisitRequestRepository.findByPatientIdOrderByCreatedAtDesc(profile.getId());
         for (HomeVisitRequest visit : homeVisits) {
+            String serviceType = visit.getServiceType() != null ? visit.getServiceType() : "General";
             events.add(TimelineEventDTO.builder()
                     .id("VISIT-" + visit.getId())
                     .type("HOME_VISIT")
-                    .title(visit.getServiceType() + " Home Visit")
-                    .description("Status: " + visit.getStatus() + ", Urgency: " + visit.getUrgency())
+                    .title(serviceType + " Home Visit")
+                    .description("Status: " + visit.getStatus())
                     .status(visit.getStatus())
-                    // Convert LocalDate to ZonedDateTime (start of day) for event sorting
-                    .eventDate(visit.getPreferredDate().atStartOfDay(ZoneId.systemDefault()))
+                    .eventDate(visit.getPreferredDate() != null
+                            ? visit.getPreferredDate().atZone(ZoneId.systemDefault())
+                            : visit.getCreatedAt().atZone(ZoneId.systemDefault()))
                     .referenceId(visit.getId())
                     .build());
         }

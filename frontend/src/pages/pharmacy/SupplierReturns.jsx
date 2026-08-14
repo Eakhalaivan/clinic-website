@@ -61,7 +61,7 @@ export default function SupplierReturns({ onBack }) {
               toast('Please select a specific batch to return from the Stock Registry.', { icon: '📦' });
               navigate('/pharmacy/medicine-stock');
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" /> New Return
           </button>

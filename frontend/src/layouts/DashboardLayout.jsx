@@ -11,13 +11,26 @@ import useAuthStore, { isTokenValid } from '../store/authStore';
 import DashboardGrid from '../components/dashboard/DashboardGrid';
 import ThemeToggle from '../components/ui/ThemeToggle';
 import ErrorBoundary from '../components/ui/ErrorBoundary';
+import CommandPalette from '../components/ui/CommandPalette';
 
 const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { token, user, roles = [], logout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (!isTokenValid(token)) return <Navigate to={`/${portalSlug || 'patient'}/login`} replace />;
   const userRoles = roles || [];
@@ -91,9 +104,11 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
                 <Search className="h-4 w-4 text-slate-400" />
               </span>
               <input 
-                type="text" 
-                placeholder={portalSlug === 'patient' ? "Search health records, vitals, appointments...   ⌘ K" : "Search patients, appointments, reports...   ⌘ K"}
-                className="block w-full pl-10 pr-12 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 placeholder-slate-400"
+                type="text"
+                readOnly
+                onClick={() => setIsSearchOpen(true)} 
+                placeholder={portalSlug === 'patient' ? "Search health records, vitals, appointments..." : "Search patients, appointments, reports..."}
+                className="block w-full pl-10 pr-12 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 placeholder-slate-400 cursor-pointer hover:bg-slate-100 transition-colors"
               />
               <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">
                 ⌘ K
@@ -227,6 +242,8 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
       </header>
 
       {/* Horizontal Nav Bar Removed as requested */}
+      
+      <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       
       {/* Main Content Area
           - Dashboard routes: overflow-hidden → tiles fill the viewport, no scrollbars.

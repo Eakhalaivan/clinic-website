@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.sql.DataSource;
 import java.util.HashMap;
 
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -79,7 +81,17 @@ public class ClinicDatabaseConfig {
                 "com.healthcare.clinic.tenant",
                 "com.healthcare.clinic.subscription",
                 "com.healthcare.clinic.ai",
-                "com.healthcare.clinic.fhir"
+                "com.healthcare.clinic.fhir",
+                "com.healthcare.clinic.homevisit",
+                "com.healthcare.clinic.inpatient",
+                "com.healthcare.clinic.audit",
+                "com.healthcare.clinic.engagement",
+                "com.healthcare.clinic.document",
+                "com.healthcare.clinic.emergency",
+                "com.healthcare.clinic.emr",
+                "com.healthcare.clinic.integration",
+                "com.healthcare.clinic.surgery",
+                "com.healthcare.clinic.telemedicine"
         );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();

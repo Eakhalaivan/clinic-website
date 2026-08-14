@@ -8,7 +8,7 @@ import com.healthcare.clinic.document.service.DocumentService;
 import com.healthcare.clinic.document.service.DocumentStorageService;
 import com.healthcare.clinic.document.service.ShareService;
 import com.healthcare.clinic.document.service.SignatureService;
-import com.healthcare.clinic.identity.entity.User;
+import com.healthcare.clinic.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -46,10 +46,10 @@ public class DocumentController {
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "expiresAt", required = false) String expiresAtStr,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserPrincipal user) {
 
         ZonedDateTime expiresAt = expiresAtStr != null ? ZonedDateTime.parse(expiresAtStr) : null;
-        Document doc = documentService.uploadNewDocument(file, ownerType, ownerId, documentType, title, description, expiresAt, user.getBranchId(), user.getId());
+        Document doc = documentService.uploadNewDocument(file, ownerType, ownerId, documentType, title, description, expiresAt, user.getBranchId(), user.getUserId());
         return ResponseEntity.ok(doc);
     }
 
@@ -58,8 +58,8 @@ public class DocumentController {
     public ResponseEntity<Document> uploadNewVersion(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal User user) {
-        Document newVersion = documentService.uploadNewVersion(id, file, user.getId());
+            @AuthenticationPrincipal UserPrincipal user) {
+        Document newVersion = documentService.uploadNewVersion(id, file, user.getUserId());
         return ResponseEntity.ok(newVersion);
     }
 
@@ -71,11 +71,11 @@ public class DocumentController {
             @RequestParam(required = false) String documentType,
             @RequestParam(required = false) String status,
             Pageable pageable,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserPrincipal user) {
 
         // Basic RBAC: If PATIENT, force ownerId to themselves.
         if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"))) {
-            ownerId = user.getId();
+            ownerId = user.getUserId();
             ownerType = "PATIENT";
         }
         
@@ -121,11 +121,11 @@ public class DocumentController {
             @PathVariable Long id,
             @RequestBody Map<String, String> payload,
             HttpServletRequest request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserPrincipal user) {
         
         String ipAddress = request.getRemoteAddr();
         String signatureNote = payload.get("signatureNote");
-        DocumentSignature signature = signatureService.signDocument(id, user.getId(), ipAddress, signatureNote);
+        DocumentSignature signature = signatureService.signDocument(id, user.getUserId(), ipAddress, signatureNote);
         return ResponseEntity.ok(signature);
     }
     
@@ -140,13 +140,13 @@ public class DocumentController {
     public ResponseEntity<DocumentShare> createExternalShare(
             @PathVariable Long id,
             @RequestBody Map<String, String> payload,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserPrincipal user) {
         
         String permission = payload.getOrDefault("permissionLevel", "VIEW");
         String expiresAtStr = payload.get("expiresAt");
         ZonedDateTime expiresAt = expiresAtStr != null ? ZonedDateTime.parse(expiresAtStr) : ZonedDateTime.now().plusDays(7);
         
-        DocumentShare share = shareService.createExternalShare(id, permission, expiresAt, user.getId());
+        DocumentShare share = shareService.createExternalShare(id, permission, expiresAt, user.getUserId());
         return ResponseEntity.ok(share);
     }
 

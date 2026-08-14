@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Repository("nursingBedRepository")
 public interface BedRepository extends JpaRepository<Bed, Long> {
     List<Bed> findByWardIdAndIsActiveTrue(Long wardId);
     Optional<Bed> findByWardIdAndBedNumber(Long wardId, String bedNumber);

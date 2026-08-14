@@ -25,7 +25,7 @@ public class ClinicalObservation {
     @Column(name = "observation_name", nullable = false, length = 255)
     private String observationName;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "\"value\"", nullable = false, length = 255)
     private String value;
 
     @Column(length = 50)

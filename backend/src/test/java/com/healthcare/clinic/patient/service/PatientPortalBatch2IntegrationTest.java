@@ -4,7 +4,7 @@ import com.healthcare.clinic.identity.entity.Role;
 import com.healthcare.clinic.identity.entity.User;
 import com.healthcare.clinic.identity.repository.RoleRepository;
 import com.healthcare.clinic.identity.repository.UserRepository;
-import com.healthcare.clinic.patient.entity.HomeVisitRequest;
+import com.healthcare.clinic.homevisit.entity.HomeVisitRequest;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.entity.TeleconsultationRequest;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,19 +90,14 @@ class PatientPortalBatch2IntegrationTest {
     @Test
     void testHomeVisitRequestWorkflow() {
         HomeVisitRequest request = new HomeVisitRequest();
-        request.setAddress("123 Test St");
-        request.setPreferredDate(LocalDate.now().plusDays(1));
-        request.setPreferredTime("Morning (8AM - 12PM)");
+        request.setAddressText("123 Test St");
+        request.setPreferredDate(LocalDateTime.now().plusDays(1));
         request.setServiceType("Nursing Care");
-        request.setUrgency("Routine");
-        request.setContactPerson("Test Patient");
-        request.setContactPhone("1234567890");
         
         // Create Request
         HomeVisitRequest saved = homeVisitService.requestHomeVisit(testPatient, request);
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getStatus()).isEqualTo("Requested");
-        assertThat(saved.getBranchId()).isEqualTo(testBranch.getId());
 
         // Get Requests
         List<HomeVisitRequest> requests = homeVisitService.getPatientRequests(testPatient);
@@ -116,12 +112,9 @@ class PatientPortalBatch2IntegrationTest {
     @Test
     void testHomeVisitCancelInvalidState() {
         HomeVisitRequest request = new HomeVisitRequest();
-        request.setAddress("123 Test St");
-        request.setPreferredDate(LocalDate.now().plusDays(1));
-        request.setPreferredTime("Morning");
+        request.setAddressText("123 Test St");
+        request.setPreferredDate(LocalDateTime.now().plusDays(1));
         request.setServiceType("Nursing Care");
-        request.setContactPerson("Test Patient");
-        request.setContactPhone("1234567890");
         
         HomeVisitRequest saved = homeVisitService.requestHomeVisit(testPatient, request);
         
