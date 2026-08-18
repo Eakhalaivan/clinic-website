@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.healthcare.clinic.audit.annotation.AuditableAction;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/doctor/encounters")
+@PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_SUPER_ADMIN')")
 @RequiredArgsConstructor
 public class ClinicalEncounterController {
 
