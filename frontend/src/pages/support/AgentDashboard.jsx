@@ -1,6 +1,5 @@
 import React from 'react';
 import { Users, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader';
 
 export default function AgentDashboard() {
     const stats = [
@@ -12,7 +11,7 @@ export default function AgentDashboard() {
 
     return (
         <div className="p-6">
-            <PageHeader title="Support Dashboard" subtitle="Overview of your active workload and SLAs" />
+            <div className="mb-6"><h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">Support Dashboard</h1><p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">Overview of your active workload and SLAs</p></div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                 {stats.map((stat, i) => (

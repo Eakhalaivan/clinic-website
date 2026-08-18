@@ -37,7 +37,7 @@ public class SaleController {
         this.billPdfService = billPdfService;
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_BILLING_STAFF','ROLE_SUPERVISOR','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_BILLING_STAFF','ROLE_SUPERVISOR','ROLE_PHARMACIST')")
     @PostMapping
     public ResponseEntity<ApiResponse<PharmacyBill>> createSale(@Valid @RequestBody SaleRequestDTO request) {
         PharmacyBill bill = saleService.processSale(request);

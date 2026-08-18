@@ -18,10 +18,13 @@ const NurseWorkspace = () => {
   const [activeTab, setActiveTab] = useState('notes');
   const [newNote, setNewNote] = useState('');
 
-  const { data: patient, isLoading: patientLoading } = useQuery({
+  const { data: patient360, isLoading: patientLoading } = useQuery({
     queryKey: ['patient', patientId],
-    queryFn: async () => (await axiosPrivate.get(`/patients/${patientId}`)).data
+    queryFn: async () => (await axiosPrivate.get(`/patients/${patientId}/360`)).data
   });
+  
+  const patient = patient360?.identity;
+  const profile = patient360?.profile;
 
   const { data: notes = [], isLoading: notesLoading } = useQuery({
     queryKey: ['nursing-notes', patientId],
@@ -67,7 +70,7 @@ const NurseWorkspace = () => {
           <h1 style={{ margin: '0 0 8px', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text)' }}>
             {patient?.firstName} {patient?.lastName}
           </h1>
-          <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>MRN: {patient?.mrn} | DOB: {patient?.dateOfBirth}</p>
+          <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>MRN: {profile?.opNumber} | DOB: {profile?.dateOfBirth}</p>
         </div>
       </div>
 

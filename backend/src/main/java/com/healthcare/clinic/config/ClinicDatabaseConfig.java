@@ -27,7 +27,8 @@ import java.util.HashMap;
                 pattern = "com\\.healthcare\\.clinic\\.pharmacy\\..*"
         ),
         entityManagerFactoryRef = "clinicEntityManagerFactory",
-        transactionManagerRef = "clinicTransactionManager"
+        transactionManagerRef = "clinicTransactionManager",
+        nameGenerator = org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator.class
 )
 public class ClinicDatabaseConfig {
 
@@ -43,7 +44,6 @@ public class ClinicDatabaseConfig {
 
     @Primary
     @Bean(name = "clinicEntityManagerFactory")
-    @org.springframework.context.annotation.DependsOn("clinicFlyway")
     public LocalContainerEntityManagerFactoryBean clinicEntityManagerFactory(
             @Qualifier("clinicDataSource") DataSource dataSource,
             org.springframework.core.env.Environment env) {
@@ -51,35 +51,50 @@ public class ClinicDatabaseConfig {
         em.setDataSource(dataSource);
         em.setPersistenceUnitName("clinic");
         em.setPackagesToScan(
-                "com.healthcare.clinic.identity",
-                "com.healthcare.clinic.patient",
-                "com.healthcare.clinic.doctor",
-                "com.healthcare.clinic.nursing",
-                "com.healthcare.clinic.reception",
-                "com.healthcare.clinic.appointment",
-                "com.healthcare.clinic.medicalrecord",
-                "com.healthcare.clinic.laboratory",
-                "com.healthcare.clinic.billing",
-                "com.healthcare.clinic.insurance",
-                "com.healthcare.clinic.hr",
-                "com.healthcare.clinic.finance",
-                "com.healthcare.clinic.branch",
-                "com.healthcare.clinic.superadmin",
-                "com.healthcare.clinic.marketing",
-                "com.healthcare.clinic.ecommerce",
-                "com.healthcare.clinic.support",
-                "com.healthcare.clinic.vendor",
-                "com.healthcare.clinic.ambulance",
-                "com.healthcare.clinic.radiology",
-                "com.healthcare.clinic.analytics",
-                "com.healthcare.clinic.notification",
-                "com.healthcare.clinic.clinicaldecision",
-                "com.healthcare.clinic.backoffice",
-                "com.healthcare.clinic.inventory",
-                "com.healthcare.clinic.tenant",
-                "com.healthcare.clinic.subscription",
                 "com.healthcare.clinic.ai",
-                "com.healthcare.clinic.fhir"
+                "com.healthcare.clinic.ambulance",
+                "com.healthcare.clinic.analytics",
+                "com.healthcare.clinic.appointment",
+                "com.healthcare.clinic.audit",
+                "com.healthcare.clinic.backoffice",
+                "com.healthcare.clinic.billing",
+                "com.healthcare.clinic.branch",
+                "com.healthcare.clinic.clinicaldecision",
+                "com.healthcare.clinic.common",
+                "com.healthcare.clinic.department",
+                "com.healthcare.clinic.doctor",
+                "com.healthcare.clinic.document",
+                "com.healthcare.clinic.ecommerce",
+                "com.healthcare.clinic.emergency",
+                "com.healthcare.clinic.emr",
+                "com.healthcare.clinic.engagement",
+                "com.healthcare.clinic.exception",
+                "com.healthcare.clinic.fhir",
+                "com.healthcare.clinic.finance",
+                "com.healthcare.clinic.health",
+                "com.healthcare.clinic.homevisit",
+                "com.healthcare.clinic.hr",
+                "com.healthcare.clinic.identity",
+                "com.healthcare.clinic.inpatient",
+                "com.healthcare.clinic.insurance",
+                "com.healthcare.clinic.integration",
+                "com.healthcare.clinic.inventory",
+                "com.healthcare.clinic.laboratory",
+                "com.healthcare.clinic.marketing",
+                "com.healthcare.clinic.medicalrecord",
+                "com.healthcare.clinic.notification",
+                "com.healthcare.clinic.nursing",
+                "com.healthcare.clinic.patient",
+                "com.healthcare.clinic.radiology",
+                "com.healthcare.clinic.reception",
+                "com.healthcare.clinic.security",
+                "com.healthcare.clinic.subscription",
+                "com.healthcare.clinic.superadmin",
+                "com.healthcare.clinic.support",
+                "com.healthcare.clinic.surgery",
+                "com.healthcare.clinic.telemedicine",
+                "com.healthcare.clinic.tenant",
+                "com.healthcare.clinic.vendor"
         );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();

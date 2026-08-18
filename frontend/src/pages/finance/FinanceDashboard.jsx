@@ -8,22 +8,26 @@ export default function FinanceDashboard() {
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState('overview');
 
-    const { data: payments = [] } = useQuery({ queryKey: ['finance-payments'], queryFn: async () => (await axiosPrivate.get('/api/finance/payments')).data });
-    const { data: expenses = [] } = useQuery({ queryKey: ['finance-expenses'], queryFn: async () => (await axiosPrivate.get('/api/finance/expenses')).data });
-    const { data: claims = [] } = useQuery({ queryKey: ['finance-claims'], queryFn: async () => (await axiosPrivate.get('/api/finance/claims')).data });
+    const { data: dashboard = {} } = useQuery({
+        queryKey: ['finance-dashboard'],
+        queryFn: async () => {
+            const now = new Date();
+            const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const endDate = now.toISOString().split('T')[0];
+            return (await axiosPrivate.get('/finance/dashboard', { params: { startDate, endDate } })).data;
+        }
+    });
+    const { data: expenses = [] } = useQuery({ queryKey: ['finance-expenses'], queryFn: async () => (await axiosPrivate.get('/finance/expenses')).data });
 
-    const totalRevenue = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
-    const totalExpenses = expenses.filter(e => e.status !== 'REJECTED').reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
-    const netIncome = totalRevenue - totalExpenses;
-
-    const pendingExpenses = expenses.filter(e => e.status === 'PENDING_APPROVAL');
-    const approvedExpenses = expenses.filter(e => e.status === 'APPROVED');
+    const totalRevenue = dashboard.totalRevenue || 0;
+    const totalExpenses = dashboard.totalExpenses || 0;
+    const netIncome = dashboard.netProfit || 0;
 
     const approveMutation = useMutation({
         mutationFn: async (id) => {
             const userStr = localStorage.getItem('user');
             const userId = userStr ? JSON.parse(userStr).id : 1;
-            return await axiosPrivate.post(`/api/finance/expenses/${id}/approve?approverId=${userId}`);
+            return await axiosPrivate.post(`/finance/expenses/${id}/approve?approverId=${userId}`);
         },
         onSuccess: () => queryClient.invalidateQueries(['finance-expenses'])
     });
@@ -32,7 +36,7 @@ export default function FinanceDashboard() {
         mutationFn: async (id) => {
             const userStr = localStorage.getItem('user');
             const userId = userStr ? JSON.parse(userStr).id : 1;
-            return await axiosPrivate.post(`/api/finance/expenses/${id}/pay?payerId=${userId}`);
+            return await axiosPrivate.post(`/finance/expenses/${id}/pay?payerId=${userId}`);
         },
         onSuccess: () => queryClient.invalidateQueries(['finance-expenses'])
     });

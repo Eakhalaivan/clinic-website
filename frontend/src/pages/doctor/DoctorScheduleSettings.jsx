@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '../../store/authStore';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import { Clock, Calendar, Plus, Trash2, CalendarOff, Settings } from 'lucide-react';
 import PageHeader from './PageHeader';
 import DataTable from '../../components/ui/DataTable';
@@ -71,7 +72,7 @@ const DoctorScheduleSettings = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries(['doctorWorkingHours']);
-      alert(`Successfully saved! Generated ${data.slotsGenerated} slots for the next 14 days.`);
+      toast.success(`Schedule saved! Generated ${data.slotsGenerated} slots for the next 14 days.`);
     }
   });
 
@@ -84,7 +85,7 @@ const DoctorScheduleSettings = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['doctorWorkingHours']);
       setShowOverrideForm(false);
-      alert('Override saved successfully.');
+      toast.success('Override saved successfully.');
     }
   });
 

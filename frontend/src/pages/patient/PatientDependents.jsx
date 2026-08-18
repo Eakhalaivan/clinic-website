@@ -18,14 +18,14 @@ const PatientDependents = () => {
   const { data: dependents, isLoading, error } = useQuery({
     queryKey: ['dependents'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/settings/dependents');
+      const res = await axiosPrivate.get('/v1/patient/settings/dependents');
       return res.data;
     }
   });
 
   const addMutation = useMutation({
     mutationFn: async (newDependent) => {
-      const res = await axiosPrivate.post('/api/v1/patient/settings/dependents', newDependent);
+      const res = await axiosPrivate.post('/v1/patient/settings/dependents', newDependent);
       return res.data;
     },
     onSuccess: () => {
@@ -39,7 +39,7 @@ const PatientDependents = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      await axiosPrivate.delete(`/api/v1/patient/settings/dependents/${id}`);
+      await axiosPrivate.delete(`/v1/patient/settings/dependents/${id}`);
     },
     onSuccess: () => queryClient.invalidateQueries(['dependents'])
   });

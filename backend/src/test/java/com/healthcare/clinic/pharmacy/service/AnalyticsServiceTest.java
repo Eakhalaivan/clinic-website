@@ -48,6 +48,7 @@ class AnalyticsServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.springframework.test.util.ReflectionTestUtils.setField(analyticsService, "entityManager", entityManager);
         start = LocalDateTime.now().minusDays(7);
         end = LocalDateTime.now();
     }
@@ -59,6 +60,7 @@ class AnalyticsServiceTest {
         when(entityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
         when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
         when(mockQuery.getSingleResult()).thenReturn(new BigDecimal("500.00"));
+        lenient().when(mockQuery.getResultList()).thenReturn(java.util.Collections.emptyList());
 
         AnalyticsDashboardDTO dashboard = analyticsService.getDashboardSummary(start, end);
 
@@ -70,11 +72,11 @@ class AnalyticsServiceTest {
 
     @Test
     void testGetDashboard_EmptyDb_NoDataYet() {
-        when(billRepository.sumNetAmountByBillingDateBetween(any(), any())).thenReturn(null);
-        when(entityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
-        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
+        lenient().when(billRepository.sumNetAmountByBillingDateBetween(any(), any())).thenReturn(null);
+        lenient().when(entityManager.createNativeQuery(anyString())).thenReturn(mockQuery);
+        lenient().when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
         // Simulate an empty db where native query might throw NoResultException
-        when(mockQuery.getSingleResult()).thenThrow(new NoResultException("No result found"));
+        lenient().when(mockQuery.getSingleResult()).thenThrow(new NoResultException("No result found"));
 
         AnalyticsDashboardDTO dashboard = analyticsService.getDashboardSummary(start, end);
 

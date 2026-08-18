@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DispenseItemRequest {
+    private Long prescribedItemId;
     private Long medicineId;
     private Integer quantity;
 }

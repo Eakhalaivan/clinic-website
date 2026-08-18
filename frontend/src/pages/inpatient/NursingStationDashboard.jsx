@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { Activity, Users, UserPlus, Clock, ArrowRightLeft, FileOutput } from 'lucide-react';
+import { Activity, Users, UserPlus, Clock, ArrowRightLeft, FileOutput, X } from 'lucide-react';
 import EmptyState from '../../components/common/EmptyState';
+import toast from 'react-hot-toast';
 
 const NursingStationDashboard = () => {
   const [filter, setFilter] = useState('ALL'); // ALL, ADMITTED, DISCHARGED
+  const [activeModal, setActiveModal] = useState(null); // 'TRANSFER', 'DISCHARGE'
+  const [selectedAdmission, setSelectedAdmission] = useState(null);
+  const [formData, setFormData] = useState({});
+  const queryClient = useQueryClient();
 
   const { data: admissions, isLoading } = useQuery({
     queryKey: ['admissions', filter],
@@ -18,6 +23,66 @@ const NursingStationDashboard = () => {
       return res.data;
     }
   });
+
+  const { data: availableBeds } = useQuery({
+    queryKey: ['available-beds'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/inpatient/beds?status=AVAILABLE');
+      return res.data;
+    },
+    enabled: activeModal === 'TRANSFER'
+  });
+
+  const transferMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post(`/inpatient/admissions/${selectedAdmission.id}/transfer`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Patient transferred successfully');
+      queryClient.invalidateQueries(['admissions']);
+      queryClient.invalidateQueries(['available-beds']);
+      closeModal();
+    }
+  });
+
+  const dischargeMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post(`/inpatient/admissions/${selectedAdmission.id}/discharge`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Patient discharged successfully');
+      queryClient.invalidateQueries(['admissions']);
+      closeModal();
+    }
+  });
+
+  const openModal = (type, admission) => {
+    setSelectedAdmission(admission);
+    setActiveModal(type);
+    setFormData({});
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedAdmission(null);
+    setFormData({});
+  };
+
+  const handleAction = () => {
+    if (activeModal === 'TRANSFER') {
+      transferMutation.mutate({
+        newBedId: formData.newBedId,
+        reason: formData.reason
+      });
+    } else if (activeModal === 'DISCHARGE') {
+      dischargeMutation.mutate({
+        dischargingDoctorId: formData.dischargingDoctorId,
+        summaryData: formData.summaryData || {}
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="p-10 flex justify-center text-slate-400">Loading admitted patients...</div>;
@@ -92,8 +157,8 @@ const NursingStationDashboard = () => {
               <div className="p-5 bg-slate-50 flex-grow grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-slate-500 mb-1 flex items-center gap-1.5"><BedDoubleIcon /> Location</p>
-                  <p className="font-medium text-slate-800">{admission.bed.room.ward.name}, Room {admission.bed.room.roomNumber}</p>
-                  <p className="text-xs text-slate-500">Bed {admission.bed.bedNumber}</p>
+                  <p className="font-medium text-slate-800">{admission.bed?.room?.ward?.name}, Room {admission.bed?.room?.roomNumber}</p>
+                  <p className="text-xs text-slate-500">Bed {admission.bed?.bedNumber}</p>
                 </div>
                 <div>
                   <p className="text-slate-500 mb-1 flex items-center gap-1.5"><Clock size={14} /> Admitted At</p>
@@ -103,7 +168,7 @@ const NursingStationDashboard = () => {
                 <div className="col-span-2 mt-2 pt-4 border-t border-slate-200">
                   <p className="text-slate-500 mb-1">Admission Reason</p>
                   <p className="text-slate-800 font-medium">{admission.admissionReason || 'No reason provided'}</p>
-                  <p className="text-xs text-slate-500 mt-1">Admitting Dr. {admission.admittingDoctor.userId}</p>
+                  <p className="text-xs text-slate-500 mt-1">Admitting Dr. {admission.admittingDoctor?.userId}</p>
                 </div>
               </div>
 
@@ -112,10 +177,16 @@ const NursingStationDashboard = () => {
                   <button className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200 transition-colors flex items-center gap-1.5">
                     <Activity size={16} /> Vitals
                   </button>
-                  <button className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1.5">
+                  <button 
+                    onClick={() => openModal('TRANSFER', admission)}
+                    className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                  >
                     <ArrowRightLeft size={16} /> Transfer
                   </button>
-                  <button className="px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors flex items-center gap-1.5">
+                  <button 
+                    onClick={() => openModal('DISCHARGE', admission)}
+                    className="px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors flex items-center gap-1.5"
+                  >
                     <FileOutput size={16} /> Discharge
                   </button>
                 </div>
@@ -124,6 +195,98 @@ const NursingStationDashboard = () => {
           ))}
         </div>
       )}
+
+      {/* Modals */}
+      {activeModal && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="font-bold text-lg text-slate-800">
+                {activeModal === 'TRANSFER' && 'Transfer Bed'}
+                {activeModal === 'DISCHARGE' && 'Discharge Patient'}
+              </h3>
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 flex-1 overflow-y-auto space-y-4 max-h-[60vh]">
+              {activeModal === 'TRANSFER' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">New Bed</label>
+                    <select 
+                      value={formData.newBedId || ''}
+                      onChange={(e) => setFormData({...formData, newBedId: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Bed...</option>
+                      {availableBeds?.map(bed => (
+                        <option key={bed.id} value={bed.id}>
+                          {bed.room?.ward?.name} - Room {bed.room?.roomNumber} - Bed {bed.bedNumber}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Transfer Reason</label>
+                    <textarea 
+                      value={formData.reason || ''}
+                      onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
+
+              {activeModal === 'DISCHARGE' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Discharging Doctor ID</label>
+                    <input 
+                      type="number"
+                      value={formData.dischargingDoctorId || ''}
+                      onChange={(e) => setFormData({...formData, dischargingDoctorId: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Discharge Summary / Notes</label>
+                    <textarea 
+                      value={formData.summaryData?.notes || ''}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        summaryData: { ...(formData.summaryData || {}), notes: e.target.value }
+                      })}
+                      className="w-full border border-slate-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={4}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
+              <button 
+                onClick={closeModal}
+                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleAction}
+                disabled={activeModal === 'TRANSFER' ? transferMutation.isPending : dischargeMutation.isPending}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {activeModal === 'TRANSFER' && (transferMutation.isPending ? 'Transferring...' : 'Confirm Transfer')}
+                {activeModal === 'DISCHARGE' && (dischargeMutation.isPending ? 'Discharging...' : 'Confirm Discharge')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

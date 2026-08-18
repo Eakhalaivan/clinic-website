@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.annotation.PostConstruct;
@@ -45,6 +46,9 @@ public class StripePaymentService {
     @Value("${stripe.publishable-key}")
     private String stripePublishableKey;
 
+    @Value("${app.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
+
     @PostConstruct
     public void init() {
         Stripe.apiKey = stripeSecretKey;
@@ -64,15 +68,15 @@ public class StripePaymentService {
         try {
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
-                    .setSuccessUrl("https://your-frontend-url.com/success?session_id={CHECKOUT_SESSION_ID}") // You should configure this via properties
-                    .setCancelUrl("https://your-frontend-url.com/cancel")
+                    .setSuccessUrl(frontendUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                    .setCancelUrl(frontendUrl + "/cancel")
                     .setClientReferenceId("INV_" + invoice.getId().toString())
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)
                                     .setPriceData(
                                             SessionCreateParams.LineItem.PriceData.builder()
-                                                    .setCurrency("usd")
+                                                    .setCurrency("inr")
                                                     .setUnitAmount(amountInCents)
                                                     .setProductData(
                                                             SessionCreateParams.LineItem.PriceData.ProductData.builder()
@@ -109,15 +113,15 @@ public class StripePaymentService {
         try {
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
-                    .setSuccessUrl("https://your-frontend-url.com/success?session_id={CHECKOUT_SESSION_ID}")
-                    .setCancelUrl("https://your-frontend-url.com/cancel")
+                    .setSuccessUrl(frontendUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                    .setCancelUrl(frontendUrl + "/cancel")
                     .setClientReferenceId("MED_" + order.getId().toString())
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)
                                     .setPriceData(
                                             SessionCreateParams.LineItem.PriceData.builder()
-                                                    .setCurrency("usd")
+                                                    .setCurrency("inr")
                                                     .setUnitAmount(amountInCents)
                                                     .setProductData(
                                                             SessionCreateParams.LineItem.PriceData.ProductData.builder()
@@ -141,6 +145,7 @@ public class StripePaymentService {
         }
     }
 
+    @Transactional
     public void processWebhook(String payload, String signature) {
         Event event;
         try {
@@ -172,6 +177,7 @@ public class StripePaymentService {
                                 .amount(invoice.getTotalAmount())
                                 .paymentMethod("STRIPE")
                                 .transactionRef(session.getId())
+                                .idempotencyKey(event.getId())
                                 .build();
                         Payment savedPayment = paymentRepository.save(payment);
                         
@@ -199,6 +205,7 @@ public class StripePaymentService {
                                 .amount(order.getTotalAmount())
                                 .paymentMethod("STRIPE")
                                 .transactionRef(session.getId())
+                                .idempotencyKey(event.getId())
                                 .build();
                         Payment savedPayment = paymentRepository.save(payment);
 
@@ -224,6 +231,7 @@ public class StripePaymentService {
                                     .amount(invoice.getTotalAmount())
                                     .paymentMethod("STRIPE")
                                     .transactionRef(session.getId())
+                                    .idempotencyKey(event.getId())
                                     .build();
                             Payment savedPayment = paymentRepository.save(payment);
                             

@@ -8,7 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="PatientHomeVisitRequest")
 @Table(name = "home_visit_requests")
 @Data
 public class HomeVisitRequest {

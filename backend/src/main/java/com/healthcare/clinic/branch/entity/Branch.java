@@ -26,7 +26,7 @@ public class Branch {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @JoinColumn(name = "tenant_id")
     @com.fasterxml.jackson.annotation.JsonIgnore
     private Tenant tenant;
 

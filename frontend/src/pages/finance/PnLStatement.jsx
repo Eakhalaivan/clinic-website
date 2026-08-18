@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 const fetchPnL = async (startDate, endDate, branchId) => {
   const params = new URLSearchParams({ startDate, endDate });
   if (branchId) params.append('branchId', branchId);
-  const response = await axiosPrivate.get(`/api/v1/finance/pnl?${params.toString()}`);
+  const response = await axiosPrivate.get(`/v1/finance/pnl?${params.toString()}`);
   return response.data;
 };
 

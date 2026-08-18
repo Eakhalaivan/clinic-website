@@ -6,6 +6,7 @@ import com.healthcare.clinic.appointment.entity.AppointmentStatus;
 import com.healthcare.clinic.identity.repository.UserRepository;
 import com.healthcare.clinic.doctor.repository.PrescriptionRepository;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
+import com.healthcare.clinic.patient.repository.PatientDocumentRepository;
 import com.healthcare.clinic.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class DoctorPatientController {
     private final PatientProfileRepository patientProfileRepository;
     private final UserRepository userRepository;
     private final PrescriptionRepository prescriptionRepository;
+    private final PatientDocumentRepository patientDocumentRepository;
 
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
@@ -143,5 +145,16 @@ public class DoctorPatientController {
             .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{patientId}/documents")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<com.healthcare.clinic.patient.entity.PatientDocument>> getPatientDocuments(@PathVariable Long patientId) {
+        // Here patientId from path is the userId of the patient based on PatientDetail.jsx
+        var patient = patientProfileRepository.findByUserId(patientId)
+            .orElseThrow(() -> new com.healthcare.clinic.exception.ResourceNotFoundException("Patient not found"));
+
+        return ResponseEntity.ok(patientDocumentRepository.findByPatientIdOrderByUploadedAtDesc(patient.getId()));
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { Calendar as CalendarIcon, Clock, ArrowRight, Search, MapPin, ChevronLeft, ChevronRight, Check, ArrowLeft, Filter, Shield, Headphones, Zap, Map, ChevronDown } from 'lucide-react';
@@ -12,6 +12,10 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function BookAppointment() {
     const { doctorId } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const rescheduleId = searchParams.get('rescheduleId');
+    const patientUserId = searchParams.get('patientId');
+    const patientName = searchParams.get('patientName');
     const queryClient = useQueryClient();
     const { user, token } = useAuthStore();
     
@@ -26,6 +30,7 @@ export default function BookAppointment() {
     const [error, setError] = useState('');
     
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedSpecialty, setSelectedSpecialty] = useState('');
 
     // Fetch list of doctors
     const { data: doctors = [], isLoading: doctorsLoading } = useQuery({
@@ -101,8 +106,16 @@ export default function BookAppointment() {
 
     const mutation = useMutation({
         mutationFn: async (data) => {
-            const res = await axiosPrivate.post('/appointments/book', data);
-            return res.data;
+            const payload = { ...data };
+            if (patientUserId) payload.patientUserId = parseInt(patientUserId);
+            
+            if (rescheduleId) {
+                const res = await axiosPrivate.patch(`/appointments/${rescheduleId}/reschedule?newSlotId=${payload.slotId}`);
+                return res.data;
+            } else {
+                const res = await axiosPrivate.post('/appointments/book', payload);
+                return res.data;
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['patientAppointments']);
@@ -127,8 +140,12 @@ export default function BookAppointment() {
 
     const filteredDoctors = doctors.filter(doc => {
         const fullName = `${doc.firstName} ${doc.lastName}`.toLowerCase();
-        return fullName.includes(searchQuery.toLowerCase()) || (doc.specialty || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = fullName.includes(searchQuery.toLowerCase()) || (doc.specialty || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSpecialty = selectedSpecialty ? (doc.specialty === selectedSpecialty) : true;
+        return matchesSearch && matchesSpecialty;
     });
+
+    const uniqueSpecialties = Array.from(new Set(doctors.map(d => d.specialty).filter(Boolean)));
 
     const selectedSlot = slots.find(s => s.id === selectedSlotId);
 
@@ -174,7 +191,7 @@ export default function BookAppointment() {
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Check className="w-10 h-10 text-green-600" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Booking {rescheduleId ? 'Rescheduled' : 'Confirmed'}!</h2>
                     <p className="text-gray-600 mb-8">
                         Your appointment with Dr. {selectedDoctor?.lastName} is scheduled for {selectedDate && format(selectedDate, 'MMMM d, yyyy')} at {selectedSlot && format(new Date(selectedSlot.startTime), 'h:mm a')}.
                     </p>
@@ -189,11 +206,12 @@ export default function BookAppointment() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     
                     {/* LEFT COLUMN */}
-                    <div className="lg:col-span-8 space-y-6">
-                        
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Book an Appointment</h1>
-                            <p className="text-gray-500">Find the right doctor and book your appointment in a few simple steps</p>
+                    <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 mt-16 sm:mt-0">
+                        <div className="mb-8">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Book Appointment</h1>
+                            <p className="text-gray-500 mt-1">
+                                {patientName ? `Booking for patient: ${patientName}` : 'Schedule a consultation with our specialists'}
+                            </p>
                         </div>
 
                         {currentStep === 1 || currentStep === 2 ? (
@@ -211,9 +229,15 @@ export default function BookAppointment() {
                                         />
                                     </div>
                                     <div className="relative flex-1">
-                                        <select className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm appearance-none cursor-pointer">
-                                            <option>Cardiologist</option>
-                                            <option>General Physician</option>
+                                        <select 
+                                            value={selectedSpecialty}
+                                            onChange={e => setSelectedSpecialty(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm appearance-none cursor-pointer"
+                                        >
+                                            <option value="">All Specialties</option>
+                                            {uniqueSpecialties.map(spec => (
+                                                <option key={spec} value={spec}>{spec}</option>
+                                            ))}
                                         </select>
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                             <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -420,13 +444,13 @@ export default function BookAppointment() {
                                 
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Reason for Visit *</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Reason for Visit {rescheduleId ? '' : '*'}</label>
                                         <textarea
                                             value={reason}
                                             onChange={e => setReason(e.target.value)}
                                             rows="4"
                                             className="w-full rounded-xl border border-gray-300 p-4 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-y"
-                                            placeholder="Please describe your symptoms or reason for visit..."
+                                            placeholder={rescheduleId ? "Reason for visit (optional for rescheduling)..." : "Please describe your symptoms or reason for visit..."}
                                         />
                                     </div>
                                     
@@ -445,7 +469,7 @@ export default function BookAppointment() {
                                         </button>
                                         <button 
                                             onClick={handleConfirm}
-                                            disabled={mutation.isPending || !reason.trim()}
+                                            disabled={mutation.isPending || (!rescheduleId && !reason.trim())}
                                             className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center"
                                         >
                                             {mutation.isPending ? 'Confirming...' : 'Review & Confirm'} <ArrowRight className="w-4 h-4 ml-2" />

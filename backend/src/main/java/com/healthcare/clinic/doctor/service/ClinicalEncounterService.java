@@ -22,6 +22,8 @@ public class ClinicalEncounterService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final PrescriptionService prescriptionService;
     private final ClinicalBillingService billingService;
+    private final com.healthcare.clinic.doctor.repository.SoapNoteRepository soapNoteRepository;
+    private final com.healthcare.clinic.appointment.service.AppointmentService appointmentService;
 
     private DoctorProfile getDoctorProfile(User user) {
         return doctorProfileRepository.findByUserId(user.getId())
@@ -47,6 +49,12 @@ public class ClinicalEncounterService {
 
     @Transactional
     public ClinicalEncounter startEncounter(User user, ClinicalEncounter encounter) {
+        if (encounter.getAppointmentId() != null) {
+             java.util.Optional<ClinicalEncounter> existing = encounterRepository.findByAppointmentId(encounter.getAppointmentId());
+             if (existing.isPresent()) {
+                 return existing.get();
+             }
+        }
         DoctorProfile doctor = getDoctorProfile(user);
         encounter.setDoctorId(doctor.getId());
         encounter.setStatus("In Progress");
@@ -54,11 +62,26 @@ public class ClinicalEncounterService {
     }
 
     @Transactional
-    public ClinicalEncounter finalizeEncounter(User user, Long id) {
+    public ClinicalEncounter closeEncounter(User user, Long id) {
         ClinicalEncounter encounter = getEncounter(user, id);
-        if (encounter.getStatus().equals("Completed") || encounter.getStatus().equals("Finalized")) {
-            throw new RuntimeException("Encounter is already finalized or completed");
+        if ("CLOSED".equals(encounter.getStatus()) || "Completed".equals(encounter.getStatus())) {
+            throw new RuntimeException("Encounter is already closed");
         }
+        
+        // Validate SOAP Note
+        com.healthcare.clinic.doctor.entity.SoapNote soapNote = soapNoteRepository.findByEncounterId(id)
+                .orElseThrow(() -> new RuntimeException("SOAP note is required to close the encounter"));
+                
+        if (soapNote.getSubjective() == null || soapNote.getSubjective().trim().isEmpty() ||
+            soapNote.getObjective() == null || soapNote.getObjective().trim().isEmpty() ||
+            soapNote.getAssessment() == null || soapNote.getAssessment().trim().isEmpty() ||
+            soapNote.getPlan() == null || soapNote.getPlan().trim().isEmpty()) {
+            throw new RuntimeException("All SOAP note sections (Subjective, Objective, Assessment, Plan) must be filled before closing.");
+        }
+        
+        // Finalize SOAP note
+        soapNote.setFinalized(true);
+        soapNoteRepository.save(soapNote);
         
         // Finalize all draft prescriptions for this encounter
         List<Prescription> prescriptions = prescriptionService.getPrescriptionsByEncounter(id);
@@ -78,8 +101,21 @@ public class ClinicalEncounterService {
                 new BigDecimal("150.00") // Example base fee
         );
 
-        encounter.setStatus("Completed");
-        encounter.setFinalizedAt(ZonedDateTime.now());
-        return encounterRepository.save(encounter);
+        encounter.setStatus("CLOSED");
+        encounter.setClosedAt(ZonedDateTime.now());
+        encounter.setFinalizedAt(ZonedDateTime.now()); // legacy compatibility
+        
+        ClinicalEncounter saved = encounterRepository.save(encounter);
+        
+        if (saved.getAppointmentId() != null) {
+            try {
+                appointmentService.updateAppointmentStatus(saved.getAppointmentId(), com.healthcare.clinic.appointment.entity.AppointmentStatus.COMPLETED);
+            } catch (Exception e) {
+                // Log and continue, do not block encounter closing
+                System.err.println("Failed to update appointment status: " + e.getMessage());
+            }
+        }
+        
+        return saved;
     }
 }

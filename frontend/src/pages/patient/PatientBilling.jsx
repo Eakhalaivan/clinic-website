@@ -20,14 +20,23 @@ const PatientBilling = () => {
     enabled: !!user?.id
   });
 
-  // Fetch Mock Payments
+  // Fetch Payment History (Paid Invoices)
   const { data: payments, isLoading: isLoadingPayments } = useQuery({
-    queryKey: ['patientPayments'],
+    queryKey: ['patientPayments', user?.id],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/payments');
-      return res.data;
+      const res = await axiosPrivate.get(`/billing/patient/${user.id}`);
+      return res.data
+        .filter(inv => inv.status === 'PAID')
+        .map(inv => ({
+          id: inv.id,
+          paymentDate: inv.paidAt || inv.updatedAt,
+          paymentMethod: inv.paymentMethod || 'Online',
+          transactionId: inv.invoiceNumber,
+          amount: inv.totalAmount || inv.amount,
+          status: inv.status
+        }));
     },
-    enabled: activeTab === 'history'
+    enabled: activeTab === 'history' && !!user?.id
   });
 
   const payMutation = useMutation({

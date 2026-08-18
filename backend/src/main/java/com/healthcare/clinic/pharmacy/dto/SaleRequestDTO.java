@@ -57,4 +57,8 @@ public class SaleRequestDTO {
     private String billType;
     public String getBillType() { return billType; }
     public void setBillType(String billType) { this.billType = billType; }
+
+    private String idempotencyKey;
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 }

@@ -117,7 +117,7 @@ public class PatientPortalBatch3IntegrationTest {
         PatientDocument doc = new PatientDocument();
         doc.setTitle("Blood Test Result");
         doc.setDocumentType("Lab Report");
-        PatientDocument saved = patientDocumentService.saveDocumentMetadata(testPatient, doc);
+        PatientDocument saved = patientDocumentService.saveDocumentMetadata(testPatient, doc, null);
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getFileUrl()).isEqualTo("https://example.com/mock-document-url.pdf");
@@ -134,7 +134,7 @@ public class PatientPortalBatch3IntegrationTest {
         PatientDocument doc = new PatientDocument();
         doc.setTitle("Prescription Scan");
         doc.setDocumentType("Prescription");
-        patientDocumentService.saveDocumentMetadata(testPatient, doc);
+        patientDocumentService.saveDocumentMetadata(testPatient, doc, null);
 
         // Fetch timeline
         List<TimelineEventDTO> timeline = healthTimelineService.getTimelineEvents(testPatient);

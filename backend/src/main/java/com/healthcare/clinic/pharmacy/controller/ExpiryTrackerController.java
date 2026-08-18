@@ -42,7 +42,7 @@ public class ExpiryTrackerController {
     }
 
     @PostMapping("/return")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_STOREKEEPER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_STOREKEEPER')")
     public ResponseEntity<ApiResponse<BatchReturnToSupplier>> initiateReturn(@Valid @RequestBody BatchReturnToSupplier returnRequest) {
         return ResponseEntity.ok(ApiResponse.success(service.initiateBatchReturn(returnRequest), "Return initiated successfully"));
     }

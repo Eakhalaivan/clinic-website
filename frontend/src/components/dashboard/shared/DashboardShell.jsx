@@ -32,21 +32,21 @@ export const DashboardShell = ({
 
       {/* ── Main Navigation Tabs ── */}
       {tabs.length > 0 && (
-        <div className="flex items-center gap-6 px-4 bg-white border-b border-slate-200 overflow-x-auto text-xs font-semibold shrink-0 h-11 no-scrollbar">
+        <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-slate-200 overflow-x-auto shrink-0 no-scrollbar">
           {tabs.map((tab, i) => {
             const tabId = typeof tab === 'string' ? tab : tab.id;
             const tabLabel = typeof tab === 'string' ? tab : tab.label;
-            const TabIcon = typeof tab === 'object' ? tab.icon : null;
             const isActive = activeTab === tabId || (!activeTab && i === 0);
             return (
               <button 
                 key={i}
                 onClick={() => onTabChange && onTabChange(tabId)}
-                className={`h-full border-b-2 whitespace-nowrap flex items-center gap-1.5 transition-all text-xs font-semibold ${
-                  isActive ? 'border-[#5145CD] text-[#5145CD] font-bold' : 'border-transparent text-slate-500 hover:text-slate-800'
+                className={`whitespace-nowrap flex items-center justify-center px-5 py-2.5 rounded-[12px] border transition-all text-[15px] font-medium ${
+                  isActive 
+                    ? 'border-[#2B4AFE] bg-[#2B4AFE] text-white' 
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300'
                 }`}
               >
-                {TabIcon && <TabIcon size={15} className={isActive ? 'text-[#5145CD]' : 'text-slate-400'} />}
                 {tabLabel}
               </button>
             );

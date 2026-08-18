@@ -14,14 +14,14 @@ export default function MarketingNps() {
   const { data: surveys } = useQuery({
     queryKey: ['nps-surveys', searched, page],
     queryFn: async () =>
-      (await axiosPrivate.get('/api/marketing/nps/surveys', { params: { branchId: searched, page, size: 20 } })).data,
+      (await axiosPrivate.get('/marketing/nps/surveys', { params: { branchId: searched, page, size: 20 } })).data,
     enabled: !!searched,
   });
 
   const { data: metrics } = useQuery({
     queryKey: ['nps-metrics', searched],
     queryFn: async () =>
-      (await axiosPrivate.get('/api/marketing/nps/metrics', { params: { branchId: searched } })).data,
+      (await axiosPrivate.get('/marketing/nps/metrics', { params: { branchId: searched } })).data,
     enabled: !!searched,
   });
 
@@ -29,7 +29,7 @@ export default function MarketingNps() {
     if (!responding) return;
     setSubmitting(true);
     try {
-      await axiosPrivate.post(`/api/marketing/nps/surveys/${responding}/respond`, null, {
+      await axiosPrivate.post(`/marketing/nps/surveys/${responding}/respond`, null, {
         params: { npsScore: response.npsScore, rating: response.rating, comments: response.comments, category: 'GENERAL' },
       });
       qc.invalidateQueries({ queryKey: ['nps-surveys', searched, page] });
@@ -45,7 +45,7 @@ export default function MarketingNps() {
 
   const handleResolve = async (surveyId) => {
     try {
-      await axiosPrivate.post(`/api/marketing/nps/surveys/${surveyId}/resolve`, null, {
+      await axiosPrivate.post(`/marketing/nps/surveys/${surveyId}/resolve`, null, {
         params: { resolvedBy: 1, resolutionNotes: 'Resolved by manager' },
       });
       qc.invalidateQueries({ queryKey: ['nps-surveys', searched, page] });

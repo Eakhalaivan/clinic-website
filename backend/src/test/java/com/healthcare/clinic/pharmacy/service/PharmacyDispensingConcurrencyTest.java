@@ -113,6 +113,28 @@ public class PharmacyDispensingConcurrencyTest {
         prescriptionRecord2.setPrescriptionDate(LocalDateTime.now());
         prescriptionRecord2 = prescriptionRepository.save(prescriptionRecord2);
 
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem item1 = new com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem();
+        item1.setPharmacyPrescription(prescriptionRecord1);
+        item1.setMedicationName(testMedicine.getName());
+        item1.setMedicineId(testMedicine.getId());
+        item1.setPrescribedQuantity(8);
+        item1.setDosage("1x1");
+        item1.setFrequency("Daily");
+        item1.setDuration("8 days");
+        prescriptionRecord1.setItems(List.of(item1));
+        prescriptionRepository.save(prescriptionRecord1);
+
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem item2 = new com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem();
+        item2.setPharmacyPrescription(prescriptionRecord2);
+        item2.setMedicationName(testMedicine.getName());
+        item2.setMedicineId(testMedicine.getId());
+        item2.setPrescribedQuantity(8);
+        item2.setDosage("1x1");
+        item2.setFrequency("Daily");
+        item2.setDuration("8 days");
+        prescriptionRecord2.setItems(List.of(item2));
+        prescriptionRepository.save(prescriptionRecord2);
+
         // Stub cross-DB doctor prescription lookup
         com.healthcare.clinic.doctor.entity.Prescription cp1 = new com.healthcare.clinic.doctor.entity.Prescription();
         cp1.setId(101L);

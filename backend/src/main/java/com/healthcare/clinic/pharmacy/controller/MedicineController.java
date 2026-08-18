@@ -68,7 +68,7 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.success(dtos, "Medicines fetched successfully"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST')")
     @PostMapping("/medicines")
     public ResponseEntity<ApiResponse<MedicineDTO>> createMedicine(@Valid @RequestBody Medicine medicine) {
         boolean autoGenerateCode = medicine.getMedicineCode() == null || medicine.getMedicineCode().trim().isEmpty();
@@ -91,7 +91,7 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.success(dto, "Medicine added successfully"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST')")
     @PutMapping("/medicines/{id}")
     public ResponseEntity<ApiResponse<MedicineDTO>> updateMedicine(@PathVariable Long id, @Valid @RequestBody Medicine medicineData) {
         return medicineRepository.findById(id).map(medicine -> {
@@ -128,7 +128,7 @@ public class MedicineController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST')")
     @DeleteMapping("/medicines/{id}")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<ApiResponse<Void>> deleteMedicine(@PathVariable Long id) {
@@ -139,7 +139,7 @@ public class MedicineController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_DOCTOR')")
     @GetMapping("/medicines/search")
     public ResponseEntity<List<MedicineDTO>> searchMedicines(@RequestParam String name) {
         List<Medicine> medicines = medicineRepository.findByNameContainingIgnoreCase(name);
@@ -166,13 +166,13 @@ public class MedicineController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACIST','ROLE_SUPERVISOR')")
     @GetMapping("/stocks/search")
     public ResponseEntity<List<MedicineStock>> searchStocks(@RequestParam String name) {
         return ResponseEntity.ok(stockRepository.findByMedicineNameContainingIgnoreCaseWithMedicineAndSupplier(name));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACIST','ROLE_SUPERVISOR')")
     @GetMapping("/stocks/barcode/{barcode}")
     public ResponseEntity<ApiResponse<MedicineStock>> getStockByBarcode(@PathVariable String barcode) {
         return medicineRepository.findByBarcode(barcode)
@@ -183,14 +183,14 @@ public class MedicineController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACIST','ROLE_SUPERVISOR')")
     @GetMapping("/stocks")
     public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<MedicineStock>>> getAllStocks(
             @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(stockRepository.findAllActiveWithMedicineAndSupplier(pageable), "Stocks fetched successfully"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_STOREKEEPER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_STOREKEEPER')")
     @PostMapping("/stocks")
     public ResponseEntity<ApiResponse<MedicineStock>> addStock(@Valid @RequestBody MedicineStock stock) {
         // Ensure medicine is linked
@@ -203,7 +203,7 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.success(saved, "Stock updated successfully"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_STOREKEEPER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_STOREKEEPER')")
     @PostMapping("/stocks/adjust")
     public ResponseEntity<ApiResponse<StockAdjustment>> adjustStock(@Valid @RequestBody StockAdjustment adjustment) {
         MedicineStock stock = stockRepository.findById(adjustment.getMedicineStock().getId())
@@ -243,7 +243,7 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.success(valuation, "Valuation calculated"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_STOREKEEPER','ROLE_PURCHASE_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_STOREKEEPER','ROLE_PURCHASE_MANAGER')")
     @PostMapping("/purchase-orders/auto-generate")
     public ResponseEntity<ApiResponse<String>> autoGeneratePOs() {
         List<Medicine> medicines = medicineRepository.findAll();
@@ -296,7 +296,7 @@ public class MedicineController {
         return ResponseEntity.ok(ApiResponse.success("Generated " + supplierOrders.size() + " Purchase Orders covering " + generatedCount + " medicines.", "Auto PO Generation successful"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR','ROLE_CASHIER','ROLE_BILLING_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_STOREKEEPER','ROLE_PHARMACIST','ROLE_SUPERVISOR','ROLE_CASHIER','ROLE_BILLING_STAFF')")
     @GetMapping("/stocks/low-stock")
     public ResponseEntity<ApiResponse<List<MedicineDTO>>> getLowStockMedicines() {
         List<Medicine> medicines = medicineRepository.findAll();

@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 import {
   Calendar as CalendarIcon, CheckCircle2, Clock, XCircle, Users,
   AlertCircle, ChevronRight, ChevronLeft, Loader2,
-  Filter, Search, LayoutGrid, Eye, MoreVertical,
+  Filter, Search, LayoutGrid, Eye, MoreVertical, Stethoscope,
   ArrowUpRight, ArrowDownRight, CalendarDays, FileText
 } from 'lucide-react';
 
@@ -65,6 +66,32 @@ const DoctorAppointments = () => {
     enabled: !!user?.id,
     refetchInterval: 30000,
   });
+
+  // Mutation: update status + navigate to clinical workspace encounter
+  const startConsultationMutation = useMutation({
+    mutationFn: async (appointment) => {
+      // 1. Update status to IN_PROGRESS (check-in)
+      await axiosPrivate.patch(`/appointments/${appointment.id}/status?status=IN_PROGRESS`);
+      // 2. Create or fetch the encounter for this appointment
+      const res = await axiosPrivate.post(`/v1/doctor/encounters`, {
+        appointmentId: appointment.id,
+        patientId: appointment.patientId,
+      }).catch(async () => {
+        // If encounter already exists, fetch it
+        return axiosPrivate.get(`/v1/doctor/encounters/by-appointment/${appointment.id}`);
+      });
+      return res.data;
+    },
+    onSuccess: (encounter) => {
+      queryClient.invalidateQueries(['doctorAllAppointments']);
+      navigate(`/doctor/consultation/${encounter.id}`);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to start consultation. Please try again.');
+    }
+  });
+
+  const canStartConsultation = (status) => ['BOOKED', 'CONFIRMED', 'SCHEDULED', 'CHECKED_IN'].includes(status);
 
   // Calculate Stats
   const now = new Date();
@@ -152,10 +179,7 @@ const DoctorAppointments = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-1">Total Appointments</p>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.total}</h3>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-              <ArrowUpRight size={14} />
-              <span>12% from yesterday</span>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-400">All time</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
             <CalendarDays size={24} />
@@ -167,10 +191,7 @@ const DoctorAppointments = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-1">Today's Appointments</p>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.todayCount}</h3>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-              <ArrowUpRight size={14} />
-              <span>8% from yesterday</span>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-400">Today</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <Users size={24} />
@@ -182,10 +203,9 @@ const DoctorAppointments = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-1">Completed</p>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.completed}</h3>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-              <ArrowUpRight size={14} />
-              <span>10% from yesterday</span>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-400">
+              {stats.total > 0 ? `${Math.round((stats.completed / stats.total) * 100)}% completion` : 'No data'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <CheckCircle2 size={24} />
@@ -197,10 +217,9 @@ const DoctorAppointments = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-1">Cancelled</p>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.cancelled}</h3>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-red-600">
-              <ArrowDownRight size={14} />
-              <span>2% from yesterday</span>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-400">
+              {stats.total > 0 ? `${Math.round((stats.cancelled / stats.total) * 100)}% of total` : 'No data'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
             <XCircle size={24} />
@@ -212,10 +231,9 @@ const DoctorAppointments = () => {
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-1">No Show</p>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">{stats.noShow}</h3>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-red-600">
-              <ArrowDownRight size={14} />
-              <span>1% from yesterday</span>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-400">
+              {stats.total > 0 ? `${Math.round((stats.noShow / stats.total) * 100)}% of total` : 'No data'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
             <FileText size={24} />
@@ -339,12 +357,25 @@ const DoctorAppointments = () => {
                           </td>
                           <td className="py-4 px-6">
                             <div className="flex items-center justify-center gap-2">
-                              <button onClick={() => navigate(`/doctor/patients/${a.patientId}`)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100">
+                              <button
+                                onClick={() => navigate(`/doctor/patients/${a.patientId}`)}
+                                title="View Patient"
+                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100"
+                              >
                                 <Eye size={16} />
                               </button>
-                              <button className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-slate-100">
-                                <MoreVertical size={16} />
-                              </button>
+                              {canStartConsultation(a.status) && (
+                                <button
+                                  onClick={() => startConsultationMutation.mutate(a)}
+                                  disabled={startConsultationMutation.isPending}
+                                  title="Start Consultation"
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100 disabled:opacity-50"
+                                >
+                                  {startConsultationMutation.isPending
+                                    ? <Loader2 size={16} className="animate-spin" />
+                                    : <Stethoscope size={16} />}
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -359,39 +390,50 @@ const DoctorAppointments = () => {
 
         {/* Right Sidebar */}
         <div className="space-y-6">
-          {/* Calendar Widget (Mockup Visual) */}
+          {/* Calendar Widget - real current month */}
           <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-900">Calendar</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-600">May 2024</span>
-                <div className="flex gap-1">
-                  <button className="p-1 rounded-md hover:bg-slate-100"><ChevronLeft size={14} /></button>
-                  <button className="p-1 rounded-md hover:bg-slate-100"><ChevronRight size={14} /></button>
-                </div>
-              </div>
+              <span className="text-xs font-bold text-slate-600">
+                {now.toLocaleString('en', { month: 'long', year: 'numeric' })}
+              </span>
             </div>
-            
+
             <div className="grid grid-cols-7 gap-1 text-center mb-2">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                 <div key={day} className="text-[10px] font-bold text-slate-400">{day}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
-              {[28,29,30,1,2,3,4, 5,6,7,8,9,10,11, 12,13,14,15,16,17,18, 19,20,21,22,23,24,25, 26,27,28,29,30,31,1].map((date, i) => {
-                const isCurrentMonth = i >= 3 && i <= 33;
-                const isToday = date === 21; // From mockup
-                return (
-                  <button 
-                    key={i} 
-                    className={`h-8 w-8 rounded-full text-xs font-semibold mx-auto flex items-center justify-center transition-colors
-                      ${isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 
-                        isCurrentMonth ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-300'}`}
-                  >
-                    {date}
-                  </button>
-                );
-              })}
+              {(() => {
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const cells = [];
+                // Leading blanks
+                for (let i = 0; i < firstDay; i++) {
+                  cells.push(<div key={`b-${i}`} />);
+                }
+                // Days
+                for (let d = 1; d <= daysInMonth; d++) {
+                  const isToday = d === now.getDate();
+                  const hasAppt = allAppointments.some(a => {
+                    const ad = new Date(a.startTime);
+                    return ad.getFullYear() === year && ad.getMonth() === month && ad.getDate() === d;
+                  });
+                  cells.push(
+                    <button key={d} className={`h-8 w-8 rounded-full text-xs font-semibold mx-auto flex items-center justify-center transition-colors relative
+                      ${isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'text-slate-700 hover:bg-slate-100'}`}>
+                      {d}
+                      {hasAppt && !isToday && (
+                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-400" />
+                      )}
+                    </button>
+                  );
+                }
+                return cells;
+              })()}
             </div>
           </div>
 
@@ -433,50 +475,35 @@ const DoctorAppointments = () => {
             </div>
           </div>
 
-          {/* Appointment Statistics */}
+          {/* Appointment Statistics — computed from real data */}
           <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-bold text-slate-900">Appointment Statistics</h3>
-              <button className="text-xs font-bold text-slate-500 flex items-center gap-1">
-                This Month <ChevronRight size={14} className="rotate-90" />
-              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-purple-50/50 border border-purple-100 rounded-xl">
                 <CalendarDays size={18} className="text-purple-600 mb-2" />
-                <p className="text-[10px] font-bold text-purple-900/60 mb-0.5">Total Appointments</p>
-                <div className="flex items-end justify-between">
-                  <h4 className="text-xl font-bold text-purple-900">520</h4>
-                  <span className="flex items-center text-[10px] font-bold text-emerald-600"><ArrowUpRight size={12}/> 8%</span>
-                </div>
+                <p className="text-[10px] font-bold text-purple-900/60 mb-0.5">Total</p>
+                <h4 className="text-xl font-bold text-purple-900">{stats.total}</h4>
               </div>
 
               <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
                 <CheckCircle2 size={18} className="text-emerald-600 mb-2" />
                 <p className="text-[10px] font-bold text-emerald-900/60 mb-0.5">Completed</p>
-                <div className="flex items-end justify-between">
-                  <h4 className="text-xl font-bold text-emerald-900">402</h4>
-                  <span className="flex items-center text-[10px] font-bold text-emerald-600"><ArrowUpRight size={12}/> 10.3%</span>
-                </div>
+                <h4 className="text-xl font-bold text-emerald-900">{stats.completed}</h4>
               </div>
 
               <div className="p-3 bg-red-50/50 border border-red-100 rounded-xl">
                 <XCircle size={18} className="text-red-600 mb-2" />
                 <p className="text-[10px] font-bold text-red-900/60 mb-0.5">Cancelled</p>
-                <div className="flex items-end justify-between">
-                  <h4 className="text-xl font-bold text-red-900">48</h4>
-                  <span className="flex items-center text-[10px] font-bold text-red-600"><ArrowDownRight size={12}/> 3.2%</span>
-                </div>
+                <h4 className="text-xl font-bold text-red-900">{stats.cancelled}</h4>
               </div>
 
               <div className="p-3 bg-orange-50/50 border border-orange-100 rounded-xl">
                 <FileText size={18} className="text-orange-600 mb-2" />
                 <p className="text-[10px] font-bold text-orange-900/60 mb-0.5">No Show</p>
-                <div className="flex items-end justify-between">
-                  <h4 className="text-xl font-bold text-orange-900">28</h4>
-                  <span className="flex items-center text-[10px] font-bold text-orange-600"><ArrowDownRight size={12}/> 5.1%</span>
-                </div>
+                <h4 className="text-xl font-bold text-orange-900">{stats.noShow}</h4>
               </div>
             </div>
           </div>

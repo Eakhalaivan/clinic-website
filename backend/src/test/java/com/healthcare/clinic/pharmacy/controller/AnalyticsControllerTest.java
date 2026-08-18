@@ -29,6 +29,6 @@ public class AnalyticsControllerTest {
     @Test
     @WithMockUser(authorities = "ROLE_PHARMACIST")
     public void getAnalytics_AsPharmacist_ShouldSucceed() {
-        assertDoesNotThrow(() -> controller.getDashboardSummary(null, null));
+        assertDoesNotThrow(() -> controller.getDashboardSummary(java.time.Instant.now(), java.time.Instant.now()));
     }
 }

@@ -49,12 +49,15 @@ public class AppointmentService {
     private final BillingService billingService;
     private final DoctorProfileRepository doctorProfileRepository;
     private final NoShowRepository noShowRepository;
+    private final AppointmentHoldService holdService;
+    private final com.healthcare.clinic.appointment.repository.WaitlistEntryRepository waitlistRepository;
 
     @Transactional(readOnly = true)
     public List<AppointmentSlot> getAvailableSlots(Long doctorId, ZonedDateTime start, ZonedDateTime end) {
         ZonedDateTime now = ZonedDateTime.now();
         return slotRepository.findByDoctorUserIdAndStartTimeBetweenAndIsBookedFalse(doctorId, start, end).stream()
                 .filter(slot -> slot.getStartTime().isAfter(now))
+                .filter(slot -> !holdService.isHeld(doctorId, slot.getStartTime().toInstant().toString()))
                 .toList();
     }
 
@@ -64,7 +67,15 @@ public class AppointmentService {
     }
 
     @Transactional
-    public Appointment bookAppointment(Long patientUserId, Long slotId, String reasonForVisit) {
+    public Appointment bookAppointment(Long patientUserId, Long slotId, String reasonForVisit, String holdId, String idempotencyKey) {
+        if (idempotencyKey != null && !idempotencyKey.isEmpty()) {
+            java.util.Optional<Appointment> existingAppointment = appointmentRepository.findByIdempotencyKey(idempotencyKey);
+            if (existingAppointment.isPresent()) {
+                log.info("Idempotent request received for booking. Returning existing appointment.");
+                return existingAppointment.get();
+            }
+        }
+
         // Auto-create a minimal PatientProfile if one doesn't exist yet (new patient registration flow)
         PatientProfile patient = patientRepository.findByUserId(patientUserId)
                 .orElseGet(() -> {
@@ -80,6 +91,12 @@ public class AppointmentService {
 
         AppointmentSlot slot = slotRepository.findByIdWithLock(slotId)
                 .orElseThrow(() -> new RuntimeException("Slot not found: " + slotId));
+
+        if (holdId != null && !holdId.isEmpty()) {
+            if (!holdService.validateHold(slot.getDoctor().getId(), slot.getStartTime().toInstant().toString(), holdId)) {
+                throw new RuntimeException("Hold has expired or is invalid.");
+            }
+        }
 
         if (slot.getIsBooked()) {
             throw new RuntimeException("Slot is already booked.");
@@ -108,9 +125,14 @@ public class AppointmentService {
                 .status(AppointmentStatus.BOOKED)
                 .reasonForVisit(reasonForVisit)
                 .branchId(slot.getBranchId())
+                .idempotencyKey(idempotencyKey)
                 .build();
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        if (holdId != null && !holdId.isEmpty()) {
+            holdService.releaseHold(slot.getDoctor().getId(), slot.getStartTime().toInstant().toString(), holdId);
+        }
 
         User patientUser = userRepository.findById(patient.getUserId())
                 .orElseThrow(() -> new RuntimeException("Patient user not found"));
@@ -301,6 +323,25 @@ public class AppointmentService {
                 .branchId(slot.getBranchId())
                 .build();
         eventPublisher.publishEvent(event);
+
+        // Check Waitlist
+        checkWaitlistAndNotify(slot);
+    }
+    
+    private void checkWaitlistAndNotify(AppointmentSlot slot) {
+        java.time.LocalDateTime slotTime = slot.getStartTime().toLocalDateTime();
+        List<com.healthcare.clinic.appointment.entity.WaitlistEntry> waitlist = waitlistRepository.findByDoctorIdAndStatusOrderByCreatedAtAsc(slot.getDoctor().getId(), "WAITING");
+        
+        for (com.healthcare.clinic.appointment.entity.WaitlistEntry entry : waitlist) {
+            if (entry.getDesiredDateRangeStart() != null && slotTime.isBefore(entry.getDesiredDateRangeStart())) continue;
+            if (entry.getDesiredDateRangeEnd() != null && slotTime.isAfter(entry.getDesiredDateRangeEnd())) continue;
+            
+            // Match found! Publish an event to notify this patient
+            // (In a real app, we might reserve the slot for them temporarily)
+            log.info("Waitlist match found for slot {} for patient {}", slot.getId(), entry.getPatient().getId());
+            // TODO: dispatch WaitlistMatchEvent
+            break; // Notify the first one
+        }
     }
     
     @Transactional
@@ -312,6 +353,6 @@ public class AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
                 
         // Book the new one
-        return bookAppointment(oldAppointment.getPatient().getUserId(), newSlotId, oldAppointment.getReasonForVisit());
+        return bookAppointment(oldAppointment.getPatient().getUserId(), newSlotId, oldAppointment.getReasonForVisit(), null, null);
     }
 }

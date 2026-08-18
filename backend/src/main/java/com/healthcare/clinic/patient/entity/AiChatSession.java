@@ -7,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="PatientAiChatSession")
 @Table(name = "ai_chat_sessions")
 @Data
 public class AiChatSession {

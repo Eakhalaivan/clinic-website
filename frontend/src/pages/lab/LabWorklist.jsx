@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { useAuth } from '../../context/AuthContext';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
 
 const ResultEntryModal = ({ request, onClose, onSuccess }) => {
@@ -61,7 +60,7 @@ const ResultEntryModal = ({ request, onClose, onSuccess }) => {
     }
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
     const formData = new FormData();
     const resultObj = {
@@ -70,7 +69,7 @@ const ResultEntryModal = ({ request, onClose, onSuccess }) => {
       isAbnormal: liveAbnormal,
       referenceRange,
       unit,
-      isDraft: false
+      isDraft
     };
     formData.append('result', new Blob([JSON.stringify(resultObj)], { type: 'application/json' }));
     if (file) {
@@ -129,7 +128,8 @@ const ResultEntryModal = ({ request, onClose, onSuccess }) => {
           </div>
           <div className="flex justify-end space-x-3 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={submitMutation.isLoading} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Save Result</button>
+            <button type="button" onClick={(e) => handleSubmit(e, true)} disabled={submitMutation.isLoading} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Save Draft</button>
+            <button type="button" onClick={(e) => handleSubmit(e, false)} disabled={submitMutation.isLoading} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Submit Result</button>
           </div>
         </form>
       </div>
@@ -138,7 +138,6 @@ const ResultEntryModal = ({ request, onClose, onSuccess }) => {
 };
 
 const LabWorklist = () => {
-  const { auth } = useAuth();
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
@@ -206,7 +205,7 @@ const LabWorklist = () => {
 
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex space-x-2 w-full sm:w-auto overflow-x-auto">
-          {['ALL', 'ORDERED', 'COLLECTED', 'RECEIVED', 'IN_PROGRESS', 'RESULT_ENTERED'].map(s => (
+          {['ALL', 'ORDERED', 'COLLECTED', 'RECEIVED', 'IN_PROGRESS', 'PENDING_VERIFICATION'].map(s => (
              <button key={s} onClick={() => setFilterStatus(s)} className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap ${filterStatus === s ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}>
                {s.replace('_', ' ')}
              </button>

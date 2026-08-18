@@ -27,7 +27,7 @@ const AIAssistantWidget = () => {
     setIsTyping(true);
 
     try {
-      const res = await axiosPrivate.post('/api/v1/ai/chat', { message: input });
+      const res = await axiosPrivate.post('/v1/ai/chat', { message: input });
       setMessages(prev => [...prev, { sender: 'bot', text: res.data.reply }]);
     } catch (error) {
       setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I am having trouble connecting to the server.' }]);

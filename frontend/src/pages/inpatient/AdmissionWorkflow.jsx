@@ -19,7 +19,7 @@ const AdmissionWorkflow = () => {
     queryKey: ['patients', searchPhone],
     queryFn: async () => {
       if (!searchPhone) return [];
-      const res = await axiosPrivate.get(`/patients?phone=${searchPhone}`);
+      const res = await axiosPrivate.get(`/patients/search?query=${searchPhone}`);
       return res.data;
     },
     enabled: false

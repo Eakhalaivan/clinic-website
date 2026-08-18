@@ -67,7 +67,7 @@ const LabReports = () => {
       link.click();
       link.remove();
     } catch (e) {
-      alert('Failed to download PDF report. It may not be ready yet.');
+      toast.error('Failed to download PDF report. It may not be ready yet.');
     }
   };
 

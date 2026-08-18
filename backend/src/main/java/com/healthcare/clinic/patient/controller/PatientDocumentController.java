@@ -22,10 +22,11 @@ public class PatientDocumentController {
         return ResponseEntity.ok(patientDocumentService.getPatientDocuments(user));
     }
 
-    @PostMapping
+    @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PatientDocument> uploadDocument(
             @AuthenticationPrincipal User user,
-            @RequestBody PatientDocument document) {
-        return ResponseEntity.ok(patientDocumentService.saveDocumentMetadata(user, document));
+            @RequestPart("document") PatientDocument document,
+            @RequestPart(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+        return ResponseEntity.ok(patientDocumentService.saveDocumentMetadata(user, document, file));
     }
 }

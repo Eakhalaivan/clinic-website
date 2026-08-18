@@ -108,6 +108,28 @@ const PatientRegistration = () => {
                 />
               </FormField>
 
+              <FormField label="Email Address" id="email">
+                <input 
+                  id="email"
+                  type="email"
+                  value={patient.email} 
+                  onChange={e => setPatient({ ...patient, email: e.target.value })} 
+                  placeholder="e.g. email@example.com"
+                  className="input-field" 
+                />
+              </FormField>
+
+              <FormField label="Address" id="address">
+                <input 
+                  id="address"
+                  type="text"
+                  value={patient.address} 
+                  onChange={e => setPatient({ ...patient, address: e.target.value })} 
+                  placeholder="e.g. 123 Main St"
+                  className="input-field" 
+                />
+              </FormField>
+
               <FormField label="Gender" id="gender">
                 <select 
                   id="gender"

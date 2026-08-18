@@ -3,6 +3,7 @@ import { Search, ChevronDown, Eye, Download, MoreVertical, ArrowUp, Upload, Acti
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 
 const DoctorLabReports = () => {
@@ -32,7 +33,7 @@ const DoctorLabReports = () => {
       link.remove();
     } catch (err) {
       console.error('Failed to download PDF', err);
-      alert('Failed to download PDF report. It may not be ready yet.');
+      toast.error('Failed to download PDF report. It may not be ready yet.');
     }
   };
 

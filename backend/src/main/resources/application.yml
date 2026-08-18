@@ -49,7 +49,7 @@ cors:
   # In production (Render), override via the ALLOWED_ORIGINS environment variable.
   # Set it to your Render frontend URL, e.g.: https://your-app.onrender.com
   # For multiple origins: https://your-app.onrender.com,http://localhost:5173
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:5174}
 
 management:
   endpoints:
@@ -58,9 +58,28 @@ management:
         include: health, info
 
 twilio:
-  account-sid: ${TWILIO_ACCOUNT_SID}
-  auth-token: ${TWILIO_AUTH_TOKEN}
-  from-number: ${TWILIO_FROM_NUMBER}
+  account-sid: ${TWILIO_ACCOUNT_SID:mock}
+  auth-token: ${TWILIO_AUTH_TOKEN:mock}
+  from-number: ${TWILIO_FROM_NUMBER:mock}
+  api-key-sid: ${TWILIO_API_KEY_SID:mock}
+  api-key-secret: ${TWILIO_API_KEY_SECRET:mock}
+  video:
+    enabled: ${TWILIO_VIDEO_ENABLED:false}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+# PACS / DICOM (Orthanc) Configuration
+orthanc:
+  url: ${ORTHANC_URL:http://localhost:8042}
+  username: ${ORTHANC_USERNAME:orthanc}
+  password: ${ORTHANC_PASSWORD:orthanc}
+
+# Gemini AI Configuration
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:mock_gemini_key}
+    url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY}

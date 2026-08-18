@@ -38,6 +38,18 @@ export default {
           info: 'var(--color-info)',
           infoBg: 'var(--color-info-bg)',
         },
+        behance: {
+          bg: '#EBF0FE',
+          text: '#0B0A0A',
+          accent: '#246AFE',
+          white: '#FFFFFF'
+        },
+        medvice: {
+          primary: '#1A56DB', // Bright Royal Blue
+          bg: '#F8FAFC', // Very light blue/grey
+          text: '#1E293B', // Slate 800
+          white: '#FFFFFF',
+        },
         // MD3 tokens for Aurelian Health Redesign
         "tertiary": "#34476c",
         "error": "#ba1a1a",
@@ -89,9 +101,10 @@ export default {
         "gold": "#C5A059"
       },
       fontFamily: {
-        display: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'],
-        body: ['Poppins', 'sans-serif'],
+        display: ['Onest', 'sans-serif'],
+        sans: ['Onest', 'sans-serif'],
+        body: ['Onest', 'sans-serif'],
+        onest: ['Onest', 'sans-serif'],
         "label-sm": ["Poppins"],
         "label-md": ["Poppins"],
         "headline-lg-mobile": ["Poppins"],

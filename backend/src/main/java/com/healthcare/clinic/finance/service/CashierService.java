@@ -20,6 +20,14 @@ public class CashierService {
     private final CashierSessionRepository cashierSessionRepository;
     private final BranchRepository branchRepository;
 
+    public java.util.Optional<CashierSession> getCurrentSession(Long cashierId) {
+        return cashierSessionRepository.findByCashierIdAndStatus(cashierId, CashierSession.SessionStatus.OPEN);
+    }
+
+    public java.util.List<CashierSession> getAllSessions() {
+        return cashierSessionRepository.findAll();
+    }
+
     @Transactional
     public CashierSession openSession(Long branchId, Long cashierId, BigDecimal openingFloat) {
         // Check if there's already an open session for this cashier

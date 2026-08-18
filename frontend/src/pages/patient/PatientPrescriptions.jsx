@@ -2,6 +2,7 @@ import React from 'react';
 import logger from '../../utils/logger';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 import { Pill, Activity, CalendarDays, Info, Eye, X, Printer } from 'lucide-react';
 import PrescriptionDocument from '../../components/doctor/PrescriptionDocument';
@@ -93,7 +94,7 @@ const PatientPrescriptions = () => {
                        link.remove();
                      } catch (e) {
                        logger.error('Failed to download PDF', e);
-                       alert('Failed to download PDF');
+                       toast.error('Failed to download PDF. Please try again.');
                      }
                   }}
                   style={{
@@ -127,6 +128,9 @@ const PatientPrescriptions = () => {
                             <Info size={16} /> {item.instructions}
                           </div>
                         )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-navy-700)', fontWeight: 'bold' }}>
+                          <Pill size={16} /> Dispensed: {item.dispensedQuantity || 0} / {item.prescribedQuantity || '-'}
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -10,12 +10,20 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/finance/refunds")
 @RequiredArgsConstructor
 public class RefundController {
 
     private final RefundService refundService;
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    public ResponseEntity<List<Refund>> getRefunds() {
+        return ResponseEntity.ok(refundService.getAllRefunds());
+    }
 
     @PostMapping("/initiate")
     @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")

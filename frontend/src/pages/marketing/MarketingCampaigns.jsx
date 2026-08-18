@@ -42,7 +42,9 @@ const MarketingCampaigns = () => {
         startDate: campaignForm.startDate ? new Date(campaignForm.startDate).toISOString() : null,
         endDate: campaignForm.endDate ? new Date(campaignForm.endDate).toISOString() : null
       };
-      const res = await axiosPrivate.post('/marketing/campaigns', payload);
+      const res = await axiosPrivate.post('/marketing/campaigns', payload, {
+        params: { ownerId: 1, branchId: 1 }
+      });
       return res.data;
     },
     onSuccess: () => {

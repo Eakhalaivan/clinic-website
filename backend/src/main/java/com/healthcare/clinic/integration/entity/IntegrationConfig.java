@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="IntegrationIntegrationConfig")
 @Table(name = "integration_configs")
 @Data
 @NoArgsConstructor
@@ -48,9 +48,10 @@ public class IntegrationConfig {
     private String healthStatus = "UNKNOWN";
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name="created_at", updatable = false)
     private ZonedDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name="updated_at")
     private ZonedDateTime updatedAt;
 }

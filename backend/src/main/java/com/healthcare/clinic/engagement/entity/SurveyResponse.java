@@ -28,7 +28,7 @@ public class SurveyResponse {
     private Long patientId;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column()
     private String answers;
 
     private Long sourceEncounterId;

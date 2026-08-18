@@ -35,13 +35,12 @@ export const useCampaignMutations = () => {
     onSuccess: invalidate,
   });
 
-  const lifecycleAction = (action) =>
-    useMutation({
-      mutationFn: (id) => axiosPrivate.post(`${BASE}/campaigns/${id}/${action}`),
-      onSuccess: invalidate,
-    });
+  const actionMutation = useMutation({
+    mutationFn: ({ id, action }) => axiosPrivate.post(`${BASE}/campaigns/${id}/${action}`),
+    onSuccess: invalidate,
+  });
 
-  return { create, lifecycleAction };
+  return { create, actionMutation };
 };
 
 // ─── Consent ─────────────────────────────────────────────────────────────────

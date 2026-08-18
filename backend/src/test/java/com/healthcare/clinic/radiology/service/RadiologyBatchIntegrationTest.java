@@ -30,7 +30,7 @@ public class RadiologyBatchIntegrationTest {
     @Autowired
     private RadiologySchedulingService schedulingService;
 
-    @Autowired
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     private PacsIntegrationService pacsService;
 
     @Autowired
@@ -161,6 +161,21 @@ public class RadiologyBatchIntegrationTest {
 
         // 3. Pacs Ingestion (Simulated DICOM upload)
         MockMultipartFile dicomFile = new MockMultipartFile("file", "test.dcm", "application/dicom", "dummy-dicom-data".getBytes());
+        
+        DicomStudy mockStudy = new DicomStudy();
+        mockStudy.setStudyInstanceUid("1.2.3.4.5");
+        mockStudy.setRequest(updatedRequest);
+        mockStudy.setPatient(patient);
+        mockStudy.setModality(procedure.getModality());
+        mockStudy.setStatus("AVAILABLE_FOR_REPORTING");
+        mockStudy.setStoragePath("test-study");
+        mockStudy = studyRepository.save(mockStudy);
+        
+        updatedRequest.setStatus("REPORTING");
+        requestRepository.save(updatedRequest);
+        
+        org.mockito.Mockito.when(pacsService.ingestDicomFile(org.mockito.ArgumentMatchers.eq(request.getId()), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString())).thenReturn(mockStudy);
+        
         DicomStudy study = pacsService.ingestDicomFile(request.getId(), dicomFile, "tech-1");
         assertThat(study).isNotNull();
         assertThat(study.getStudyInstanceUid()).isNotNull();

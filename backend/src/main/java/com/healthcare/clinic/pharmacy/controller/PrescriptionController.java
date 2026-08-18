@@ -103,25 +103,27 @@ public class PrescriptionController {
             request = DispenseRequest.builder().prescriptionId(id).items(new ArrayList<>()).build();
             
             for (PharmacyPrescriptionItem item : record.getItems()) {
-                // Try to find the medicine by name
-                List<Medicine> meds = medicineRepository.findByNameContainingIgnoreCase(item.getMedicationName());
-                if (!meds.isEmpty()) {
-                    Medicine med = meds.get(0);
-                    // Default to 1 quantity or parse dosage if possible, but 1 is safe for testing
-                    int qty = 1; 
-                    try {
-                        if (item.getDuration() != null && item.getDuration().contains("day")) {
-                             String num = item.getDuration().replaceAll("[^0-9]", "");
-                             if (!num.isEmpty()) qty = Integer.parseInt(num);
-                        }
-                    } catch(Exception ignored) {}
+                if (item.getMedicineId() != null) {
+                    int qty = item.getPrescribedQuantity() != null ? item.getPrescribedQuantity() : 1;
                     
                     request.getItems().add(DispenseItemRequest.builder()
-                            .medicineId(med.getId())
+                            .medicineId(item.getMedicineId())
                             .quantity(qty)
                             .build());
                 } else {
-                     throw new RuntimeException("Could not find stock for medication: " + item.getMedicationName());
+                    // Fallback to name search if ID is missing
+                    List<Medicine> meds = medicineRepository.findByNameContainingIgnoreCase(item.getMedicationName());
+                    if (!meds.isEmpty()) {
+                        Medicine med = meds.get(0);
+                        int qty = item.getPrescribedQuantity() != null ? item.getPrescribedQuantity() : 1;
+                        
+                        request.getItems().add(DispenseItemRequest.builder()
+                                .medicineId(med.getId())
+                                .quantity(qty)
+                                .build());
+                    } else {
+                         throw new RuntimeException("Could not find stock for medication: " + item.getMedicationName());
+                    }
                 }
             }
         }

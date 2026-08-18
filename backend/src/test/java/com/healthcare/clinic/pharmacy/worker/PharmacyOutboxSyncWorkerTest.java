@@ -41,7 +41,7 @@ public class PharmacyOutboxSyncWorkerTest {
         event.setAggregateId(p.getId().toString());
         event.setEventType("STATUS_UPDATE");
         event.setStatus("PENDING");
-        event.setPayload("{\"clinicalPrescriptionId\": " + p.getId() + ", \"status\": \"DISPENSED\", \"pharmacistUsername\": \"ph1\", \"dispensedAt\": \"2026-08-08T10:00:00Z\"}");
+        event.setPayload("{\"clinicalPrescriptionId\": " + p.getId() + ", \"status\": \"DISPENSED\", \"pharmacistUsername\": \"ph1\", \"dispensedAt\": \"2026-08-08T10:00:00\", \"items\": []}");
         event = outboxEventRepository.save(event);
 
         // Act

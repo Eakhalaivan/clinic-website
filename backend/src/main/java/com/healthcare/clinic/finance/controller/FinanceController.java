@@ -29,11 +29,6 @@ public class FinanceController {
         return ResponseEntity.ok(financeService.getAllPayments());
     }
 
-    @PostMapping("/payments")
-    public ResponseEntity<Payment> recordPayment(@RequestBody Payment payment, @AuthenticationPrincipal UserPrincipal user) {
-        payment.setRecordedBy(user.getUserId());
-        return ResponseEntity.ok(financeService.recordPayment(payment));
-    }
 
     @GetMapping("/expenses")
     public ResponseEntity<List<Expense>> getExpenses() {

@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, AlertTriangle, Stethoscope } from 'lucide-react';
 import { axiosPublic } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 
 const DoctorList = () => {
   const { token, roles } = useAuthStore();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
 
@@ -33,10 +34,19 @@ const DoctorList = () => {
   }, [doctors]);
 
   const getBookLink = (doctorId) => {
-    if (token && roles.includes('ROLE_PATIENT')) {
-      return `/patient/book/${doctorId}`;
+    if (!token) return '/register';
+    
+    let path = '';
+    if (roles.includes('ROLE_RECEPTION')) {
+      path = `/reception/book/${doctorId}`;
+    } else if (roles.includes('ROLE_PATIENT')) {
+      path = `/patient/book/${doctorId}`;
+    } else {
+      return '/register';
     }
-    return '/register';
+
+    const qs = searchParams.toString();
+    return qs ? `${path}?${qs}` : path;
   };
 
   if (error) {

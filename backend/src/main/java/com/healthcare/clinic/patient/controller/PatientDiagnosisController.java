@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class PatientDiagnosisController {
     }
 
     @PostMapping
+    @AuditableAction(module = "CLINICAL_ENCOUNTER", action = "ADD_DIAGNOSIS", resourceType = "PatientDiagnosis", sensitivityLevel = "HIGH")
     public ResponseEntity<PatientDiagnosis> addDiagnosis(
             @AuthenticationPrincipal User user,
             @PathVariable Long patientId,

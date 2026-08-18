@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class PrescriptionController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+    @AuditableAction(module = "PHARMACY", action = "CREATE_PRESCRIPTION", resourceType = "Prescription", sensitivityLevel = "HIGH")
     public ResponseEntity<PrescriptionResponse> createPrescription(@Valid @RequestBody PrescriptionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(prescriptionService.createPrescription(request));
     }

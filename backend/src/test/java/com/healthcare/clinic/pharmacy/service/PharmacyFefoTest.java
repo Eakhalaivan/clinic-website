@@ -110,8 +110,18 @@ public class PharmacyFefoTest {
         testRecord.setDoctorName("Dr. FEFO");
         testRecord.setVerificationStatus("VERIFIED");
         testRecord.setStatus("PENDING");
-        testRecord.setClinicalPrescriptionId(777L);
+        testRecord.setClinicalPrescriptionId(System.nanoTime());
         testRecord.setPrescriptionDate(LocalDateTime.now());
+        
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem item = new com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem();
+        item.setMedicineId(testMedicine.getId());
+        item.setPrescribedQuantity(30);
+        item.setMedicationName(testMedicine.getName());
+        item.setDosage("1 tablet");
+        item.setRemainingQuantity(30);
+        item.setPharmacyPrescription(testRecord);
+        testRecord.getItems().add(item);
+        
         testRecord = prescriptionRepository.save(testRecord);
 
 

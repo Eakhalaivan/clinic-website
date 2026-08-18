@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="NursingBed")
 @Table(name = "beds")
 @Data
 @NoArgsConstructor
@@ -22,6 +22,10 @@ public class Bed {
 
     @Column(name = "ward_id", nullable = false)
     private Long wardId;
+
+    @Column(name = "room_id")
+    @Builder.Default
+    private Long roomId = 1L;
 
     @Column(name = "bed_number", nullable = false, length = 20)
     private String bedNumber;
@@ -39,6 +43,10 @@ public class Bed {
 
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
+
+    @Version
+    @Builder.Default
+    private Long version = 0L;
 
     @PrePersist
     protected void onCreate() {

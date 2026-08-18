@@ -17,7 +17,7 @@ export const PORTAL_CONFIGS = [
     slug: 'doctor',
     displayName: 'Doctor',
     role: 'ROLE_DOCTOR',
-    themeColor: '#15803d',
+    themeColor: '#2B4AFE',
     dashboardRoute: '/doctor/dashboard',
     authConfig: {
       heroTitle: 'Provider Intelligence Access.',
@@ -45,7 +45,7 @@ export const PORTAL_CONFIGS = [
     slug: 'patient',
     displayName: 'Patient',
     role: 'ROLE_PATIENT',
-    themeColor: '#0369a1',
+    themeColor: '#2B4AFE',
     dashboardRoute: '/patient/dashboard',
     authConfig: {
       heroTitle: 'Welcome back to excellence.',
@@ -130,41 +130,11 @@ export const PORTAL_CONFIGS = [
     ],
   },
 
-  // ── 7. Pharmacist ─────────────────────────────────────────────────────────
-  {
-    slug: 'pharmacist',
-    displayName: 'Pharmacist',
-    role: 'ROLE_PHARMACIST',
-    themeColor: '#4338ca',
-    dashboardRoute: '/pharmacist/dashboard',
-    authConfig: {
-      heroTitle: 'Pharmaceutical Control Center.',
-      heroSubtitle: 'e-Prescription dispensing, barcode safety checks, OTC sales, and batch expiry tracking.',
-      sideBadge: 'GDR COMPLIANT',
-      sideQuoteTitle: 'Safety in every prescription.',
-      sideQuoteText: 'Automated drug interaction checks, barcode verification, and running narcotic register reconciliation.',
-      allowRegister: false,
-    },
-    dashboardTiles: [
-      { label: 'Dashboard', path: '/pharmacist/dashboard',        icon: 'LayoutDashboard', description: 'View dashboard metrics' },
-      { label: 'Prescriptions', path: '/pharmacy/pending-indent-prescriptions',    icon: 'ClipboardList', description: 'Manage and view prescriptions' },
-      { label: 'Dispensing', path: '/pharmacy/dispense-worklists',         icon: 'Pill', description: 'Manage and view dispensing' },
-      { label: 'OTC Sales', path: '/pharmacy/pharmacy-sales',            icon: 'ShoppingCart', description: 'Manage and view otc sales' },
-      { label: 'Inventory', path: '/pharmacy/medicine-stock',        icon: 'Package', description: 'Manage and view inventory' },
-      { label: 'Batch Tracking', path: '/pharmacy/grnentry',          icon: 'Layers', description: 'Manage and view batch tracking' },
-      { label: 'Expiry Alerts', path: '/pharmacy/expiry-tracker',           icon: 'AlertTriangle', description: 'Manage and view expiry alerts' },
-      { label: 'Purchase Orders', path: '/pharmacy/purchase-orders',  icon: 'FileText', description: 'Manage and view purchase orders' },
-      { label: 'Suppliers', path: '/pharmacy/suppliers',        icon: 'Truck', description: 'Manage and view suppliers' },
-      { label: 'Deliveries', path: '/pharmacy/supplier-returns',       icon: 'MapPin', description: 'Manage and view deliveries' },
-      { label: 'Reports', path: '/pharmacy/reports',          icon: 'BarChart3', description: 'Manage and view reports' },
-    ],
-  },
-
   // ── 7b. Pharmacy (Full Module) ──────────────────────────────────────────────
   {
     slug: 'pharmacy',
     displayName: 'Pharmacy System',
-    role: 'ROLE_PHARMACY_STAFF',
+    role: 'ROLE_PHARMACIST',
     themeColor: '#065f46', // Dark emerald
     dashboardRoute: '/pharmacy/dashboard',
     authConfig: {
@@ -202,10 +172,9 @@ export const PORTAL_CONFIGS = [
     },
     dashboardTiles: [
       { label: 'Dashboard', path: '/lab/dashboard',      icon: 'LayoutDashboard', description: 'View dashboard metrics' },
-      { label: 'Worklist', path: '/lab/worklist',       icon: 'List', description: 'Manage lab requests' },
+      { label: 'Worklist', path: '/lab/worklist',       icon: 'List', description: 'Manage lab requests and enter results' },
       { label: 'Catalog', path: '/lab/catalog',        icon: 'Settings', description: 'Manage test catalog' },
-      { label: 'Result Entry', path: '/lab/results',        icon: 'ClipboardPen', description: 'Manage and view result entry' },
-      { label: 'Report Verify', path: '/lab/verify',         icon: 'BadgeCheck', description: 'Manage and view report verify' },
+      { label: 'Report Verify', path: '/lab/verification',         icon: 'BadgeCheck', description: 'Manage and view report verify' },
       { label: 'Notifications', path: '/lab/notifications',  icon: 'Bell', description: 'Manage and view notifications' },
     ],
   },
@@ -285,6 +254,157 @@ export const PORTAL_CONFIGS = [
       { label: 'Insurance Claims', path: '/finance/insurance-claims', icon: 'ShieldCheck', description: 'Manage and view insurance claims' },
       { label: 'Revenue', path: '/finance/revenue',          icon: 'TrendingUp', description: 'Manage and view revenue' },
       { label: 'Reports', path: '/finance/reports',          icon: 'FileBarChart', description: 'Manage and view reports' },
+    ],
+  },
+
+  // ── 12. Inpatient ─────────────────────────────────────────────────────────
+  {
+    slug: 'inpatient',
+    displayName: 'Inpatient',
+    role: 'ROLE_NURSE',
+    themeColor: '#0369a1',
+    dashboardRoute: '/inpatient/dashboard',
+    authConfig: {
+      heroTitle: 'Inpatient Management.',
+      heroSubtitle: 'Manage wards, beds, and patient admissions.',
+      sideBadge: 'WARDS ACTIVE',
+      sideQuoteTitle: 'Continuous patient care.',
+      sideQuoteText: 'Manage inpatient admissions, real-time bed availability, and nursing stations.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Dashboard', path: '/inpatient/dashboard', icon: 'LayoutDashboard', description: 'View dashboard metrics' },
+      { label: 'Beds', path: '/inpatient/beds', icon: 'Bed', description: 'Manage bed status' },
+      { label: 'Nursing Station', path: '/inpatient/nursing-station', icon: 'Clipboard', description: 'Manage nursing station' },
+      { label: 'Admissions', path: '/inpatient/admission', icon: 'UserPlus', description: 'Manage admissions workflow' },
+    ],
+  },
+
+  // ── 13. Emergency ─────────────────────────────────────────────────────────
+  {
+    slug: 'emergency',
+    displayName: 'Emergency',
+    role: 'ROLE_DOCTOR',
+    themeColor: '#dc2626',
+    dashboardRoute: '/emergency/queue',
+    authConfig: {
+      heroTitle: 'Emergency Response.',
+      heroSubtitle: 'Manage ER triage and patient stabilization.',
+      sideBadge: 'ER ACTIVE',
+      sideQuoteTitle: 'Rapid triage & care.',
+      sideQuoteText: 'Streamlined emergency queue management and rapid response protocols.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Emergency Queue', path: '/emergency/queue', icon: 'AlertTriangle', description: 'Manage ER queue' },
+    ],
+  },
+
+  // ── 14. Surgery ─────────────────────────────────────────────────────────
+  {
+    slug: 'surgery',
+    displayName: 'Surgery',
+    role: 'ROLE_DOCTOR',
+    themeColor: '#4f46e5',
+    dashboardRoute: '/surgery/schedule',
+    authConfig: {
+      heroTitle: 'Surgical Management.',
+      heroSubtitle: 'Schedule operating theaters and manage surgical workflows.',
+      sideBadge: 'OT ACTIVE',
+      sideQuoteTitle: 'Precision surgical care.',
+      sideQuoteText: 'Centralized operating theater scheduling and surgical team coordination.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'OT Schedule', path: '/surgery/schedule', icon: 'Calendar', description: 'Manage OT schedule' },
+    ],
+  },
+
+  // ── 15. Branch Admin ─────────────────────────────────────────────────────────
+  {
+    slug: 'branch-admin',
+    displayName: 'Branch Admin',
+    role: 'ROLE_BRANCH_ADMIN',
+    themeColor: '#ca8a04',
+    dashboardRoute: '/branch-admin/analytics',
+    authConfig: {
+      heroTitle: 'Branch Administration.',
+      heroSubtitle: 'Manage branch facilities, local HR, and analytics.',
+      sideBadge: 'ADMIN ACTIVE',
+      sideQuoteTitle: 'Local facility oversight.',
+      sideQuoteText: 'Comprehensive branch administration and local performance tracking.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Analytics', path: '/branch-admin/analytics', icon: 'BarChart', description: 'View branch analytics' },
+      { label: 'Staff', path: '/branch-admin/staff', icon: 'Users', description: 'Manage local staff' },
+      { label: 'Facilities', path: '/branch-admin/facilities', icon: 'Building', description: 'Manage branch facilities' },
+    ],
+  },
+
+  // ── 16. Back Office ─────────────────────────────────────────────────────────
+  {
+    slug: 'backoffice',
+    displayName: 'Back Office',
+    role: 'ROLE_ADMIN',
+    themeColor: '#475569',
+    dashboardRoute: '/backoffice/support',
+    authConfig: {
+      heroTitle: 'Back Office Operations.',
+      heroSubtitle: 'Manage support ticketing, ecommerce, and vendors.',
+      sideBadge: 'OPS ACTIVE',
+      sideQuoteTitle: 'Centralized operations.',
+      sideQuoteText: 'Streamlined internal ticketing and core business administration.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Support Ticketing', path: '/backoffice/support', icon: 'LifeBuoy', description: 'Manage support tickets' },
+      { label: 'Ecommerce', path: '/backoffice/ecommerce', icon: 'ShoppingCart', description: 'Manage ecommerce catalog' },
+      { label: 'Vendors', path: '/backoffice/vendors', icon: 'Truck', description: 'Manage external vendors' },
+    ],
+  },
+
+  // ── 17. Support ─────────────────────────────────────────────────────────
+  {
+    slug: 'support',
+    displayName: 'Support',
+    role: 'ROLE_SUPPORT',
+    themeColor: '#059669',
+    dashboardRoute: '/support/dashboard',
+    authConfig: {
+      heroTitle: 'Customer Support.',
+      heroSubtitle: 'Manage patient and internal support interactions.',
+      sideBadge: 'SUPPORT ACTIVE',
+      sideQuoteTitle: 'Dedicated assistance.',
+      sideQuoteText: 'Comprehensive support dashboard and agent ticketing interface.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Dashboard', path: '/support/dashboard', icon: 'LayoutDashboard', description: 'View support metrics' },
+      { label: 'Agent Tools', path: '/support/agent', icon: 'Headset', description: 'Agent interface' },
+      { label: 'Ticket Desk', path: '/support/tickets', icon: 'Ticket', description: 'Manage active tickets' },
+    ],
+  },
+  
+  // ── 18. Admin ─────────────────────────────────────────────────────────
+  {
+    slug: 'admin',
+    displayName: 'Administration',
+    role: 'ROLE_SUPER_ADMIN',
+    themeColor: '#1E3A8A',
+    dashboardRoute: '/admin/dashboard',
+    authConfig: {
+      heroTitle: 'System Administration.',
+      heroSubtitle: 'Master control panel for users, branches, and system settings.',
+      sideBadge: 'SUPER_ADMIN ACTIVE',
+      sideQuoteTitle: 'Global system oversight.',
+      sideQuoteText: 'Manage all clinics, users, and global configurations.',
+      allowRegister: false,
+    },
+    dashboardTiles: [
+      { label: 'Admin Dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard', description: 'System overview' },
+      { label: 'Branch Management', path: '/admin/branches', icon: 'Building', description: 'Manage clinic branches' },
+      { label: 'User Management', path: '/admin/users', icon: 'Users', description: 'Manage system users' },
     ],
   },
 ];

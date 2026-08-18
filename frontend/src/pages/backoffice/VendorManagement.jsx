@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Truck, Plus, ArrowLeft, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,9 +8,11 @@ import Button from '../../components/ui/Button';
 import FormField from '../../components/ui/FormField';
 import { fadeIn } from '../../components/ui/motion';
 import EmptyState from '../../components/ui/EmptyState';
+import { axiosPrivate } from '../../api/axios';
 
 const VendorManagement = () => {
   const [showAdd, setShowAdd] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [vendorForm, setVendorForm] = useState({
     name: '',
     contactPerson: '',
@@ -19,13 +21,23 @@ const VendorManagement = () => {
     category: 'PHARMACEUTICALS'
   });
 
-  const [vendors, setVendors] = useState([
-    { id: 1, name: 'MedSupply Co.', contactPerson: 'Jane Smith', email: 'jane@medsupply.com', phone: '555-0101', category: 'PHARMACEUTICALS', status: 'ACTIVE' },
-    { id: 2, name: 'LabTech Instruments', contactPerson: 'John Doe', email: 'john@labtech.com', phone: '555-0202', category: 'MEDICAL_EQUIPMENT', status: 'ACTIVE' },
-    { id: 3, name: 'Office Essentials', contactPerson: 'Alice Brown', email: 'alice@office.com', phone: '555-0303', category: 'OFFICE_SUPPLIES', status: 'INACTIVE' }
-  ]);
+  const [vendors, setVendors] = useState([]);
 
-  const handleAddSubmit = (e) => {
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const res = await axiosPrivate.get('/backoffice/inventory/suppliers');
+        setVendors(res.data);
+      } catch (err) {
+        toast.error('Failed to load vendors');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVendors();
+  }, []);
+
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!vendorForm.name || !vendorForm.email) {
       toast.error('Name and email are required');
@@ -33,15 +45,19 @@ const VendorManagement = () => {
     }
     
     const newVendor = {
-      id: vendors.length + 1,
       ...vendorForm,
       status: 'ACTIVE'
     };
     
-    setVendors([newVendor, ...vendors]);
-    toast.success('Vendor added successfully (Mock)');
-    setShowAdd(false);
-    setVendorForm({ name: '', contactPerson: '', email: '', phone: '', category: 'PHARMACEUTICALS' });
+    try {
+      const res = await axiosPrivate.post('/backoffice/inventory/suppliers', newVendor);
+      setVendors([res.data, ...vendors]);
+      toast.success('Vendor added successfully');
+      setShowAdd(false);
+      setVendorForm({ name: '', contactPerson: '', email: '', phone: '', category: 'PHARMACEUTICALS' });
+    } catch (err) {
+      toast.error('Failed to add vendor');
+    }
   };
 
   return (

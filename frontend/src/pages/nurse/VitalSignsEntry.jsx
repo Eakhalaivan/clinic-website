@@ -39,7 +39,7 @@ const VitalSignsEntry = () => {
         pulseBpm: vitals.heartRate,
         bloodPressure: `${vitals.systolicBp}/${vitals.diastolicBp}`,
       };
-      return axiosPrivate.post(`/patients/${vitals.patientId}/vitals/record`, payload);
+      return axiosPrivate.post(`/patients/${vitals.patientId}/vitals`, payload);
     },
     onSuccess: () => {
       toast.success('Vital signs recorded successfully!');

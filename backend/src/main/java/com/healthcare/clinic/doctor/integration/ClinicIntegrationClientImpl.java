@@ -27,8 +27,8 @@ public class ClinicIntegrationClientImpl implements ClinicIntegrationClient {
     private final PrescriptionRepository prescriptionRepository;
 
     @Override
-    public void syncClinicalStatus(Long clinicalPrescriptionId, String status, String pharmacistUsername, LocalDateTime dispensedAt) {
-        clinicPrescriptionSyncService.syncClinicalStatus(clinicalPrescriptionId, status, pharmacistUsername, dispensedAt);
+    public void syncClinicalStatus(Long clinicalPrescriptionId, String status, String pharmacistUsername, LocalDateTime dispensedAt, java.util.List<java.util.Map<String, Object>> dispensedItems) {
+        clinicPrescriptionSyncService.syncClinicalStatus(clinicalPrescriptionId, status, pharmacistUsername, dispensedAt, dispensedItems);
     }
 
     @Override

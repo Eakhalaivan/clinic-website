@@ -162,33 +162,36 @@ const MarketingDashboard = () => {
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['marketing-dashboard', selectedBranchId],
     queryFn: async () =>
-      (await axiosPrivate.get('/api/marketing/dashboard', { params: { branchId: selectedBranchId } })).data,
+      (await axiosPrivate.get('/marketing/dashboard', { params: { branchId: selectedBranchId } })).data,
     staleTime: 30_000,
   });
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
     queryKey: ['campaigns'],
-    queryFn: async () => (await axiosPrivate.get('/api/marketing/campaigns')).data,
+    queryFn: async () => (await axiosPrivate.get('/marketing/campaigns')).data,
   });
 
   const { data: leads, isLoading: leadsLoading } = useQuery({
     queryKey: ['leads', selectedBranchId, null, 0],
     queryFn: async () =>
-      (await axiosPrivate.get('/api/marketing/leads', { params: { branchId: selectedBranchId, size: 50 } })).data,
+      (await axiosPrivate.get('/marketing/leads', { params: { branchId: selectedBranchId, size: 50 } })).data,
   });
 
   const { data: npsMetrics, isLoading: npsLoading } = useQuery({
     queryKey: ['nps-metrics', selectedBranchId],
     queryFn: async () =>
       selectedBranchId
-        ? (await axiosPrivate.get('/api/marketing/nps/metrics', { params: { branchId: selectedBranchId } })).data
+        ? (await axiosPrivate.get('/marketing/nps/metrics', { params: { branchId: selectedBranchId } })).data
         : null,
     enabled: !!selectedBranchId,
   });
 
   const handleCampaignAction = async (id, action) => {
     try {
-      await axiosPrivate.post(`/api/marketing/campaigns/${id}/${action}`);
+      const params = {};
+      if (action === 'approve') params.approvedBy = 1;
+      if (action === 'clone') params.clonedBy = 1;
+      await axiosPrivate.post(`/marketing/campaigns/${id}/${action}`, null, { params });
       // Invalidation handled by TanStack Query refetch
     } catch (e) {
       alert(e?.response?.data?.message || `Failed to ${action} campaign`);

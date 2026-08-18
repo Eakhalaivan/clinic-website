@@ -19,6 +19,7 @@ public class QueueTokenService {
 
     private final QueueTokenRepository queueTokenRepository;
     private final com.healthcare.clinic.branch.repository.BranchRepository branchRepository;
+    private final com.healthcare.clinic.appointment.repository.AppointmentRepository appointmentRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public QueueToken generateToken(Branch branch, WalkInRegistration walkIn, Long appointmentId) {
@@ -44,8 +45,7 @@ public class QueueTokenService {
         }
         
         if (appointmentId != null) {
-            com.healthcare.clinic.appointment.entity.Appointment appointment = new com.healthcare.clinic.appointment.entity.Appointment();
-            appointment.setId(appointmentId);
+            com.healthcare.clinic.appointment.entity.Appointment appointment = appointmentRepository.getReferenceById(appointmentId);
             token.setAppointment(appointment);
         }
 

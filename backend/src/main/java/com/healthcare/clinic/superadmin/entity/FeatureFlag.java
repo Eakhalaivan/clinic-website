@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "SuperadminFeatureFlag")
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "feature_flags")
 @Data
@@ -19,7 +19,7 @@ public class FeatureFlag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "flag_key", nullable = false, unique = true)
     private String flagKey;
 
     private String description;

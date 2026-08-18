@@ -34,7 +34,7 @@ public class PreOpChecklist {
     private User completedBy;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "checklist_data", columnDefinition = "jsonb")
+    @Column(name = "checklist_data")
     private Map<String, Boolean> checklistData; // e.g. {"consentSigned": true, "fastingConfirmed": true, "siteMarked": true}
 
     @Column(columnDefinition = "TEXT")

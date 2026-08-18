@@ -36,6 +36,7 @@ public class Batch3ReferralAttachmentTest {
         referral.setReferringDoctorId(101L);
         referral.setReferredToSpecialty("Cardiology");
         referral.setReasonForReferral("Abnormal ECG");
+        referral.setReferralReason("Abnormal ECG");
         
         ClinicalReferral savedReferral = referralService.createReferral(referral);
         assertThat(savedReferral.getId()).isNotNull();

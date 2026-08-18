@@ -1,0 +1,25 @@
+ALTER TABLE pharmacy_prescriptions ADD COLUMN valid_until TIMESTAMP;
+ALTER TABLE pharmacy_prescriptions ADD COLUMN refills_allowed INT DEFAULT 0;
+ALTER TABLE pharmacy_prescriptions ADD COLUMN refills_remaining INT DEFAULT 0;
+ALTER TABLE pharmacy_prescriptions ADD COLUMN refill_interval_days INT DEFAULT 0;
+ALTER TABLE pharmacy_prescriptions ADD COLUMN doctor_registration_number VARCHAR(255);
+
+ALTER TABLE pharmacy_prescription_items ADD COLUMN substitution_allowed BOOLEAN DEFAULT FALSE;
+ALTER TABLE pharmacy_prescription_items ADD COLUMN dispensed_medicine_id BIGINT;
+ALTER TABLE pharmacy_prescription_items ADD COLUMN dispensed_medicine_name VARCHAR(255);
+
+ALTER TABLE pharmacy_outbox_events ADD COLUMN retry_count INT DEFAULT 0;
+ALTER TABLE pharmacy_outbox_events ADD COLUMN last_error TEXT;
+
+ALTER TABLE pharmacy_medicines ADD COLUMN schedule_category VARCHAR(50) DEFAULT 'NORMAL';
+
+CREATE TABLE controlled_substance_register (
+    id BIGSERIAL PRIMARY KEY,
+    pharmacy_prescription_id BIGINT NOT NULL,
+    medicine_id BIGINT NOT NULL,
+    dispensed_quantity INT NOT NULL,
+    patient_name VARCHAR(255) NOT NULL,
+    doctor_registration_number VARCHAR(255) NOT NULL,
+    dispensed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dispensed_by VARCHAR(255) NOT NULL
+);

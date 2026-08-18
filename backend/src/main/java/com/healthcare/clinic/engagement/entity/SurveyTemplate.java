@@ -29,7 +29,7 @@ public class SurveyTemplate {
     private TriggerContext triggerContext;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column()
     private String questions;
 
     @CreatedDate

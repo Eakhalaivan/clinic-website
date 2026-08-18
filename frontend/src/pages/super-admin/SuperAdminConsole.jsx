@@ -42,11 +42,8 @@ const SuperAdminConsole = ({ defaultTab = 'health' }) => {
   const { data: stats = {}, isLoading: loadingStats } = useQuery({
     queryKey: ['super-admin-stats'],
     queryFn: async () => {
-      try {
-        return (await axiosPrivate.get('/super-admin/stats')).data;
-      } catch (e) {
-        return { activePlans: 3, totalPlans: 5, totalConfigs: 42, totalAuditLogs: 10245 };
-      }
+      const res = await axiosPrivate.get('/super-admin/stats');
+      return res.data;
     },
     refetchInterval: 30000,
   });
@@ -54,14 +51,8 @@ const SuperAdminConsole = ({ defaultTab = 'health' }) => {
   const { data: flags = [], isLoading: loadingFlags } = useQuery({
     queryKey: ['super-admin-flags'],
     queryFn: async () => {
-        try {
-            return (await axiosPrivate.get('/super-admin/portal/feature-flags')).data;
-        } catch(e) {
-            return [
-                { id: 1, flagKey: 'ENABLE_TELEMEDICINE', description: 'Enable global video consults', enabled: true },
-                { id: 2, flagKey: 'BETA_AI_SCRIBING', description: 'Enable AI notes for select tenants', enabled: false }
-            ];
-        }
+        const res = await axiosPrivate.get('/super-admin/portal/feature-flags');
+        return res.data;
     },
     enabled: activeTab === 'flags',
   });
@@ -69,20 +60,13 @@ const SuperAdminConsole = ({ defaultTab = 'health' }) => {
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ['super-admin-sessions'],
     queryFn: async () => {
-        try {
-            return (await axiosPrivate.get('/super-admin/portal/sessions')).data;
-        } catch(e) {
-            return [
-                { id: 1, userId: 101, device: 'MacBook Pro', ipAddress: '192.168.1.1', loginTime: new Date().toISOString(), revoked: false }
-            ];
-        }
+        const res = await axiosPrivate.get('/super-admin/portal/sessions');
+        return res.data;
     },
     enabled: activeTab === 'sessions',
   });
 
-  // Mocking other queries for UI robustness if endpoints aren't perfectly mapped yet
-  const auditLogs = [];
-  const loadingAudit = false;
+
 
   // -- Mutations --
   const revokeSession = useMutation({

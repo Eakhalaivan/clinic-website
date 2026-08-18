@@ -5,9 +5,11 @@ import com.healthcare.clinic.patient.entity.PatientDocument;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientDocumentRepository;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
+import com.healthcare.clinic.document.service.DocumentStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class PatientDocumentService {
 
     private final PatientDocumentRepository documentRepository;
     private final PatientProfileRepository patientProfileRepository;
+    private final DocumentStorageService storageService;
 
     private PatientProfile getPatientProfile(User user) {
         return patientProfileRepository.findByUserId(user.getId())
@@ -29,14 +32,16 @@ public class PatientDocumentService {
     }
 
     @Transactional
-    public PatientDocument saveDocumentMetadata(User user, PatientDocument document) {
+    public PatientDocument saveDocumentMetadata(User user, PatientDocument document, MultipartFile file) {
         PatientProfile profile = getPatientProfile(user);
         
         document.setPatientId(profile.getId());
         
-        // In a real application, this would handle the file upload to S3 or a local directory
-        // and set the URL. We assume the URL is already set or mocked by the controller/client.
-        if (document.getFileUrl() == null || document.getFileUrl().isEmpty()) {
+        if (file != null && !file.isEmpty()) {
+            String storageKey = storageService.uploadFile(file);
+            document.setFileUrl(storageService.generateDownloadUrl(storageKey));
+            document.setStorageKey(storageKey);
+        } else if (document.getFileUrl() == null || document.getFileUrl().isEmpty()) {
             document.setFileUrl("https://example.com/mock-document-url.pdf");
         }
 

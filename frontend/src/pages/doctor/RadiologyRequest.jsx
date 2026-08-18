@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import { HeartPulse, ChevronLeft, Send, Check } from 'lucide-react';
 
 const RadiologyRequest = () => {
@@ -39,7 +40,7 @@ const RadiologyRequest = () => {
       });
     },
     onSuccess: () => {
-      alert('Imaging order placed successfully!');
+      toast.success('Imaging order placed successfully!');
       if (patientId) {
         navigate(`/doctor/patients/${patientId}/notes`);
       } else {

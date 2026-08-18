@@ -24,4 +24,8 @@ public class PrescriptionItemRequest {
     private String strength;
 
     private String timing;
+
+    private Long medicineId;
+
+    private Integer prescribedQuantity;
 }

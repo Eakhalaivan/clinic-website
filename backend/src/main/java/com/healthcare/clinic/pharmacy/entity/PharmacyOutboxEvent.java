@@ -34,4 +34,11 @@ public class PharmacyOutboxEvent {
 
     @Column(name = "processed_at")
     private ZonedDateTime processedAt;
+
+    @Column(name = "retry_count", nullable = false)
+    @Builder.Default
+    private Integer retryCount = 0;
+
+    @Column(name = "last_error", columnDefinition = "TEXT")
+    private String lastError;
 }

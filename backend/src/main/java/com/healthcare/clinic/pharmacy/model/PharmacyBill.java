@@ -90,6 +90,9 @@ public class PharmacyBill extends BaseEntity {
     @Column(name = "payment_status")
     private com.healthcare.clinic.pharmacy.enums.PaymentStatus paymentStatus;
 
+    @Column(name = "idempotency_key", unique = true)
+    private String idempotencyKey;
+
     // Getters and Setters
     public String getBillNumber() { return billNumber; }
     public void setBillNumber(String billNumber) { this.billNumber = billNumber; }
@@ -135,6 +138,9 @@ public class PharmacyBill extends BaseEntity {
     
     public com.healthcare.clinic.pharmacy.enums.PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(com.healthcare.clinic.pharmacy.enums.PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 
     @JsonManagedReference
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

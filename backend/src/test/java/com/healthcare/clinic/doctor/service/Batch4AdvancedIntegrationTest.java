@@ -10,23 +10,22 @@ import com.healthcare.clinic.identity.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
 public class Batch4AdvancedIntegrationTest {
 
     @Autowired
     private ClinicalEncounterService encounterService;
-
-    @Autowired
-    private PrescriptionService prescriptionService;
 
     @Autowired
     private BillingOutboxRepository billingOutboxRepository;
@@ -36,6 +35,9 @@ public class Batch4AdvancedIntegrationTest {
 
     @Autowired
     private com.healthcare.clinic.doctor.repository.DoctorProfileRepository doctorProfileRepository;
+
+    @Autowired
+    private com.healthcare.clinic.doctor.repository.SoapNoteRepository soapNoteRepository;
 
     @Test
     public void testFinalizeConsultationFlow() {
@@ -81,13 +83,22 @@ public class Batch4AdvancedIntegrationTest {
         prescription.setPharmacyStatus("DRAFT");
         // For simplicity, we just save it directly via repo or we can test using an existing method
         // But PrescriptionService saveDraft doesn't take encounterId in request yet. Let's just create one manually or via service if possible.
-        // Actually I can just call finalize and see if BillingOutbox is created
+        // 2.5 Add a SOAP note to allow closing the encounter
+        com.healthcare.clinic.doctor.entity.SoapNote note = new com.healthcare.clinic.doctor.entity.SoapNote();
+        note.setEncounterId(encounterId);
+        note.setSubjective("Complains of pain");
+        note.setObjective("Temp 99F");
+        note.setAssessment("Mild fever");
+        note.setPlan("Rest");
+        // Save via repository or service if available. We can just use a repository if injected or manually save via entity manager.
+        // Actually we don't have SoapNoteRepository injected in this test, but let's inject it.
+        soapNoteRepository.save(note);
         
         // 3. Finalize Encounter
-        ClinicalEncounter finalized = encounterService.finalizeEncounter(doctorUser, encounterId);
+        ClinicalEncounter closed = encounterService.closeEncounter(doctorUser, encounterId);
         
-        assertThat(finalized.getStatus()).isEqualTo("Completed");
-        assertThat(finalized.getFinalizedAt()).isNotNull();
+        assertThat(closed.getStatus()).isEqualTo("CLOSED");
+        assertThat(closed.getFinalizedAt()).isNotNull();
 
         // 4. Verify BillingOutbox
         List<BillingOutbox> outboxItems = billingOutboxRepository.findByEncounterId(encounterId);

@@ -25,11 +25,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service("pharmacySaleService")
 public class SaleService {
@@ -70,6 +67,13 @@ public class SaleService {
     public PharmacyBill processSale(SaleRequestDTO request) {
         Timer.Sample sample = Timer.start(meterRegistry);
         try {
+            if (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isEmpty()) {
+                java.util.Optional<PharmacyBill> existingBill = billRepository.findByIdempotencyKey(request.getIdempotencyKey());
+                if (existingBill.isPresent()) {
+                    return existingBill.get();
+                }
+            }
+
             if (request.getPrescriptionId() != null) {
                 com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionRecord p = prescriptionRepository.findById(request.getPrescriptionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Prescription not found"));
@@ -86,23 +90,11 @@ public class SaleService {
             if (request.getDoctorId() != null) {
                 bill.setDoctorId(request.getDoctorId());
             }
+            bill.setIdempotencyKey(request.getIdempotencyKey());
             bill.setDiscountAmount(request.getDiscountAmount());
 
         BigDecimal subTotal = BigDecimal.ZERO;
-        BigDecimal taxTotal = BigDecimal.ZERO;
-
-        List<Long> medicineIds = request.getItems().stream()
-                .filter(i -> i.getMedicineId() != null)
-                .map(SaleItemDTO::getMedicineId)
-                .distinct()
-                .collect(Collectors.toList());
-
-        Map<Long, List<MedicineStock>> batchesByMedicine = medicineIds.isEmpty() ? Collections.emptyMap() :
-                stockRepository.findByMedicineIdInAndDeletedFalseOrderByExpiryDateAsc(medicineIds)
-                        .stream()
-                        .collect(Collectors.groupingBy(s -> s.getMedicine().getId()));
-
-        for (SaleItemDTO itemDto : request.getItems()) {
+        BigDecimal taxTotal = BigDecimal.ZERO;        for (SaleItemDTO itemDto : request.getItems()) {
             int quantityToDeduct = itemDto.getQuantity();
 
             if (itemDto.getStockId() != null) {
@@ -141,8 +133,8 @@ public class SaleService {
                 billItem.setNetAmount(lineTotal.add(lineTax));
                 bill.getItems().add(billItem);
             } else if (itemDto.getMedicineId() != null) {
-                // Use pre-fetched batches (FEFO)
-                List<MedicineStock> batches = batchesByMedicine.getOrDefault(itemDto.getMedicineId(), Collections.emptyList());
+                // Fetch FEFO batches dynamically with PESSIMISTIC_WRITE lock
+                List<MedicineStock> batches = stockRepository.findBatchesForDispensingWithLock(itemDto.getMedicineId());
 
                 int remainingToDeduct = quantityToDeduct;
                 for (MedicineStock stock : batches) {

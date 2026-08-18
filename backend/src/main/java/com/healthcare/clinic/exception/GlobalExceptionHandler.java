@@ -49,12 +49,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         log.error("Data integrity violation: ", ex);
-        if (ex.getMessage() != null && (ex.getMessage().toLowerCase().contains("slot_id") || ex.getMessage().contains("appointments_slot_id_key"))) {
+        String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        if (msg.contains("slot_id") || msg.contains("appointments_slot_id_key")) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiResponse.error("This time slot was just booked by someone else. Please choose another."));
+        } else if (msg.contains("email") || msg.contains("users_email_key")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("A user with this email address already exists."));
+        } else if (msg.contains("phone_number") || msg.contains("users_phone_number_key")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("A user with this phone number already exists."));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Missing required field or database constraint violation."));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("Database constraint violation or duplicate entry."));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -108,7 +115,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex) {
         log.warn("Optimistic locking failure: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error("This time slot was just booked by someone else. Please choose another."));
+                .body(ApiResponse.error("The record was modified by another user. Please refresh and try again."));
     }
 
     @ExceptionHandler(DataAccessException.class)

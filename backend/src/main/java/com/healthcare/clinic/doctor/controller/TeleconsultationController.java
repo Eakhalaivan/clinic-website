@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("doctorTeleconsultationController")
-@RequestMapping("/api/doctor/teleconsultations")
+@RestController("sharedTeleconsultationController")
+@RequestMapping("/api/v1/teleconsultations")
 @RequiredArgsConstructor
 public class TeleconsultationController {
 

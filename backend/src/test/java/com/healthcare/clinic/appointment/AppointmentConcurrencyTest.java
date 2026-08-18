@@ -1,6 +1,6 @@
 package com.healthcare.clinic.appointment;
 
-import com.healthcare.clinic.appointment.entity.Appointment;
+
 import com.healthcare.clinic.appointment.entity.AppointmentSlot;
 import com.healthcare.clinic.appointment.repository.AppointmentRepository;
 import com.healthcare.clinic.appointment.repository.AppointmentSlotRepository;
@@ -113,7 +113,7 @@ public class AppointmentConcurrencyTest {
         Runnable bookTask1 = () -> {
             try {
                 latch.await();
-                appointmentService.bookAppointment(patient1.getId(), testSlot.getId(), "Reason 1");
+                appointmentService.bookAppointment(patient1.getId(), testSlot.getId(), "Reason 1", null, null);
                 successCount.incrementAndGet();
             } catch (org.springframework.dao.DataIntegrityViolationException | ObjectOptimisticLockingFailureException e) {
                 optimisticLockCount.incrementAndGet();
@@ -131,7 +131,7 @@ public class AppointmentConcurrencyTest {
         Runnable bookTask2 = () -> {
             try {
                 latch.await();
-                appointmentService.bookAppointment(patient2.getId(), testSlot.getId(), "Reason 2");
+                appointmentService.bookAppointment(patient2.getId(), testSlot.getId(), "Reason 2", null, null);
                 successCount.incrementAndGet();
             } catch (org.springframework.dao.DataIntegrityViolationException | ObjectOptimisticLockingFailureException e) {
                 optimisticLockCount.incrementAndGet();

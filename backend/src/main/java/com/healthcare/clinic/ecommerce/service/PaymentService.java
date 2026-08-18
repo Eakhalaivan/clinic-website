@@ -11,10 +11,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.stripe.Stripe;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.param.checkout.SessionCreateParams;
+
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
+import jakarta.annotation.PostConstruct;
 
 @Slf4j
 @Service("ecommercePaymentService")
@@ -26,8 +35,22 @@ public class PaymentService {
     private final ObjectMapper objectMapper;
     private final InventoryService inventoryService;
 
-    @Value("${ecommerce.payment.provider:MOCK}")
+    @Value("${ecommerce.payment.provider:STRIPE}")
     private String paymentProvider;
+
+    @Value("${stripe.secret-key}")
+    private String stripeSecretKey;
+
+    @Value("${stripe.webhook-secret}")
+    private String endpointSecret;
+
+    @Value("${app.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
+
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = stripeSecretKey;
+    }
 
     @Transactional
     public EcPayment initiatePayment(EcommerceOrder order) {
@@ -45,10 +68,44 @@ public class PaymentService {
         if ("MOCK".equals(paymentProvider)) {
             payment.setProviderRef("MOCK_TXN_" + UUID.randomUUID().toString().substring(0, 8));
             log.info("Mock payment initiated for order {}, ref {}", order.getId(), payment.getProviderRef());
+        } else if ("STRIPE".equalsIgnoreCase(paymentProvider)) {
+            long amountInCents = order.getTotalAmount().multiply(new BigDecimal("100")).longValue();
+
+            try {
+                SessionCreateParams params = SessionCreateParams.builder()
+                        .setMode(SessionCreateParams.Mode.PAYMENT)
+                        .setSuccessUrl(frontendUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                        .setCancelUrl(frontendUrl + "/cancel")
+                        .setClientReferenceId("ECOMM_" + order.getId().toString())
+                        .addLineItem(
+                                SessionCreateParams.LineItem.builder()
+                                        .setQuantity(1L)
+                                        .setPriceData(
+                                                SessionCreateParams.LineItem.PriceData.builder()
+                                                        .setCurrency("inr")
+                                                        .setUnitAmount(amountInCents)
+                                                        .setProductData(
+                                                                SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                        .setName("Ecommerce Order #" + order.getId())
+                                                                        .build()
+                                                        )
+                                                        .build()
+                                        )
+                                        .build()
+                        )
+                        .build();
+
+                Session session = Session.create(params);
+                payment.setProviderRef(session.getUrl()); // Storing URL in providerRef to redirect client
+                payment.setPaymentMethod("STRIPE");
+                log.info("Stripe payment initiated for order {}, url {}", order.getId(), session.getUrl());
+            } catch (StripeException e) {
+                log.error("Failed to create Stripe session for ecommerce order", e);
+                payment.setStatus("FAILED");
+                payment.setErrorDescription(e.getMessage());
+            }
         } else {
-            // Integration with Razorpay/Stripe would go here. We generate a provider reference in advance for mock.
-            // e.g. RazorpayClient.Orders.create(...)
-            throw new UnsupportedOperationException("Real payment gateways not implemented yet in Phase 17");
+            throw new UnsupportedOperationException("Provider " + paymentProvider + " not implemented");
         }
 
         return paymentRepository.save(payment);
@@ -56,15 +113,53 @@ public class PaymentService {
 
     @Transactional
     public void handlePaymentWebhook(String payload, String signature) {
-        // Idempotent webhook handler
-        try {
-            // Very naive mock verification, in reality verify signature here.
-            Map<String, Object> data = objectMapper.readValue(payload, Map.class);
-            String providerRef = (String) data.get("providerRef");
-            String status = (String) data.get("status");
+        if ("MOCK".equals(paymentProvider)) {
+            try {
+                Map<String, Object> data = objectMapper.readValue(payload, Map.class);
+                String providerRef = (String) data.get("providerRef");
+                String status = (String) data.get("status");
+                processPaymentOutcome(providerRef, status, payload);
+            } catch (Exception e) {
+                log.error("Failed to process mock payment webhook", e);
+                throw new RuntimeException("Webhook processing failed", e);
+            }
+        } else if ("STRIPE".equalsIgnoreCase(paymentProvider)) {
+            Event event;
+            try {
+                event = Webhook.constructEvent(payload, signature, endpointSecret);
+            } catch (SignatureVerificationException e) {
+                log.warn("Invalid Stripe signature in ecommerce webhook");
+                throw new IllegalArgumentException("Invalid signature");
+            } catch (Exception e) {
+                log.error("Webhook processing error in ecommerce", e);
+                throw new IllegalArgumentException("Invalid payload");
+            }
 
+            if ("checkout.session.completed".equals(event.getType())) {
+                Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
+                if (session != null && session.getClientReferenceId() != null && session.getClientReferenceId().startsWith("ECOMM_")) {
+                    Long orderId = Long.parseLong(session.getClientReferenceId().substring(6));
+                    
+                    EcPayment payment = paymentRepository.findAll().stream()
+                            .filter(p -> orderId.equals(p.getOrderId()) && "STRIPE".equals(p.getPaymentMethod()))
+                            .findFirst()
+                            .orElse(null);
+                    
+                    if (payment != null) {
+                        // Store actual session ID for refunds later
+                        payment.setProviderRef(session.getId());
+                        processPaymentOutcome(session.getId(), "SUCCESS", payload);
+                    }
+                }
+            }
+        }
+    }
+
+    private void processPaymentOutcome(String providerRef, String status, String payload) {
+        try {
             EcPayment payment = paymentRepository.findAll().stream()
-                    .filter(p -> providerRef.equals(p.getProviderRef()))
+                    .filter(p -> providerRef.equals(p.getProviderRef()) || 
+                                ("STRIPE".equalsIgnoreCase(p.getPaymentMethod()) && p.getProviderRef() != null && p.getProviderRef().contains("checkout.stripe.com")))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unknown payment reference"));
 
@@ -97,8 +192,8 @@ public class PaymentService {
             orderRepository.save(order);
 
         } catch (Exception e) {
-            log.error("Failed to process payment webhook", e);
-            throw new RuntimeException("Webhook processing failed", e);
+            log.error("Failed to process payment outcome", e);
+            throw new RuntimeException("Payment outcome processing failed", e);
         }
     }
 }

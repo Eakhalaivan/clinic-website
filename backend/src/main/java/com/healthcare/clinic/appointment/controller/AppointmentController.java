@@ -3,7 +3,10 @@ package com.healthcare.clinic.appointment.controller;
 import com.healthcare.clinic.appointment.entity.Appointment;
 import com.healthcare.clinic.appointment.entity.AppointmentSlot;
 import com.healthcare.clinic.appointment.service.AppointmentService;
+import com.healthcare.clinic.appointment.service.AppointmentHoldService;
+import com.healthcare.clinic.appointment.dto.AppointmentResponseDto;
 import com.healthcare.clinic.appointment.entity.AppointmentStatus;
+import com.healthcare.clinic.security.SecurityUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,15 +34,35 @@ public class AppointmentController {
         return ResponseEntity.ok(slots);
     }
 
+    private final com.healthcare.clinic.appointment.service.AppointmentHoldService holdService;
+
     @PostMapping("/book")
-    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
-    public ResponseEntity<Appointment> bookAppointment(@jakarta.validation.Valid @RequestBody BookingRequest request) {
+    @PreAuthorize("hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Appointment> bookAppointment(
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @jakarta.validation.Valid @RequestBody BookingRequest request) {
+        
         Long currentUserId = com.healthcare.clinic.security.SecurityUtils.getCurrentUserId();
+        Long targetPatientUserId = request.getPatientUserId() != null ? request.getPatientUserId() : currentUserId;
+
+        if (holdService.isIdempotencyKeyProcessed(idempotencyKey)) {
+            Long existingId = holdService.getAppointmentIdForIdempotencyKey(idempotencyKey);
+            if (existingId != null) {
+                return ResponseEntity.ok(appointmentService.getAppointmentById(existingId));
+            }
+        }
+
         Appointment appointment = appointmentService.bookAppointment(
-                currentUserId, 
+                targetPatientUserId, 
                 request.getSlotId(), 
-                request.getReasonForVisit());
+                request.getReasonForVisit(),
+                request.getHoldId(),
+                idempotencyKey);
                 
+        if (idempotencyKey != null) {
+            holdService.saveIdempotencyKey(idempotencyKey, appointment.getId());
+        }
+
         return ResponseEntity.ok(appointment);
     }
 
@@ -142,4 +165,8 @@ class BookingRequest {
     @jakarta.validation.constraints.NotBlank
     @jakarta.validation.constraints.Size(max = 500)
     private String reasonForVisit;
+
+    private String holdId;
+    
+    private Long patientUserId;
 }

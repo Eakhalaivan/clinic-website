@@ -1,44 +1,98 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { DollarSign, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { DollarSign, ArrowLeft, BarChart3, TrendingUp, Lock, Unlock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 import { fadeIn } from '../../components/ui/motion';
+import useAuthStore from '../../store/authStore';
+import Modal from '../../components/ui/Modal';
 
 const FinanceDailyCash = () => {
-  const { data: payments = [], isLoading } = useQuery({
-    queryKey: ['finance-payments-summary'],
+  const { user } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('OPEN'); // 'OPEN' or 'CLOSE'
+  const [amount, setAmount] = useState('');
+
+  const cashierId = user?.userId || 1;
+
+  const { data: currentSession, isLoading: sessionLoading } = useQuery({
+    queryKey: ['cashier-current-session', cashierId],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/finance/payments');
+      const res = await axiosPrivate.get(`/v1/finance/cashier/session/current?cashierId=${cashierId}`);
+      return res.data || null;
+    }
+  });
+
+  const { data: sessions = [], isLoading: historyLoading } = useQuery({
+    queryKey: ['cashier-sessions'],
+    queryFn: async () => {
+      const res = await axiosPrivate.get('/v1/finance/cashier/sessions');
       return res.data;
     }
   });
 
-  const dailySummary = useMemo(() => {
-    const summary = {};
-    payments.forEach(payment => {
-      const date = new Date(payment.paidAt).toLocaleDateString();
-      if (!summary[date]) {
-        summary[date] = { total: 0, count: 0, cash: 0, card: 0, other: 0 };
-      }
-      summary[date].total += payment.amount;
-      summary[date].count += 1;
-      
-      if (payment.paymentMethod === 'CASH') summary[date].cash += payment.amount;
-      else if (payment.paymentMethod === 'CREDIT_CARD') summary[date].card += payment.amount;
-      else summary[date].other += payment.amount;
-    });
+  const openSessionMutation = useMutation({
+    mutationFn: async (openingFloat) => {
+      const payload = {
+        branchId: 1, // Defaulting for now
+        cashierId,
+        openingFloat
+      };
+      const res = await axiosPrivate.post('/v1/finance/cashier/session/open', payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Session opened successfully');
+      setIsModalOpen(false);
+      setAmount('');
+      queryClient.invalidateQueries(['cashier-current-session']);
+      queryClient.invalidateQueries(['cashier-sessions']);
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to open session');
+    }
+  });
 
-    // Convert to sorted array
-    return Object.entries(summary)
-      .map(([date, stats]) => ({ date, ...stats }))
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [payments]);
+  const closeSessionMutation = useMutation({
+    mutationFn: async (closingFloat) => {
+      const payload = { closingFloat };
+      const res = await axiosPrivate.post(`/v1/finance/cashier/session/${currentSession.id}/close`, payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Session closed successfully');
+      setIsModalOpen(false);
+      setAmount('');
+      queryClient.invalidateQueries(['cashier-current-session']);
+      queryClient.invalidateQueries(['cashier-sessions']);
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to close session');
+    }
+  });
 
-  const todayStr = new Date().toLocaleDateString();
-  const todaysData = dailySummary.find(d => d.date === todayStr) || { total: 0, count: 0, cash: 0, card: 0, other: 0 };
+  const handleModalSubmit = (e) => {
+    e.preventDefault();
+    if (modalType === 'OPEN') {
+      openSessionMutation.mutate(parseFloat(amount));
+    } else {
+      closeSessionMutation.mutate(parseFloat(amount));
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'OPEN': return <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">Open</span>;
+      case 'CLOSED': return <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">Closed</span>;
+      case 'DISCREPANCY': return <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium">Discrepancy</span>;
+      default: return <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">{status}</span>;
+    }
+  };
 
   return (
     <motion.div 
@@ -47,48 +101,58 @@ const FinanceDailyCash = () => {
       variants={fadeIn}
       className="max-w-5xl mx-auto space-y-6"
     >
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <Link to="/finance" className="inline-flex items-center text-xs font-semibold text-[var(--color-navy-600)] hover:underline mb-2 gap-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0 flex items-center gap-2">
             <BarChart3 className="w-7 h-7 text-emerald-600" />
-            Daily Cash & Summary
+            Daily Cash & Till Management
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">
-            Overview of daily revenue collections and payment breakdowns.
+            Manage your daily cash register float and view till history.
           </p>
+        </div>
+        <div>
+          {currentSession ? (
+            <Button variant="danger" icon={Lock} onClick={() => { setModalType('CLOSE'); setIsModalOpen(true); }}>
+              Close Session
+            </Button>
+          ) : (
+            <Button variant="primary" icon={Unlock} onClick={() => { setModalType('OPEN'); setIsModalOpen(true); }}>
+              Open Session
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-emerald-50 border-emerald-100">
           <Card.Body className="p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2">Today's Revenue</h3>
-            <p className="text-3xl font-bold text-emerald-600">${todaysData.total.toFixed(2)}</p>
-            <p className="text-xs font-semibold text-emerald-700 mt-2">{todaysData.count} transactions today</p>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-2">Session Status</h3>
+            <p className="text-3xl font-bold text-emerald-600">
+              {sessionLoading ? '...' : currentSession ? 'OPEN' : 'CLOSED'}
+            </p>
+            <p className="text-xs font-semibold text-emerald-700 mt-2">
+              {currentSession ? `Started at ${new Date(currentSession.openedAt).toLocaleTimeString()}` : 'No active session'}
+            </p>
+          </Card.Body>
+        </Card>
+        <Card>
+          <Card.Body className="p-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Opening Float</h3>
+            <p className="text-2xl font-bold text-[var(--color-navy-900)]">
+              ${currentSession ? currentSession.openingFloat.toFixed(2) : '0.00'}
+            </p>
           </Card.Body>
         </Card>
         <Card>
           <Card.Body className="p-5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Cash Collections</h3>
-            <p className="text-2xl font-bold text-[var(--color-navy-900)]">${todaysData.cash.toFixed(2)}</p>
-            <p className="text-xs font-semibold text-slate-400 mt-2">Today</p>
-          </Card.Body>
-        </Card>
-        <Card>
-          <Card.Body className="p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Card Payments</h3>
-            <p className="text-2xl font-bold text-[var(--color-navy-900)]">${todaysData.card.toFixed(2)}</p>
-            <p className="text-xs font-semibold text-slate-400 mt-2">Today</p>
-          </Card.Body>
-        </Card>
-        <Card>
-          <Card.Body className="p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Other (Insurance/Bank)</h3>
-            <p className="text-2xl font-bold text-[var(--color-navy-900)]">${todaysData.other.toFixed(2)}</p>
-            <p className="text-xs font-semibold text-slate-400 mt-2">Today</p>
+            <p className="text-2xl font-bold text-[var(--color-navy-900)]">
+              ${currentSession ? currentSession.cashCollections.toFixed(2) : '0.00'}
+            </p>
           </Card.Body>
         </Card>
       </div>
@@ -96,38 +160,44 @@ const FinanceDailyCash = () => {
       <Card>
         <Card.Header>
           <h2 className="text-lg font-bold text-[var(--color-navy-900)] flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-600" /> Historical Daily Summary
+            <TrendingUp className="w-5 h-5 text-emerald-600" /> Session History
           </h2>
         </Card.Header>
         <Card.Body className="p-0">
-          {isLoading ? (
-            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">Loading summaries...</div>
-          ) : dailySummary.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">No payment history available.</div>
+          {historyLoading ? (
+            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">Loading sessions...</div>
+          ) : sessions.length === 0 ? (
+            <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">No session history available.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
                   <tr>
-                    <th className="p-4 border-b border-slate-200">Date</th>
-                    <th className="p-4 border-b border-slate-200 text-right">Transactions</th>
-                    <th className="p-4 border-b border-slate-200 text-right">Cash</th>
-                    <th className="p-4 border-b border-slate-200 text-right">Card</th>
-                    <th className="p-4 border-b border-slate-200 text-right">Other</th>
-                    <th className="p-4 border-b border-slate-200 text-right text-emerald-700 bg-emerald-50/50">Total Revenue</th>
+                    <th className="p-4 border-b border-slate-200">Opened At</th>
+                    <th className="p-4 border-b border-slate-200">Closed At</th>
+                    <th className="p-4 border-b border-slate-200 text-right">Opening Float</th>
+                    <th className="p-4 border-b border-slate-200 text-right">Collections</th>
+                    <th className="p-4 border-b border-slate-200 text-right">Closing Float</th>
+                    <th className="p-4 border-b border-slate-200 text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {dailySummary.map((row, idx) => (
-                    <tr key={row.date} className="hover:bg-slate-50 transition-colors">
+                  {sessions.slice().reverse().map((session) => (
+                    <tr key={session.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-semibold text-[var(--color-navy-900)]">
-                        {row.date === todayStr ? 'Today' : row.date}
+                        {new Date(session.openedAt).toLocaleString()}
                       </td>
-                      <td className="p-4 text-right text-slate-500 font-medium">{row.count}</td>
-                      <td className="p-4 text-right text-slate-700">${row.cash.toFixed(2)}</td>
-                      <td className="p-4 text-right text-slate-700">${row.card.toFixed(2)}</td>
-                      <td className="p-4 text-right text-slate-700">${row.other.toFixed(2)}</td>
-                      <td className="p-4 text-right font-bold text-emerald-600 bg-emerald-50/30">${row.total.toFixed(2)}</td>
+                      <td className="p-4 text-slate-600">
+                        {session.closedAt ? new Date(session.closedAt).toLocaleString() : '-'}
+                      </td>
+                      <td className="p-4 text-right text-slate-700">${session.openingFloat.toFixed(2)}</td>
+                      <td className="p-4 text-right text-slate-700">${session.cashCollections.toFixed(2)}</td>
+                      <td className="p-4 text-right text-slate-700">
+                        {session.closingFloat != null ? `$${session.closingFloat.toFixed(2)}` : '-'}
+                      </td>
+                      <td className="p-4 text-right">
+                        {getStatusBadge(session.status)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -136,6 +206,31 @@ const FinanceDailyCash = () => {
           )}
         </Card.Body>
       </Card>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalType === 'OPEN' ? 'Open Session' : 'Close Session'}>
+        <form onSubmit={handleModalSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {modalType === 'OPEN' ? 'Opening Float Amount ($)' : 'Closing Cash Amount ($)'}
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              required
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant={modalType === 'OPEN' ? 'primary' : 'danger'} isLoading={modalType === 'OPEN' ? openSessionMutation.isPending : closeSessionMutation.isPending}>
+              {modalType === 'OPEN' ? 'Open Till' : 'Close Till'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </motion.div>
   );
 };

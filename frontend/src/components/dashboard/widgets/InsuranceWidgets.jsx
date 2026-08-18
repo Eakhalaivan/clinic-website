@@ -37,7 +37,11 @@ export const InsuranceAdjudicationWidget = ({ activeTab, claims, preAuths }) => 
 
   const adjudicateClaim = useMutation({
     mutationFn: async ({ claimId, status, approvedAmount, notes }) =>
-      axiosPrivate.patch(`/insurance/claims/${claimId}/adjudicate?status=${status}&approvedAmount=${approvedAmount || 0}&notes=${notes || ''}`),
+      axiosPrivate.post(`/insurance/claims/${claimId}/adjudicate`, {
+        status,
+        approvedAmount: approvedAmount || 0,
+        notes: notes || ''
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries(['insurance-claims']);
       setSelectedClaim(null);

@@ -14,8 +14,8 @@ export default function ProductCatalog() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['ecommerce-catalog'],
     queryFn: async () => {
-      const response = await axiosPrivate.get('/ecommerce/catalog/search');
-      return response.data.content || [];
+      const response = await axiosPrivate.get('/ecommerce/products');
+      return response.data || [];
     }
   });
 

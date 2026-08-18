@@ -30,7 +30,7 @@ public class CarePathwayTemplate {
     private Integer estimatedDurationDays = 7;
 
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
-    @Column(nullable = false, columnDefinition = "jsonb")
+    @Column(nullable = false)
     @Builder.Default
     private String steps = "[]";
 

@@ -12,7 +12,7 @@ const StaffDocuments = () => {
   const { data: staffList } = useQuery({
     queryKey: ['staffList'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/users');
+      const res = await axiosPrivate.get('/users');
       return res.data;
     }
   });
@@ -20,7 +20,7 @@ const StaffDocuments = () => {
   const { data: documents, isLoading } = useQuery({
     queryKey: ['staffDocuments', selectedStaff],
     queryFn: async () => {
-      const res = await axiosPrivate.get(`/api/hr/documents/${selectedStaff}`);
+      const res = await axiosPrivate.get(`/hr/documents/${selectedStaff}`);
       return res.data;
     },
     enabled: !!selectedStaff
@@ -28,7 +28,7 @@ const StaffDocuments = () => {
 
   const uploadMutation = useMutation({
     mutationFn: async (formData) => {
-      const res = await axiosPrivate.post(`/api/hr/documents/${selectedStaff}/upload`, formData, {
+      const res = await axiosPrivate.post(`/hr/documents/${selectedStaff}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return res.data;
@@ -46,7 +46,7 @@ const StaffDocuments = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (documentId) => {
-      await axiosPrivate.delete(`/api/hr/documents/${documentId}`);
+      await axiosPrivate.delete(`/hr/documents/${documentId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['staffDocuments', selectedStaff]);

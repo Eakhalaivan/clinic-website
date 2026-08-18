@@ -92,7 +92,7 @@ export default function DataTable({
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[var(--color-surface-alt)] dark:bg-white/[0.03] border-b border-[var(--color-border)] dark:border-white/[0.07] text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] select-none">
+                <tr className="bg-white dark:bg-white/[0.03] border-b border-gray-100 dark:border-white/[0.07] text-sm font-semibold text-gray-900 select-none">
                   {columns.map((col) => (
                     <th
                       key={col.key}
@@ -115,11 +115,11 @@ export default function DataTable({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border)] text-sm">
+              <tbody className="divide-y divide-gray-100 text-sm">
                 {sortedData.map((row, index) => (
                   <tr 
                     key={row.id || index} 
-                    className="hover:bg-[var(--color-surface-alt)]/70 dark:hover:bg-white/[0.04] transition-colors"
+                    className="hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors bg-white"
                   >
                     {columns.map((col) => (
                       <td 

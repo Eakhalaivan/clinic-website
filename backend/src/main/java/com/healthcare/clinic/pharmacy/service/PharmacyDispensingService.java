@@ -35,6 +35,8 @@ public class PharmacyDispensingService {
     private final StockBatchRepository stockBatchRepository;
     private final InventoryMovementRepository movementRepository;
     private final ClinicIntegrationClient clinicIntegrationClient;
+    private final com.healthcare.clinic.pharmacy.repository.PharmacyOutboxEventRepository pharmacyOutboxEventRepository;
+    private final com.healthcare.clinic.pharmacy.repository.ControlledSubstanceRegisterRepository controlledSubstanceRegisterRepository;
 
     @Transactional(transactionManager = "pharmacyTransactionManager")
     public PrescriptionDispensed dispensePrescription(DispenseRequest request, User pharmacist) {
@@ -56,11 +58,24 @@ public class PharmacyDispensingService {
             throw new IllegalStateException("Prescription must be verified before dispensing");
         }
         
-        if ("DISPENSED".equals(record.getStatus())) {
-            throw new IllegalStateException("Prescription is already dispensed");
+        if (record.getValidUntil() != null && LocalDateTime.now().isAfter(record.getValidUntil())) {
+            throw new IllegalStateException("Prescription has expired");
         }
 
+        if ("DISPENSED".equals(record.getStatus())) {
+            throw new IllegalStateException("Prescription is already fully dispensed");
+        }
 
+        if (("PARTIALLY_DISPENSED".equals(record.getStatus()) || "PENDING".equals(record.getStatus())) 
+                && record.getDispensedAt() != null 
+                && record.getRefillIntervalDays() != null 
+                && record.getRefillIntervalDays() > 0) {
+            
+            if (LocalDateTime.now().isBefore(record.getDispensedAt().plusDays(record.getRefillIntervalDays()))) {
+                throw new IllegalStateException("Refill interval has not elapsed yet. Next refill available after " + 
+                        record.getDispensedAt().plusDays(record.getRefillIntervalDays()));
+            }
+        }
         String txRef = UUID.randomUUID().toString();
 
         PrescriptionDispensed dispensed = PrescriptionDispensed.builder()
@@ -78,6 +93,31 @@ public class PharmacyDispensingService {
 
         for (DispenseItemRequest itemRequest : request.getItems()) {
             int remainingQuantity = itemRequest.getQuantity();
+
+            // Find corresponding prescribed item
+            com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem prescribedItem = null;
+            if (itemRequest.getPrescribedItemId() != null) {
+                prescribedItem = record.getItems().stream()
+                        .filter(i -> i.getId().equals(itemRequest.getPrescribedItemId()))
+                        .findFirst()
+                        .orElse(null);
+            } else {
+                prescribedItem = record.getItems().stream()
+                        .filter(i -> i.getMedicineId() != null && i.getMedicineId().equals(itemRequest.getMedicineId()))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (prescribedItem == null) {
+                throw new IllegalStateException("Prescribed item not found for dispensing");
+            }
+
+            if (prescribedItem.getMedicineId() != null && !prescribedItem.getMedicineId().equals(itemRequest.getMedicineId())) {
+                if (prescribedItem.getSubstitutionAllowed() == null || !prescribedItem.getSubstitutionAllowed()) {
+                    throw new IllegalStateException("Substitution is not allowed for medicine ID: " + prescribedItem.getMedicineId());
+                }
+                prescribedItem.setDispensedMedicineId(itemRequest.getMedicineId());
+            }
 
             // Fetch batches for medicine sorted by expiry ASC (FEFO) with PESSIMISTIC_WRITE lock
             List<StockBatch> batches = stockBatchRepository.findBatchesForDispensingWithLock(itemRequest.getMedicineId());
@@ -115,6 +155,24 @@ public class PharmacyDispensingService {
                         .build();
                 movementRepository.save(movement);
 
+                // Handle substitution name tracking
+                if (prescribedItem.getDispensedMedicineId() != null && prescribedItem.getDispensedMedicineName() == null) {
+                    prescribedItem.setDispensedMedicineName(batch.getMedicineName());
+                }
+
+                // Handle Controlled Substances
+                if ("SCHEDULE_H1".equals(batch.getMedicine().getScheduleCategory()) || "SCHEDULE_X".equals(batch.getMedicine().getScheduleCategory())) {
+                    com.healthcare.clinic.pharmacy.entity.ControlledSubstanceRegister csReg = com.healthcare.clinic.pharmacy.entity.ControlledSubstanceRegister.builder()
+                            .pharmacyPrescriptionId(record.getId())
+                            .medicineId(itemRequest.getMedicineId())
+                            .dispensedQuantity(deduct)
+                            .patientName(record.getPatientName())
+                            .doctorRegistrationNumber(record.getDoctorRegistrationNumber() != null ? record.getDoctorRegistrationNumber() : "UNKNOWN")
+                            .dispensedBy(pharmacist.getUsername())
+                            .build();
+                    controlledSubstanceRegisterRepository.save(csReg);
+                }
+
                 // Add to Invoice
                 invoiceItems.add(PharmacyInvoiceItemDTO.builder()
                         .description(batch.getMedicineName() + " (Batch: " + batch.getBatchNumber() + ")")
@@ -138,10 +196,45 @@ public class PharmacyDispensingService {
         PrescriptionDispensed savedDispensed = dispensedRepository.save(dispensed);
         
         // Update Prescription Record
-        record.setStatus(request.isPartialDispense() ? "PARTIALLY_DISPENSED" : "DISPENSED");
+        if (record.getRefillsRemaining() != null && record.getRefillsRemaining() > 0) {
+            record.setRefillsRemaining(record.getRefillsRemaining() - 1);
+            record.setStatus(record.getRefillsRemaining() > 0 ? "PARTIALLY_DISPENSED" : "DISPENSED");
+        } else {
+            record.setStatus(request.isPartialDispense() ? "PARTIALLY_DISPENSED" : "DISPENSED");
+        }
         record.setDispensedAt(LocalDateTime.now());
         record.setDispensedBy(pharmacist.getUsername());
         prescriptionRecordRepository.save(record);
+
+        // Publish to Outbox to sync back to Clinic DB
+        try {
+            com.healthcare.clinic.pharmacy.entity.PharmacyOutboxEvent event = new com.healthcare.clinic.pharmacy.entity.PharmacyOutboxEvent();
+            event.setAggregateType("PRESCRIPTION");
+            event.setAggregateId(record.getClinicalPrescriptionId().toString());
+            event.setEventType("PRESCRIPTION_DISPENSED");
+            
+            // Simple payload with quantities
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("clinicalPrescriptionId", record.getClinicalPrescriptionId());
+            payload.put("status", record.getStatus());
+            payload.put("dispensedAt", record.getDispensedAt().toString());
+            payload.put("dispensedBy", record.getDispensedBy());
+            
+            List<java.util.Map<String, Object>> outItems = new java.util.ArrayList<>();
+            for (PrescriptionDispensedItem dItem : dispensedItems) {
+                java.util.Map<String, Object> itemData = new java.util.HashMap<>();
+                itemData.put("medicineId", dItem.getMedicine().getId());
+                itemData.put("quantityDispensed", dItem.getQuantityDispensed());
+                outItems.add(itemData);
+            }
+            payload.put("items", outItems);
+            
+            event.setPayload(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload));
+            event.setStatus("PENDING");
+            pharmacyOutboxEventRepository.save(event);
+        } catch (Exception e) {
+            log.error("Failed to create outbox event", e);
+        }
 
         if (!invoiceItems.isEmpty()) {
             try {

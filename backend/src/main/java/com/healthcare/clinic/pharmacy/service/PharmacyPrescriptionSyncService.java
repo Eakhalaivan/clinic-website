@@ -20,33 +20,46 @@ public class PharmacyPrescriptionSyncService {
     @Transactional(transactionManager = "pharmacyTransactionManager")
     public void syncNewPrescription(String patientName, String doctorName, Long clinicalPrescriptionId, 
                                     List<PharmacyPrescriptionItem> items) {
-        PharmacyPrescriptionRecord pharmRx = new PharmacyPrescriptionRecord();
+        PharmacyPrescriptionRecord pharmRx = pharmacyPrescriptionRepository.findAll().stream()
+                .filter(p -> clinicalPrescriptionId.equals(p.getClinicalPrescriptionId()))
+                .findFirst()
+                .orElseGet(PharmacyPrescriptionRecord::new);
+
         pharmRx.setPatientName(patientName);
         pharmRx.setDoctorName(doctorName);
-        pharmRx.setPrescriptionDate(LocalDateTime.now());
-        pharmRx.setStatus("PENDING");
-        pharmRx.setVerificationStatus("UNVERIFIED");
-        pharmRx.setClinicalPrescriptionId(clinicalPrescriptionId);
-
-        items.forEach(pharmRx::addItem);
+        if (pharmRx.getId() == null) {
+            pharmRx.setPrescriptionDate(LocalDateTime.now());
+            pharmRx.setStatus("PENDING");
+            pharmRx.setVerificationStatus("UNVERIFIED");
+            pharmRx.setClinicalPrescriptionId(clinicalPrescriptionId);
+            items.forEach(pharmRx::addItem);
+        } else {
+            // Update items if needed? For idempotency we assume existing items are already there.
+            // A more complex sync might update items, but for now we just skip if it exists.
+        }
         pharmacyPrescriptionRepository.save(pharmRx);
     }
 
     @Transactional(transactionManager = "pharmacyTransactionManager")
     public void syncSendPrescription(String patientName, String doctorName, Long clinicalPrescriptionId, 
                                      Long pharmacyUserId, List<PharmacyPrescriptionItem> items) {
-        PharmacyPrescriptionRecord pharmRx = new PharmacyPrescriptionRecord();
+        PharmacyPrescriptionRecord pharmRx = pharmacyPrescriptionRepository.findAll().stream()
+                .filter(p -> clinicalPrescriptionId.equals(p.getClinicalPrescriptionId()))
+                .findFirst()
+                .orElseGet(PharmacyPrescriptionRecord::new);
+
         pharmRx.setPatientName(patientName);
         pharmRx.setDoctorName(doctorName);
-        pharmRx.setPrescriptionDate(LocalDateTime.now());
-        pharmRx.setStatus("PENDING");
-        pharmRx.setVerificationStatus("UNVERIFIED");
-        pharmRx.setClinicalPrescriptionId(clinicalPrescriptionId);
+        if (pharmRx.getId() == null) {
+            pharmRx.setPrescriptionDate(LocalDateTime.now());
+            pharmRx.setStatus("PENDING");
+            pharmRx.setVerificationStatus("UNVERIFIED");
+            pharmRx.setClinicalPrescriptionId(clinicalPrescriptionId);
+            items.forEach(pharmRx::addItem);
+        }
         if (pharmacyUserId != null) {
             pharmRx.setAssignedPharmacyUserId(pharmacyUserId);
         }
-
-        items.forEach(pharmRx::addItem);
         pharmacyPrescriptionRepository.save(pharmRx);
     }
 
@@ -58,5 +71,14 @@ public class PharmacyPrescriptionSyncService {
                     p.setStatus("CANCELLED");
                     pharmacyPrescriptionRepository.save(p);
                 });
+    }
+
+    @Transactional(readOnly = true, transactionManager = "pharmacyTransactionManager")
+    public java.util.Map<String, Object> getPharmacyPrescriptionStatus(Long clinicalPrescriptionId) {
+        return pharmacyPrescriptionRepository.findAll().stream()
+                .filter(p -> p.getClinicalPrescriptionId().equals(clinicalPrescriptionId))
+                .findFirst()
+                .map(p -> java.util.Map.<String, Object>of("status", p.getStatus()))
+                .orElse(null);
     }
 }

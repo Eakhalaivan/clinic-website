@@ -81,18 +81,18 @@ const PatientSearch = () => {
                   <div 
                     key={patient.id} 
                     className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-md transition-shadow cursor-pointer flex items-center justify-between group"
-                    onClick={() => navigate(`/patient/dashboard`)} // They don't have access to doctor's patient detail. They can view the profile or billing.
+                    onClick={() => navigate(`/reception/book?patientId=${patient.patientId}&patientName=${encodeURIComponent((patient.firstName || '') + ' ' + (patient.lastName || ''))}`)}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[var(--color-navy-100)] flex items-center justify-center text-[var(--color-navy-700)] font-bold text-sm">
-                        {patient.name.charAt(0).toUpperCase()}
+                        {(patient.firstName?.[0] || '').toUpperCase()}
                       </div>
                       <div>
                         <h3 className="font-bold text-[var(--color-navy-900)] group-hover:text-[var(--color-navy-700)] transition-colors">
-                          {patient.name}
+                          {patient.firstName} {patient.lastName}
                         </h3>
                         <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                          ID: {patient.id} • {patient.phone}
+                          ID: {patient.opNumber} • {patient.phone}
                         </p>
                       </div>
                     </div>

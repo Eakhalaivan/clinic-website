@@ -27,6 +27,9 @@ public class PatientDocument {
     @Column(name = "file_url", nullable = false)
     private String fileUrl;
 
+    @Column(name = "storage_key")
+    private String storageKey;
+
     @CreationTimestamp
     @Column(name = "uploaded_at", updatable = false)
     private ZonedDateTime uploadedAt;

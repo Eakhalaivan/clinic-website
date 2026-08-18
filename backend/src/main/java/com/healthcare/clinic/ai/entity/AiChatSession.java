@@ -7,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Filter;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name="AiAiChatSession")
 @Table(name = "ai_chat_sessions")
 @Data
 @Builder
@@ -22,15 +22,17 @@ public class AiChatSession {
     @Column(name = "tenant_id")
     private Long tenantId;
 
-    @Column(nullable = false)
+    @Column(name = "user_id")
     private Long userId;
 
     private String userRole; // PATIENT, DOCTOR
     private String title;
     
     @CreationTimestamp
+    @Column(name="created_at")
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 }

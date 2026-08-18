@@ -1,173 +1,46 @@
-/* Patient Dashboard Root & Layout System (Zero Window Scroll) */
-.patient-dashboard-root {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  background-color: #F3F6FF;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #334155;
+/* PatientDashboard — supports the new 3-column grid layout */
+
+/* Hide scrollbars on quick actions bar */
+.patient-dashboard-root [style*="scrollbarWidth: none"]::-webkit-scrollbar,
+div[style*="scroll-none"]::-webkit-scrollbar {
+  display: none;
 }
 
-.patient-dashboard-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 12px 16px;
-  gap: 10px;
-  overflow: auto;
-  min-height: 0;
-}
-
-/* Quick Actions Bar */
-.patient-quick-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  flex-shrink: 0;
-  padding-bottom: 4px;
-}
-
-/* Nav Tabs */
-.patient-nav-tabs {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0 12px;
-  height: 42px;
-  border: 1px solid #e2e8f0;
-}
-
-.patient-nav-tabs .nav-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  height: 100%;
-  padding: 0 8px;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.patient-nav-tabs .nav-tab.active {
-  color: #5145CD;
-  border-bottom-color: #5145CD;
-  font-weight: 700;
-}
-
-.patient-nav-tabs .nav-tab:hover:not(.active) {
-  color: #1e293b;
-}
-
-/* Main Grid (Top 3 columns + Bottom 3 cards) */
-.patient-main-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 3fr 6fr 3fr;
-  gap: 12px;
-  min-height: 0;
-}
-
-.patient-main-grid .col-left,
-.patient-main-grid .col-right {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.patient-main-grid .col-left::-webkit-scrollbar,
-.patient-main-grid .col-right::-webkit-scrollbar,
-.timeline-scroll-body::-webkit-scrollbar {
+/* Thin scrollbars for columns */
+.patient-dashboard-root *::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
-
-.patient-main-grid .col-left::-webkit-scrollbar-thumb,
-.patient-main-grid .col-right::-webkit-scrollbar-thumb,
-.timeline-scroll-body::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+.patient-dashboard-root *::-webkit-scrollbar-track { background: transparent; }
+.patient-dashboard-root *::-webkit-scrollbar-thumb {
+  background-color: #CBD5E1;
   border-radius: 4px;
 }
-
-.patient-main-grid .col-center {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
+.patient-dashboard-root *::-webkit-scrollbar-thumb:hover {
+  background-color: #94A3B8;
 }
 
-.timeline-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+/* Responsive breakpoints */
+@media (max-width: 1280px) {
+  .dashboard-three-col {
+    grid-template-columns: 240px 1fr 260px !important;
+  }
 }
 
-.timeline-scroll-body {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  position: relative;
-}
-
-/* Bottom Row */
-.patient-bottom-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-/* Utility Helpers */
-.brand-purple {
-  color: #5145CD;
-}
-
-.bg-brand-purple {
-  background-color: #5145CD;
-}
-
-.border-brand-purple {
-  border-color: #5145CD;
-}
-
-/* ── Responsive breakpoints ─────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .patient-main-grid {
-    grid-template-columns: 1fr 2fr;
+  .dashboard-three-col {
+    grid-template-columns: 1fr 1fr !important;
   }
-  .patient-main-grid .col-right {
-    display: none; /* hide right sidebar on tablet; move content below */
-  }
-  .patient-bottom-row {
-    grid-template-columns: 1fr 1fr;
+  .dashboard-right-col {
+    display: none !important;
   }
 }
 
 @media (max-width: 640px) {
-  .patient-dashboard-root {
-    padding: 8px;
+  .dashboard-three-col {
+    grid-template-columns: 1fr !important;
   }
-  .patient-main-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .patient-main-grid .col-right {
-    display: flex; /* restore on single column */
-  }
-  .patient-bottom-row {
-    grid-template-columns: 1fr;
+  .dashboard-right-col {
+    display: flex !important;
   }
 }

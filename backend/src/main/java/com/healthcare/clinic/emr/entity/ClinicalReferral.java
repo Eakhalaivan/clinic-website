@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="EmrClinicalReferral")
 @Table(name = "clinical_referrals")
 @Data
 @NoArgsConstructor

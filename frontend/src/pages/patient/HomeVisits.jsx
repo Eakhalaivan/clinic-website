@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { useNavigate } from 'react-router-dom';
 import { DashboardShell, DashboardGrid } from '../../components/dashboard/shared/DashboardShell';
 import { Home, MapPin, Truck, CheckCircle, Plus } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -8,16 +9,14 @@ import DataTable from '../../components/ui/DataTable';
 import Badge from '../../components/ui/Badge';
 
 const HomeVisits = () => {
+  const navigate = useNavigate();
   const { data: visits = [], isLoading } = useQuery({
     queryKey: ['patient-home-visits'],
     queryFn: async () => {
       try {
-          return (await axiosPrivate.get('/api/home-visit/requests')).data;
+          return (await axiosPrivate.get('/v1/patient/home-visits')).data;
       } catch(e) {
-          return [
-              { id: 1, serviceType: 'PHLEBOTOMIST', status: 'EN_ROUTE', address: { addressLine1: '123 Main St' } },
-              { id: 2, serviceType: 'DOCTOR', status: 'COMPLETED', address: { addressLine1: '456 Oak Rd' } }
-          ];
+          throw e;
       }
     }
   });
@@ -40,7 +39,7 @@ const HomeVisits = () => {
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">Track home visits and care requests.</p>
         </div>
-        <Button onClick={() => alert('New request flow opens here')} className="flex items-center gap-2">
+        <Button onClick={() => navigate('/patient/home-visits/new')} className="flex items-center gap-2">
           <Plus size={16} /> Request Visit
         </Button>
       </div>

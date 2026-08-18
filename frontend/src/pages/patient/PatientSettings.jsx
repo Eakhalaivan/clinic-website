@@ -16,14 +16,14 @@ const PatientSettings = () => {
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['notification-preferences'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/settings/notifications');
+      const res = await axiosPrivate.get('/v1/patient/settings/notifications');
       return res.data;
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ category, pref }) => {
-      const res = await axiosPrivate.put(`/api/v1/patient/settings/notifications/${category}`, pref);
+      const res = await axiosPrivate.put(`/v1/patient/settings/notifications/${category}`, pref);
       return res.data;
     },
     onSuccess: () => queryClient.invalidateQueries(['notification-preferences'])

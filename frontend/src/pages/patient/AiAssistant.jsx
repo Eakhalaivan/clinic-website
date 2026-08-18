@@ -14,7 +14,7 @@ const AiAssistant = () => {
     const { data: session, isLoading: sessionLoading } = useQuery({
         queryKey: ['aiSession', user?.id],
         queryFn: async () => {
-            const res = await axiosPrivate.post('/api/v1/patient/assistant/session');
+            const res = await axiosPrivate.post('/v1/patient/assistant/session');
             return res.data;
         }
     });
@@ -24,7 +24,7 @@ const AiAssistant = () => {
         queryKey: ['aiMessages', session?.id],
         queryFn: async () => {
             if (!session?.id) return [];
-            const res = await axiosPrivate.get(`/api/v1/patient/assistant/session/${session.id}/messages`);
+            const res = await axiosPrivate.get(`/v1/patient/assistant/session/${session.id}/messages`);
             return res.data;
         },
         enabled: !!session?.id
@@ -32,7 +32,7 @@ const AiAssistant = () => {
 
     const sendMutation = useMutation({
         mutationFn: async (content) => {
-            const res = await axiosPrivate.post(`/api/v1/patient/assistant/session/${session.id}/message`, { content });
+            const res = await axiosPrivate.post(`/v1/patient/assistant/session/${session.id}/message`, { content });
             return res.data; // AI response
         },
         onMutate: async (content) => {

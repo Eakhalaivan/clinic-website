@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name="AiAiChatMessage")
 @Table(name = "ai_chat_messages")
 @Data
 @Builder
@@ -33,5 +33,6 @@ public class AiChatMessage {
     private boolean containsSafetyFlag;
 
     @CreationTimestamp
+    @Column(name="sent_at")
     private LocalDateTime sentAt;
 }

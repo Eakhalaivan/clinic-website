@@ -1,17 +1,19 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { axiosPrivate } from '../../api/axios';
-import { Users, Clock, Bell, ChevronRight, Loader } from 'lucide-react';
+import { Users, Clock, Bell, ChevronRight, Loader, ArrowRight } from 'lucide-react';
 
 import useAuthStore from '../../store/authStore';
 
 const ConsultationQueue = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const token = useAuthStore(state => state.token);
 
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['doctor-queue'],
-    queryFn: async () => (await axiosPrivate.get('/appointments/queue')).data,
+    queryFn: async () => (await axiosPrivate.get('/appointments/today')).data,
     staleTime: 60000,
   });
 
@@ -49,6 +51,23 @@ const ConsultationQueue = () => {
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#86efac', animation: 'pulse 1.5s infinite' }} />
             <span style={{ fontSize: '0.8rem' }}>In Progress</span>
           </div>
+          <button
+            onClick={async () => {
+              try {
+                const res = await axiosPrivate.post('/v1/doctor/encounters', {
+                  patientId: inProgress.patientId,
+                  appointmentId: inProgress.id,
+                  branchId: inProgress.branchId || 1
+                });
+                navigate(`/doctor/consultation/${res.data.id}`);
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+            style={{ marginTop: '16px', background: 'var(--color-surface)', color: 'var(--color-info)', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            Enter Consultation <ArrowRight size={16} />
+          </button>
         </div>
       )}
 

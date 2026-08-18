@@ -50,21 +50,27 @@ const FinancePayments = () => {
 
   const processPayment = useMutation({
     mutationFn: async () => {
-      // Create payment record
-      const paymentPayload = {
-        invoiceId: invoiceToPay.id,
+      const idempotencyKey = `inv_${invoiceToPay.id}_${Date.now()}`;
+      const initRes = await axiosPrivate.post('/v1/finance/payments/initiate', {
         amount: Number(paymentForm.amount),
         paymentMethod: paymentForm.paymentMethod,
-        referenceNumber: paymentForm.referenceNumber,
-        status: 'COMPLETED'
-      };
+        idempotencyKey: idempotencyKey
+      });
+      const paymentId = initRes.data.id;
       
-      const res = await axiosPrivate.post('/finance/payments', paymentPayload);
+      await axiosPrivate.post(`/v1/finance/payments/${paymentId}/capture`, {
+        transactionRef: paymentForm.referenceNumber || 'CASH_TX'
+      });
+      
+      await axiosPrivate.post(`/v1/finance/payments/${paymentId}/allocate`, {
+        invoiceId: invoiceToPay.id,
+        amount: Number(paymentForm.amount)
+      });
       
       // Also mark invoice as paid
       await axiosPrivate.patch(`/billing/invoices/${invoiceToPay.id}/mark-paid?paymentMethod=${paymentForm.paymentMethod}`);
       
-      return res.data;
+      return initRes.data;
     },
     onSuccess: () => {
       toast.success('Payment processed successfully');

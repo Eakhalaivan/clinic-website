@@ -36,10 +36,10 @@ public class PasswordResetController {
             return ResponseEntity.badRequest().body("Invalid request");
         }
         
-        // boolean isValid = otpService.verifyOtp(request.getOtp(), user);
-        // if (!isValid) {
-        //     return ResponseEntity.badRequest().body("Invalid or expired OTP");
-        // }
+        boolean isValid = otpService.verifyOtp(request.getOtp(), user);
+        if (!isValid) {
+            return ResponseEntity.badRequest().body("Invalid or expired OTP");
+        }
         
         user.setPasswordHash(encoder.encode(request.getNewPassword()));
         userRepository.save(user);

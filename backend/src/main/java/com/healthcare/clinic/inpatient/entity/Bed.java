@@ -3,7 +3,7 @@ package com.healthcare.clinic.inpatient.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
+@Entity(name="InpatientBed")
 @Table(name = "beds")
 @Data
 @NoArgsConstructor

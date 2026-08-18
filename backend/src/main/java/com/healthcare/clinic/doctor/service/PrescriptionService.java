@@ -43,6 +43,7 @@ public class PrescriptionService {
 
     private final UserRepository userRepository;
     private final CdsSafetyCheckService cdsSafetyCheckService;
+    private final com.healthcare.clinic.clinicaldecision.service.DrugInteractionService drugInteractionService;
     private final ApplicationEventPublisher eventPublisher;
     private final PatientProfileRepository patientProfileRepository;
     private final DoctorProfileRepository doctorProfileRepository;
@@ -93,6 +94,15 @@ public class PrescriptionService {
         // 1. SYNCHRONOUS BLOCKING SAFETY GATE: Drug allergy & contraindication check BEFORE save
         cdsSafetyCheckService.performSynchronousSafetyCheck(request.getPatientId(), medNames, doctorId);
 
+        // 1.5 Drug Interaction Check
+        if (request.getOverrideReason() == null || request.getOverrideReason().trim().isEmpty()) {
+            List<String> interactions = drugInteractionService.checkInteractions(medNames);
+            if (!interactions.isEmpty()) {
+                throw new com.healthcare.clinic.clinicaldecision.exception.CdsCriticalSafetyException(
+                        "Critical drug interactions found. Provide override_reason to bypass.", interactions);
+            }
+        }
+
         // ── Build clinical prescription ──────────────────────────────────────
         Prescription prescription = Prescription.builder()
                 .patientId(request.getPatientId())
@@ -101,6 +111,8 @@ public class PrescriptionService {
                 .notes(request.getNotes())
                 .chiefComplaint(request.getChiefComplaint())
                 .diagnosis(request.getDiagnosis())
+                .diagnosisId(request.getDiagnosisId())
+                .overrideReason(request.getOverrideReason())
                 .symptoms(request.getSymptoms())
                 .medicalHistory(request.getMedicalHistory())
                 .followUpDate(request.getFollowUpDate())
@@ -117,6 +129,10 @@ public class PrescriptionService {
                     .instructions(itemRequest.getInstructions())
                     .strength(itemRequest.getStrength())
                     .timing(itemRequest.getTiming())
+                    .medicineId(itemRequest.getMedicineId())
+                    .prescribedQuantity(itemRequest.getPrescribedQuantity())
+                    .remainingQuantity(itemRequest.getPrescribedQuantity())
+                    .dispensedQuantity(0)
                     .build();
             prescription.addItem(item);
         });
@@ -141,6 +157,10 @@ public class PrescriptionService {
                 .instructions(itemRequest.getInstructions())
                 .strength(itemRequest.getStrength())
                 .timing(itemRequest.getTiming())
+                .medicineId(itemRequest.getMedicineId())
+                .prescribedQuantity(itemRequest.getPrescribedQuantity())
+                .dispensedQuantity(0)
+                .remainingQuantity(itemRequest.getPrescribedQuantity())
                 .build()
         ).collect(Collectors.toList());
 
@@ -244,6 +264,10 @@ public class PrescriptionService {
                     .instructions(itemRequest.getInstructions())
                     .strength(itemRequest.getStrength())
                     .timing(itemRequest.getTiming())
+                    .medicineId(itemRequest.getMedicineId())
+                    .prescribedQuantity(itemRequest.getPrescribedQuantity())
+                    .remainingQuantity(itemRequest.getPrescribedQuantity())
+                    .dispensedQuantity(0)
                     .build();
             prescription.addItem(item);
         });
@@ -283,6 +307,10 @@ public class PrescriptionService {
                     .instructions(itemRequest.getInstructions())
                     .strength(itemRequest.getStrength())
                     .timing(itemRequest.getTiming())
+                    .medicineId(itemRequest.getMedicineId())
+                    .prescribedQuantity(itemRequest.getPrescribedQuantity())
+                    .remainingQuantity(itemRequest.getPrescribedQuantity())
+                    .dispensedQuantity(0)
                     .build();
             prescription.addItem(item);
         });
@@ -332,6 +360,10 @@ public class PrescriptionService {
                 .instructions(item.getInstructions())
                 .strength(item.getStrength())
                 .timing(item.getTiming())
+                .medicineId(item.getMedicineId())
+                .prescribedQuantity(item.getPrescribedQuantity())
+                .dispensedQuantity(item.getDispensedQuantity())
+                .remainingQuantity(item.getRemainingQuantity())
                 .build()
         ).collect(Collectors.toList());
 
@@ -407,6 +439,10 @@ public class PrescriptionService {
                         .frequency(item.getFrequency())
                         .duration(item.getDuration())
                         .instructions(item.getInstructions())
+                        .medicineId(item.getMedicineId())
+                        .prescribedQuantity(item.getPrescribedQuantity())
+                        .dispensedQuantity(item.getDispensedQuantity())
+                        .remainingQuantity(item.getRemainingQuantity())
                         .build())
                 .collect(Collectors.toList());
 
@@ -634,9 +670,28 @@ public class PrescriptionService {
         prescription.setStatus("Signed");
         prescription.setSignedAt(LocalDateTime.now());
         
-        // Simple mock signature hash for demonstration
-        String dataToSign = prescription.getId() + "-" + prescription.getPatientId() + "-" + prescription.getSignedAt().toString();
-        prescription.setSignatureHash(java.util.Base64.getEncoder().encodeToString(dataToSign.getBytes()));
+        // True SHA-256 tamper-evident hash
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            StringBuilder sb = new StringBuilder();
+            sb.append(prescription.getId()).append("|");
+            sb.append(prescription.getPatientId()).append("|");
+            sb.append(prescription.getDoctorId()).append("|");
+            sb.append(prescription.getDoctorRegistrationNumber() != null ? prescription.getDoctorRegistrationNumber() : "UNREGISTERED").append("|");
+            if (prescription.getItems() != null) {
+                for (com.healthcare.clinic.doctor.entity.PrescriptionItem item : prescription.getItems()) {
+                    sb.append(item.getMedicineId()).append(":")
+                      .append(item.getPrescribedQuantity()).append(":")
+                      .append(item.getDosage()).append("|");
+                }
+            }
+            sb.append(prescription.getSignedAt().toString());
+            byte[] hash = digest.digest(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            String encodedHash = java.util.Base64.getEncoder().encodeToString(hash);
+            prescription.setSignatureHash(encodedHash);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate signature hash", e);
+        }
 
         return mapToResponse(prescriptionRepository.save(prescription));
     }

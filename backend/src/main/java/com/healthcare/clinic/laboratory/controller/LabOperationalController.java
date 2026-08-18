@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/lab/operations")
+@RequestMapping({"/api/v1/lab/operations", "/api/lab/operations"})
 @RequiredArgsConstructor
 public class LabOperationalController {
 

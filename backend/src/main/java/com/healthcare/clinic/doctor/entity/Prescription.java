@@ -84,6 +84,12 @@ public class Prescription {
     @Column(name = "chief_complaint", columnDefinition = "TEXT")
     private String chiefComplaint;
 
+    @Column(name = "diagnosis_id")
+    private Long diagnosisId;
+
+    @Column(name = "override_reason", columnDefinition = "TEXT")
+    private String overrideReason;
+
     @Column(columnDefinition = "TEXT")
     private String diagnosis;
 
@@ -95,6 +101,24 @@ public class Prescription {
 
     @Column(name = "follow_up_date")
     private LocalDateTime followUpDate;
+
+    @Column(name = "valid_until")
+    private LocalDateTime validUntil;
+
+    @Builder.Default
+    @Column(name = "refills_allowed")
+    private Integer refillsAllowed = 0;
+
+    @Builder.Default
+    @Column(name = "refills_remaining")
+    private Integer refillsRemaining = 0;
+
+    @Builder.Default
+    @Column(name = "refill_interval_days")
+    private Integer refillIntervalDays = 0;
+
+    @Column(name = "doctor_registration_number")
+    private String doctorRegistrationNumber;
 
     public void addItem(PrescriptionItem item) {
         items.add(item);

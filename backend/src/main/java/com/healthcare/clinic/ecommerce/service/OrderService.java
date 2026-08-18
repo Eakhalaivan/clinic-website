@@ -23,6 +23,31 @@ public class OrderService {
                 .filter(o -> patientId.equals(o.getPatientId()))
                 .toList();
     }
+    
+    @Transactional(readOnly = true)
+    public List<EcommerceOrder> getAllOrders() {
+        return orderRepository.findAll();
+    }
+    
+    @Transactional(readOnly = true)
+    public EcommerceOrder getOrderDetailsForAdmin(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow();
+    }
+    
+    @Transactional
+    public void updateShipping(Long orderId, String status, String trackingNumber) {
+        EcommerceOrder order = orderRepository.findById(orderId).orElseThrow();
+        order.setStatus(status);
+        order.setTrackingNumber(trackingNumber);
+        
+        if ("SHIPPED".equals(status)) {
+            order.setShippedAt(java.time.ZonedDateTime.now());
+        } else if ("DELIVERED".equals(status)) {
+            order.setDeliveredAt(java.time.ZonedDateTime.now());
+        }
+        
+        orderRepository.save(order);
+    }
 
     @Transactional(readOnly = true)
     public EcommerceOrder getOrderDetails(Long orderId, Long patientId) {

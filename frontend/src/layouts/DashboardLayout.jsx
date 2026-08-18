@@ -19,20 +19,6 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  if (!isTokenValid(token)) return <Navigate to={`/${portalSlug || 'patient'}/login`} replace />;
-  const userRoles = roles || [];
-  const hasPermission = userRoles.includes('ROLE_ADMIN') || 
-                        userRoles.includes('ROLE_SUPER_ADMIN') ||
-                        !allowedRoles ||
-                        allowedRoles.some((r) => userRoles.includes(r));
-
-  if (!hasPermission) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  const portalConfig = getPortalConfig(portalSlug);
-  const { displayName, dashboardTiles = [] } = portalConfig;
-
   const { data: unreadCountData } = useQuery({
     queryKey: ['unreadNotifications', user?.id],
     queryFn: async () => {
@@ -47,6 +33,20 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
     refetchInterval: 30000 // Poll every 30s
   });
   const unreadCount = unreadCountData?.count || 0;
+
+  if (!isTokenValid(token)) return <Navigate to={`/${portalSlug || 'patient'}/login`} replace />;
+  const userRoles = roles || [];
+  const hasPermission = userRoles.includes('ROLE_ADMIN') || 
+                        userRoles.includes('ROLE_SUPER_ADMIN') ||
+                        !allowedRoles ||
+                        allowedRoles.some((r) => userRoles.includes(r));
+
+  if (!hasPermission) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  const portalConfig = getPortalConfig(portalSlug);
+  const { displayName, dashboardTiles = [] } = portalConfig;
 
   const userName = user?.email?.split('@')[0] || 'John Smith';
   const displayTitle = displayName || 'Doctor';
@@ -69,13 +69,13 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
               </button>
             )}
             <Link to={`/${portalSlug}/dashboard`} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-xs cursor-pointer hover:bg-indigo-700 transition">
+              <div className="w-10 h-10 bg-[#2B4AFE] rounded-xl flex items-center justify-center shadow-xs cursor-pointer hover:opacity-90 transition">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-indigo-900 leading-none cursor-pointer hover:text-indigo-700 transition">AURELIAN HEALTH</h1>
+                <h1 className="text-xl font-bold tracking-tight text-[#0B1220] leading-none cursor-pointer hover:opacity-80 transition">AURELIAN HEALTH</h1>
                 <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
                   {portalSlug ? `${portalSlug.charAt(0).toUpperCase() + portalSlug.slice(1)} Portal` : 'Portal'}
                 </p>
@@ -93,7 +93,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
               <input 
                 type="text" 
                 placeholder={portalSlug === 'patient' ? "Search health records, vitals, appointments...   ⌘ K" : "Search patients, appointments, reports...   ⌘ K"}
-                className="block w-full pl-10 pr-12 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-800 placeholder-slate-400"
+                className="block w-full pl-10 pr-12 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-[#2B4AFE] focus:border-[#2B4AFE] text-slate-800 placeholder-slate-400 outline-none"
               />
               <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">
                 ⌘ K
@@ -106,7 +106,7 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
             <div className="relative">
               <button 
                 onClick={() => setIsQuickActionOpen(!isQuickActionOpen)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-indigo-700 transition shadow-xs"
+                className="bg-[#2B4AFE] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold hover:opacity-90 transition shadow-xs"
               >
                 <Zap size={16} className="fill-current" />
                 Quick Action

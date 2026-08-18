@@ -56,7 +56,6 @@ const useAuthStore = create(
     persist(
         (set) => ({
             token: null,
-            refreshToken: null,
             user: null,
             roles: [],
             mfaPending: false,
@@ -76,11 +75,10 @@ const useAuthStore = create(
                         return false; // MFA needed
                     }
                     
-                    const { token, refreshToken } = res.data;
+                    const { token } = res.data;
                     const parsedToken = parseJwtPayload(token);
                     set({ 
                         token, 
-                        refreshToken, 
                         roles: parsedToken.roles || [],
                         user: { id: parsedToken.userId, email: parsedToken.sub },
                         mfaPending: false,
@@ -99,11 +97,10 @@ const useAuthStore = create(
                     const { axiosPublic } = await import('../api/axios');
                     const res = await axiosPublic.post(`/auth/${portal}/login/mfa`, { email, otp });
                     
-                    const { token, refreshToken } = res.data;
+                    const { token } = res.data;
                     const parsedToken = parseJwtPayload(token);
                     set({ 
                         token, 
-                        refreshToken, 
                         roles: parsedToken.roles || [],
                         user: { id: parsedToken.userId, email: parsedToken.sub },
                         mfaPending: false,
@@ -119,16 +116,13 @@ const useAuthStore = create(
 
             refresh: async () => {
                 try {
-                    const { refreshToken } = useAuthStore.getState();
-                    if (!refreshToken) return null;
-                    
                     const { axiosPublic } = await import('../api/axios');
-                    const res = await axiosPublic.post(`/auth/refresh`, { refreshToken });
+                    // Must include withCredentials to send the HttpOnly refresh_token cookie
+                    const res = await axiosPublic.post(`/auth/refresh`, {}, { withCredentials: true });
                     
                     const newAccessToken = res.data.accessToken;
-                    const newRefreshToken = res.data.refreshToken;
                     
-                    set({ token: newAccessToken, refreshToken: newRefreshToken });
+                    set({ token: newAccessToken });
                     return newAccessToken;
                 } catch (_err) {
                     return null;
@@ -162,12 +156,20 @@ const useAuthStore = create(
             },
 
             clearError: () => set({ error: null }),
-            logout: () => set({ token: null, refreshToken: null, user: null, roles: [], mfaPending: false, mfaEmail: null, error: null }),
+            logout: async () => {
+                set({ token: null, user: null, roles: [], mfaPending: false, mfaEmail: null, error: null });
+                try {
+                    const { axiosPrivate } = await import('../api/axios');
+                    await axiosPrivate.post('/auth/logout');
+                } catch (err) {
+                    // Ignore errors if backend session is already dead or network fails
+                }
+            },
             // Clears any stale/expired token from storage without full logout UI
             clearStaleToken: () => {
                 const { token } = useAuthStore.getState();
                 if (token && !isTokenValid(token)) {
-                    set({ token: null, refreshToken: null, user: null, roles: [] });
+                    set({ token: null, user: null, roles: [] });
                 }
             },
             isAuthenticated: () => {
@@ -180,7 +182,6 @@ const useAuthStore = create(
             name: 'auth-storage',
             partialize: (state) => ({
                 token: state.token,
-                refreshToken: state.refreshToken,
                 user: state.user,
                 roles: state.roles,
             }),

@@ -52,7 +52,7 @@ public class NarcoticRegisterController {
     }
 
     @PostMapping("/entry")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_SUPERVISOR','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_SUPERVISOR','ROLE_PHARMACIST')")
     public ResponseEntity<ApiResponse<NarcoticRegister>> createEntry(@Valid @RequestBody NarcoticRegister entry) {
         // Validation and opening/closing balance calculation
         var medicine = medicineRepository.findById(entry.getMedicine().getId())

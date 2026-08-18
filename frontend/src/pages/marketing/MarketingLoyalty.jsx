@@ -18,14 +18,14 @@ export default function MarketingLoyalty() {
 
   const { data: loyalty, isLoading: loyaltyLoading, refetch } = useQuery({
     queryKey: ['loyalty', searched],
-    queryFn: async () => (await axiosPrivate.get(`/api/marketing/loyalty/${searched}`)).data,
+    queryFn: async () => (await axiosPrivate.get(`/marketing/loyalty/${searched}`)).data,
     enabled: !!searched,
   });
 
   const { data: history } = useQuery({
     queryKey: ['loyalty-history', searched, 0],
     queryFn: async () =>
-      (await axiosPrivate.get(`/api/marketing/loyalty/${searched}/transactions`, { params: { page: 0, size: 10 } })).data,
+      (await axiosPrivate.get(`/marketing/loyalty/${searched}/transactions`, { params: { page: 0, size: 10 } })).data,
     enabled: !!searched,
   });
 
@@ -33,7 +33,7 @@ export default function MarketingLoyalty() {
     if (!searched || !adjustPoints.points) return;
     setLoading(true);
     try {
-      await axiosPrivate.post('/api/marketing/loyalty/adjust', null, {
+      await axiosPrivate.post('/marketing/loyalty/adjust', null, {
         params: { patientId: searched, points: adjustPoints.points, notes: adjustPoints.notes, approvedBy: 1 },
       });
       qc.invalidateQueries({ queryKey: ['loyalty', searched] });

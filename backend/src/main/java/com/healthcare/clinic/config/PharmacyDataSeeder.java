@@ -65,7 +65,22 @@ public class PharmacyDataSeeder implements CommandLineRunner {
             pharmacyUserRepository.save(pUser);
             log.info("PharmacyDataSeeder: synced admin@clinic.com into Pharmacy DB.");
         }
-
+        if (pharmacyUserRepository.findByUsername("pharmacist@clinic.com").isEmpty()) {
+            PharmacyUser pharmacistUser = new PharmacyUser();
+            pharmacistUser.setUsername("pharmacist@clinic.com");
+            pharmacistUser.setEmail("pharmacist@clinic.com");
+            pharmacistUser.setName("Pharma Cist");
+            pharmacistUser.setPasswordHash(passwordEncoder.encode(System.getenv().getOrDefault("SEED_PHARMACIST_PASSWORD", "CHANGE_ME_PHARMACIST")));
+            pharmacistUser.setStatus("ACTIVE");
+            pharmacistUser.setMustChangePassword(false);
+            pharmacistUser.setBranch("Main Branch");
+            pharmacistUser.setShift("General 9AM–5PM");
+            Set<PharmacyRole> roles = new HashSet<>();
+            roles.add(sysAdminRole); // Using sysAdminRole for now, ideally ROLE_PHARMACIST
+            pharmacistUser.setRoles(roles);
+            pharmacyUserRepository.save(pharmacistUser);
+            log.info("PharmacyDataSeeder: synced pharmacist@clinic.com into Pharmacy DB.");
+        }
         // Seed Suppliers
         Supplier s1;
         if (supplierRepository.count() == 0) {

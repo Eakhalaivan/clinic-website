@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { MessageSquare, Clock, AlertTriangle, CheckCircle, Search, Filter } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader';
 
 export default function TicketDesk() {
     const { data: tickets = [], isLoading } = useQuery({
-        queryKey: ['agentTickets'],
+        queryKey: ['all-tickets'],
         queryFn: async () => {
-            const res = await axiosPrivate.get('/api/v1/support/agent/tickets');
+            const res = await axiosPrivate.get('/support/tickets');
             return res.data;
         }
     });
 
     return (
         <div className="p-6">
-            <PageHeader title="Support Desk" subtitle="Manage patient tickets and inquiries" />
+            <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">Support Desk</h1>
+                <p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">Manage patient tickets and inquiries</p>
+            </div>
             
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mt-6 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">

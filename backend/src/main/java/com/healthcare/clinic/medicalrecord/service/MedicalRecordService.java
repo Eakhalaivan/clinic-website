@@ -21,20 +21,23 @@ public class MedicalRecordService {
 
     private final MedicalRecordRepository recordRepository;
     private final UserRepository userRepository;
+    private final com.healthcare.clinic.doctor.repository.ClinicalEncounterRepository encounterRepository;
 
     @Transactional(readOnly = true)
     public List<MedicalRecordResponse> getRecordsForPatient(Long patientId) {
-        return recordRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        return encounterRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
                 .stream()
-                .map(this::mapToResponse)
+                .filter(e -> "CLOSED".equals(e.getStatus()) || "Completed".equals(e.getStatus()))
+                .map(this::mapEncounterToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<MedicalRecordResponse> getRecordsByDoctor(Long doctorId) {
-        return recordRepository.findByDoctorIdOrderByCreatedAtDesc(doctorId)
+        return encounterRepository.findByDoctorIdOrderByCreatedAtDesc(doctorId)
                 .stream()
-                .map(this::mapToResponse)
+                .filter(e -> "CLOSED".equals(e.getStatus()) || "Completed".equals(e.getStatus()))
+                .map(this::mapEncounterToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -98,6 +101,24 @@ public class MedicalRecordService {
                 .notes(record.getNotes())
                 .createdAt(record.getCreatedAt())
                 .updatedAt(record.getUpdatedAt())
+                .build();
+    }
+
+    private MedicalRecordResponse mapEncounterToResponse(com.healthcare.clinic.doctor.entity.ClinicalEncounter encounter) {
+        String doctorName = userRepository.findById(encounter.getDoctorId())
+                .map(u -> u.getFirstName() + " " + u.getLastName())
+                .orElse("Unknown Doctor");
+
+        return MedicalRecordResponse.builder()
+                .id(encounter.getId())
+                .patientId(encounter.getPatientId())
+                .doctorId(encounter.getDoctorId())
+                .doctorName(doctorName)
+                .recordType(com.healthcare.clinic.medicalrecord.entity.RecordType.CONSULTATION_NOTE)
+                .title("Clinical Encounter")
+                .notes(encounter.getChiefComplaint() != null ? "Complaint: " + encounter.getChiefComplaint() : "Completed Encounter")
+                .createdAt(encounter.getCreatedAt() != null ? encounter.getCreatedAt().toLocalDateTime() : null)
+                .updatedAt(encounter.getUpdatedAt() != null ? encounter.getUpdatedAt().toLocalDateTime() : null)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, ArrowLeft, Building, Wrench, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6,8 +6,29 @@ import Card from '../../components/ui/Card';
 import { fadeIn } from '../../components/ui/motion';
 import EmptyState from '../../components/ui/EmptyState';
 import Button from '../../components/ui/Button';
+import { axiosPrivate } from '../../api/axios';
+import toast from 'react-hot-toast';
 
 const BranchFacility = () => {
+  const [branch, setBranch] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBranch = async () => {
+      try {
+        const res = await axiosPrivate.get('/branches');
+        if (res.data && res.data.length > 0) {
+          setBranch(res.data[0]);
+        }
+      } catch (err) {
+        toast.error('Failed to load branch data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBranch();
+  }, []);
+
   return (
     <motion.div 
       initial="hidden" 
@@ -22,10 +43,10 @@ const BranchFacility = () => {
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0 flex items-center gap-2">
             <Building className="w-7 h-7 text-indigo-600" />
-            Facility Management
+            Facility Management: {loading ? 'Loading...' : (branch ? branch.name : 'Unknown Branch')}
           </h1>
           <p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">
-            Monitor branch infrastructure, maintenance schedules, and safety compliance. (Mocked UI)
+            {branch ? `${branch.address} • Contact: ${branch.contactNumber}` : 'Monitor branch infrastructure, maintenance schedules, and safety compliance.'}
           </p>
         </div>
       </div>

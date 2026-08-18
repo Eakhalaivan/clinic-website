@@ -16,6 +16,7 @@ import java.util.Optional;
 @Repository("pharmacyPharmacyBillRepository")
 public interface PharmacyBillRepository extends JpaRepository<PharmacyBill, Long> {
     Optional<PharmacyBill> findByBillNumber(String billNumber);
+    Optional<PharmacyBill> findByIdempotencyKey(String idempotencyKey);
 
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"items"})
     Optional<PharmacyBill> findWithItemsById(Long id);

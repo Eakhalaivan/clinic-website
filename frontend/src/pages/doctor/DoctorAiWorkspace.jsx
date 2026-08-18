@@ -14,7 +14,7 @@ const DoctorAiWorkspace = ({ encounterId }) => {
 
     const generateSummary = useMutation({
         mutationFn: async () => {
-            return (await axiosPrivate.post(`/api/ai/doctor/summarize-encounter?encounterId=${encounterId}&doctorId=${doctorId}&tenantId=${tenantId}`)).data;
+            return (await axiosPrivate.post(`/ai/doctor/summarize-encounter?encounterId=${encounterId}&doctorId=${doctorId}&tenantId=${tenantId}`)).data;
         },
         onSuccess: (data) => {
             setSummary(data);
@@ -24,7 +24,7 @@ const DoctorAiWorkspace = ({ encounterId }) => {
 
     const approveSummary = useMutation({
         mutationFn: async () => {
-            return await axiosPrivate.post(`/api/ai/doctor/approve-summary?encounterId=${encounterId}&doctorId=${doctorId}&tenantId=${tenantId}`);
+            return await axiosPrivate.post(`/ai/doctor/approve-summary?encounterId=${encounterId}&doctorId=${doctorId}&tenantId=${tenantId}`);
         },
         onSuccess: () => {
             setIsApproved(true);

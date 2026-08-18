@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, Plus, Eye, Edit2, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronDown, Plus, Eye, Edit2, MoreVertical, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PatientList = ({ onPatientClick }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortField, setSortField] = useState('name'); 
   const [currentPage, setCurrentPage] = useState(1);
+  const [editPatient, setEditPatient] = useState(null);  // patient being edited
+  const [editForm, setEditForm] = useState({});
+  const [actionsOpenId, setActionsOpenId] = useState(null);
   const itemsPerPage = 10;
 
   const { data: patients = [], isLoading } = useQuery({
@@ -58,6 +62,29 @@ const PatientList = ({ onPatientClick }) => {
     if (status === 'Active') return 'text-[#10b981] bg-[#d1fae5]';
     return 'text-slate-500 bg-slate-100';
   };
+
+  const openEdit = (p) => {
+    setEditPatient(p);
+    setEditForm({
+      gender: p.gender || '',
+      bloodGroup: p.bloodGroup || '',
+      address: p.address || '',
+      emergencyContactName: p.emergencyContactName || '',
+      emergencyContactPhone: p.emergencyContactPhone || '',
+      medicalHistorySummary: p.medicalHistorySummary || '',
+      allergies: p.allergies || '',
+    });
+  };
+
+  const editMutation = useMutation({
+    mutationFn: async () => (await axiosPrivate.put(`/patients/${editPatient.patientId}`, editForm)).data,
+    onSuccess: () => {
+      toast.success('Patient profile updated');
+      queryClient.invalidateQueries(['doctor-patients']);
+      setEditPatient(null);
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || 'Update failed'),
+  });
 
   return (
     <div className="p-6 bg-white min-h-full font-sans">
@@ -194,19 +221,28 @@ const PatientList = ({ onPatientClick }) => {
                             <Eye size={16} strokeWidth={2.5} />
                           </button>
                           <button 
-                            onClick={() => toast.success('Edit patient functionality coming soon')}
+                            onClick={() => openEdit(p)}
                             className="hover:text-indigo-900 transition-colors bg-indigo-50 p-1.5 rounded" 
                             title="Edit Patient"
                           >
                             <Edit2 size={16} strokeWidth={2.5} />
                           </button>
-                          <button 
-                            onClick={() => toast.success('More actions coming soon')}
-                            className="hover:text-indigo-900 transition-colors bg-indigo-50 p-1.5 rounded" 
-                            title="More Actions"
-                          >
-                            <MoreVertical size={16} strokeWidth={2.5} />
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={() => setActionsOpenId(actionsOpenId === p.patientId ? null : p.patientId)}
+                              className="hover:text-indigo-900 transition-colors bg-indigo-50 p-1.5 rounded" 
+                              title="More Actions"
+                            >
+                              <MoreVertical size={16} strokeWidth={2.5} />
+                            </button>
+                            {actionsOpenId === p.patientId && (
+                              <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-20 py-1">
+                                <button onClick={() => { navigate(`/doctor/patients/${p.patientId}`); setActionsOpenId(null); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">View Profile</button>
+                                <button onClick={() => { navigate(`/doctor/appointments/new?patientId=${p.patientId}`); setActionsOpenId(null); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Book Appointment</button>
+                                <button onClick={() => { navigate(`/doctor/prescriptions/new?patientId=${p.patientId}`); setActionsOpenId(null); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">New Prescription</button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -257,6 +293,71 @@ const PatientList = ({ onPatientClick }) => {
           )}
         </div>
       </div>
+
+      {/* Edit Patient Modal */}
+      {editPatient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-slate-200">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800">Edit Patient</h2>
+                <p className="text-sm text-slate-500 mt-0.5">{editPatient.name} · {generateDisplayId(editPatient.patientId)}</p>
+              </div>
+              <button onClick={() => setEditPatient(null)} className="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={e => { e.preventDefault(); editMutation.mutate(); }} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Gender</label>
+                  <select value={editForm.gender} onChange={e => setEditForm({...editForm, gender: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Not set</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Blood Group</label>
+                  <select value={editForm.bloodGroup} onChange={e => setEditForm({...editForm, bloodGroup: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Not set</option>
+                    {['A+','A-','B+','B-','O+','O-','AB+','AB-'].map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Address</label>
+                <input type="text" value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Emergency Contact Name</label>
+                  <input type="text" value={editForm.emergencyContactName} onChange={e => setEditForm({...editForm, emergencyContactName: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Emergency Contact Phone</label>
+                  <input type="tel" value={editForm.emergencyContactPhone} onChange={e => setEditForm({...editForm, emergencyContactPhone: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Allergies</label>
+                <input type="text" value={editForm.allergies} onChange={e => setEditForm({...editForm, allergies: e.target.value})} placeholder="e.g. Penicillin, Aspirin" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Medical History Summary</label>
+                <textarea rows={3} value={editForm.medicalHistorySummary} onChange={e => setEditForm({...editForm, medicalHistorySummary: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setEditPatient(null)} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={editMutation.isPending} className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors disabled:opacity-60">
+                  {editMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

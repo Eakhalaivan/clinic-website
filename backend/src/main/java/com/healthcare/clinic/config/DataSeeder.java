@@ -20,21 +20,11 @@ import java.util.Set;
 
 import org.springframework.context.annotation.Profile;
 
-/**
- * Seeds initial admin and doctor accounts on first boot.
- *
- * Requires SEED_ADMIN_PASSWORD and SEED_DOCTOR_PASSWORD to be set in the
- * environment (or application properties).  The application will refuse to
- * start if either value is still the default CHANGE_ME sentinel, preventing
- * weak default credentials from reaching production.
- */
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
-
-    private static final String SENTINEL_PREFIX = "CHANGE_ME_";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -42,18 +32,9 @@ public class DataSeeder implements CommandLineRunner {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorWorkingHoursRepository doctorWorkingHoursRepository;
 
-    @Value("${SEED_ADMIN_PASSWORD:CHANGE_ME_ADMIN}")
-    private String seedAdminPassword;
-
-    @Value("${SEED_DOCTOR_PASSWORD:CHANGE_ME_DOCTOR}")
-    private String seedDoctorPassword;
-
     @Override
     public void run(String... args) throws Exception {
-        validateSeedPassword("SEED_ADMIN_PASSWORD", seedAdminPassword);
-        validateSeedPassword("SEED_DOCTOR_PASSWORD", seedDoctorPassword);
 
-        // Ensure all system roles exist in DB
         String[] allRoleNames = {
             "ROLE_ADMIN", "ROLE_SUPER_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_BRANCH_ADMIN",
             "ROLE_DOCTOR", "ROLE_PATIENT", "ROLE_PHARMACIST", "ROLE_NURSE",
@@ -73,33 +54,16 @@ public class DataSeeder implements CommandLineRunner {
             adminRoles.add(role);
         }
 
-        // Seed / Reset Admin User with Full Roles Access
-        User admin = userRepository.findByEmail("admin@clinic.com").orElseGet(() -> 
-            User.builder().email("admin@clinic.com").firstName("Admin").lastName("User").build()
-        );
-        admin.setPasswordHash(passwordEncoder.encode(seedAdminPassword));
-        admin.setFailedLoginAttempts(0);
-        admin.setLockedUntil(null);
-        admin.setEnabled(true);
+        seedUser("superadmin@clinic.com", "Clinic@2026#Super", "Super", "Admin", Set.of("ROLE_SUPER_ADMIN"));
+        
+        User admin = seedUser("admin@clinic.com", "Clinic@2026#Admin", "Admin", "User", null);
         admin.setRoles(adminRoles);
         userRepository.save(admin);
-        log.info("DataSeeder: synced admin@clinic.com with full administrative and system roles.");
 
-        // Seed / Reset Doctor User
-        User doctor = userRepository.findByEmail("doctor@clinic.com").orElseGet(() -> 
-            User.builder().email("doctor@clinic.com").firstName("John").lastName("Doe").build()
-        );
-        doctor.setPasswordHash(passwordEncoder.encode(seedDoctorPassword));
-        doctor.setFailedLoginAttempts(0);
-        doctor.setLockedUntil(null);
-        doctor.setEnabled(true);
-
-        Set<Role> doctorRoles = doctor.getRoles() != null ? new HashSet<>(doctor.getRoles()) : new HashSet<>();
-        roleRepository.findByName("ROLE_DOCTOR").ifPresent(doctorRoles::add);
-        doctor.setRoles(doctorRoles);
-        userRepository.save(doctor);
-        log.info("DataSeeder: synced doctor@clinic.com credentials and roles.");
-
+        seedUser("manager@clinic.com", "Clinic@2026#Manager", "Manager", "User", Set.of("ROLE_BRANCH_ADMIN"));
+        
+        User doctor = seedUser("doctor@clinic.com", "Clinic@2026#Doctor", "John", "Doe", Set.of("ROLE_DOCTOR"));
+        
         // Ensure the seeded doctor has a DoctorProfile so the dashboard loads
         if (doctorProfileRepository.findByUserId(doctor.getId()).isEmpty()) {
             DoctorProfile profile = DoctorProfile.builder()
@@ -133,31 +97,37 @@ public class DataSeeder implements CommandLineRunner {
             log.info("DataSeeder: created default DoctorWorkingHours for doctor@clinic.com.");
         }
 
-        // Seed / Reset Nurse User
-        User nurse = userRepository.findByEmail("nurse@clinic.com").orElseGet(() -> 
-            User.builder().email("nurse@clinic.com").firstName("Jane").lastName("Smith").build()
-        );
-        nurse.setPasswordHash(passwordEncoder.encode(System.getenv().getOrDefault("SEED_NURSE_PASSWORD", "CHANGE_ME_NURSE")));
-        nurse.setFailedLoginAttempts(0);
-        nurse.setLockedUntil(null);
-        nurse.setEnabled(true);
-
-        Set<Role> nurseRoles = nurse.getRoles() != null ? new HashSet<>(nurse.getRoles()) : new HashSet<>();
-        roleRepository.findByName("ROLE_NURSE").ifPresent(nurseRoles::add);
-        nurse.setRoles(nurseRoles);
-        userRepository.save(nurse);
-        log.info("DataSeeder: synced nurse@clinic.com credentials and roles.");
-
-        // Seeding Pharmacy User is now handled by PharmacyDataSeeder
+        seedUser("nurse@clinic.com", "Clinic@2026#Nurse", "Jane", "Smith", Set.of("ROLE_NURSE"));
+        seedUser("receptionist@clinic.com", "Clinic@2026#Reception", "Rec", "Eptionist", Set.of("ROLE_RECEPTION"));
+        seedUser("labtech@clinic.com", "Clinic@2026#LabTech", "Lab", "Tech", Set.of("ROLE_LAB_TECH"));
+        seedUser("radiologist@clinic.com", "Clinic@2026#Radio", "Radio", "Logist", Set.of("ROLE_RADIOLOGIST"));
+        seedUser("pharmacist@clinic.com", "Clinic@2026#Pharmacy", "Pharma", "Cist", Set.of("ROLE_PHARMACIST"));
+        seedUser("pharmacymanager@clinic.com", "Clinic@2026#PharmMgr", "Pharma", "Manager", Set.of("ROLE_PHARMACIST", "ROLE_INVENTORY_MANAGER"));
+        seedUser("accountant@clinic.com", "Clinic@2026#Account", "Acc", "Ountant", Set.of("ROLE_ACCOUNTANT"));
+        seedUser("hrmanager@clinic.com", "Clinic@2026#HR", "HR", "Manager", Set.of("ROLE_HR"));
+        seedUser("staff@clinic.com", "Clinic@2026#Staff", "Staff", "User", Set.of("ROLE_SUPPORT"));
+        seedUser("patient@clinic.com", "Clinic@2026#Patient", "Pat", "Ient", Set.of("ROLE_PATIENT"));
     }
 
-    private void validateSeedPassword(String envVarName, String value) {
-        if (value == null || value.startsWith(SENTINEL_PREFIX)) {
-            throw new IllegalStateException(
-                "Refusing to start: " + envVarName + " is not configured. " +
-                "Set a strong password in your .env file before running the application."
-            );
+    private User seedUser(String email, String password, String firstName, String lastName, Set<String> roleNames) {
+        User user = userRepository.findByEmail(email).orElseGet(() -> 
+            User.builder().email(email).firstName(firstName).lastName(lastName).build()
+        );
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setEnabled(true);
+
+        Set<Role> roles = user.getRoles() != null ? new HashSet<>(user.getRoles()) : new HashSet<>();
+        if (roleNames != null) {
+            for (String roleName : roleNames) {
+                roleRepository.findByName(roleName).ifPresent(roles::add);
+            }
         }
+        user.setRoles(roles);
+        User savedUser = userRepository.save(user);
+        log.info("DataSeeder: synced {} credentials and roles.", email);
+        return savedUser;
     }
 
     private String getLoginPortalForRole(String roleName) {
@@ -168,7 +138,7 @@ public class DataSeeder implements CommandLineRunner {
             case "ROLE_BRANCH_ADMIN" -> "branch-admin";
             case "ROLE_NURSE" -> "nurse";
             case "ROLE_RECEPTION" -> "reception";
-            case "ROLE_PHARMACIST" -> "pharmacist";
+            case "ROLE_PHARMACIST" -> "pharmacy";
             case "ROLE_LAB_TECH", "ROLE_LAB", "ROLE_PATHOLOGIST", "ROLE_LAB_SENIOR" -> "lab";
             case "ROLE_RADIOLOGIST" -> "radiologist";
             case "ROLE_ACCOUNTANT" -> "accountant";

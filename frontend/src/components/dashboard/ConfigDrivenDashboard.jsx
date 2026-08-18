@@ -225,7 +225,7 @@ const renderWidget = (widgetName, props) => {
   }
 };
 
-export const ConfigDrivenDashboard = ({ config, data, activeTab, onTabChange }) => {
+export const ConfigDrivenDashboard = ({ config, data, activeTab, onTabChange, children }) => {
   const navigate = useNavigate();
   const { appointments, dashboardStats } = data || {};
 
@@ -236,6 +236,7 @@ export const ConfigDrivenDashboard = ({ config, data, activeTab, onTabChange }) 
   };
 
   const layout = config.layout || {};
+  const isDefaultTab = !activeTab || (config.tabs && config.tabs.length > 0 && activeTab === config.tabs[0]);
 
   return (
     <DashboardShell
@@ -247,30 +248,42 @@ export const ConfigDrivenDashboard = ({ config, data, activeTab, onTabChange }) 
       activeTab={activeTab}
       onTabChange={onTabChange}
     >
-      {layout.top && (
-        <div className="mb-6 space-y-6">
-          {layout.top.map(w => renderWidget(w, widgetProps))}
+      {isDefaultTab ? (
+        <>
+          {layout.top && (
+            <div className="mb-6 space-y-6">
+              {layout.top.map(w => renderWidget(w, widgetProps))}
+            </div>
+          )}
+          <DashboardGrid
+            left={
+              layout.left && layout.left.map(w => renderWidget(w, widgetProps))
+            }
+            center={
+              layout.center && layout.center.map(w => renderWidget(w, widgetProps))
+            }
+            right={
+              layout.right && layout.right.map(w => renderWidget(w, widgetProps))
+            }
+          />
+          {layout.bottom && (
+            <BottomRow
+              recentActivities={layout.bottom.recentActivities && renderWidget(WIDGETS.RECENT_ACTIVITIES, widgetProps)}
+              aiAssistant={layout.bottom.aiAssistant && renderWidget(WIDGETS.AI_ASSISTANT, widgetProps)}
+              quickSearch={layout.bottom.quickSearch && renderWidget(WIDGETS.QUICK_SEARCH, widgetProps)}
+              pharmacyRecentBills={layout.bottom.pharmacyRecentBills && layout.bottom.pharmacyRecentBills.map(w => renderWidget(w, widgetProps))}
+              pharmacyLowStock={layout.bottom.pharmacyLowStock && layout.bottom.pharmacyLowStock.map(w => renderWidget(w, widgetProps))}
+            />
+          )}
+        </>
+      ) : (
+        <div className="mt-4">
+          {children || (
+            <div className="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200 shadow-sm mt-4">
+              Content for <span className="font-semibold text-slate-700">{activeTab}</span> is under construction.
+            </div>
+          )}
         </div>
-      )}
-      <DashboardGrid
-        left={
-          layout.left && layout.left.map(w => renderWidget(w, widgetProps))
-        }
-        center={
-          layout.center && layout.center.map(w => renderWidget(w, widgetProps))
-        }
-        right={
-          layout.right && layout.right.map(w => renderWidget(w, widgetProps))
-        }
-      />
-      {layout.bottom && (
-        <BottomRow
-          recentActivities={layout.bottom.recentActivities && renderWidget(WIDGETS.RECENT_ACTIVITIES, widgetProps)}
-          aiAssistant={layout.bottom.aiAssistant && renderWidget(WIDGETS.AI_ASSISTANT, widgetProps)}
-          quickSearch={layout.bottom.quickSearch && renderWidget(WIDGETS.QUICK_SEARCH, widgetProps)}
-          pharmacyRecentBills={layout.bottom.pharmacyRecentBills && layout.bottom.pharmacyRecentBills.map(w => renderWidget(w, widgetProps))}
-          pharmacyLowStock={layout.bottom.pharmacyLowStock && layout.bottom.pharmacyLowStock.map(w => renderWidget(w, widgetProps))}
-        />
       )}
     </DashboardShell>
   );

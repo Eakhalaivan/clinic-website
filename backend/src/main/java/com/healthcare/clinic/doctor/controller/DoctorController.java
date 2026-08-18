@@ -58,6 +58,31 @@ public class DoctorController {
         }).orElse(ResponseEntity.noContent().build());
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @com.healthcare.clinic.audit.annotation.AuditableAction(module = "DOCTOR", action = "LIST", resourceType = "DoctorList", sensitivityLevel = "NORMAL")
+    public ResponseEntity<org.springframework.data.domain.Page<java.util.Map<String, Object>>> getAllDoctorsAdmin(
+            @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<DoctorProfile> doctorsPage = doctorRepository.findAll(pageable);
+        org.springframework.data.domain.Page<java.util.Map<String, Object>> dtoPage = doctorsPage.map(d -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            com.healthcare.clinic.identity.entity.User u = d.getUserId() != null ? 
+                userRepository.findById(d.getUserId()).orElse(null) : null;
+            map.put("id", d.getId());
+            map.put("userId", d.getUserId());
+            map.put("firstName", u != null && u.getFirstName() != null ? u.getFirstName() : "");
+            map.put("lastName", u != null && u.getLastName() != null ? u.getLastName() : "");
+            map.put("email", u != null && u.getEmail() != null ? u.getEmail() : "");
+            map.put("phone", u != null && u.getPhoneNumber() != null ? u.getPhoneNumber() : "");
+            map.put("specialty", d.getSpecialty());
+            map.put("qualifications", d.getQualifications());
+            map.put("registrationNumber", d.getRegistrationNumber());
+            map.put("isActive", d.getIsActive());
+            return map;
+        });
+        return ResponseEntity.ok(dtoPage);
+    }
+
     @GetMapping("/profile/{userId}")
     public ResponseEntity<DoctorProfile> getDoctorProfile(@PathVariable Long userId) {
         com.healthcare.clinic.security.SecurityUtils.assertOwnerOrAdmin(userId);

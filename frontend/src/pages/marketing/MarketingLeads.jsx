@@ -21,18 +21,18 @@ export default function MarketingLeads() {
   const { data, isLoading } = useQuery({
     queryKey: ['leads', null, status, page],
     queryFn: async () =>
-      (await axiosPrivate.get('/api/marketing/leads', { params: { status: status || undefined, page, size: 20 } })).data,
+      (await axiosPrivate.get('/marketing/leads', { params: { status: status || undefined, page, size: 20 } })).data,
   });
 
   const { data: activities = [] } = useQuery({
     queryKey: ['lead-activities', selected?.id],
-    queryFn: async () => (await axiosPrivate.get(`/api/marketing/leads/${selected.id}/activities`)).data,
+    queryFn: async () => (await axiosPrivate.get(`/marketing/leads/${selected.id}/activities`)).data,
     enabled: !!selected?.id,
   });
 
   const updateStatus = useMutation({
     mutationFn: ({ id, newStatus }) =>
-      axiosPrivate.put(`/api/marketing/leads/${id}/status`, null, { params: { status: newStatus, performedBy: 1 } }),
+      axiosPrivate.put(`/marketing/leads/${id}/status`, null, { params: { status: newStatus, performedBy: 1 } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
   });
 

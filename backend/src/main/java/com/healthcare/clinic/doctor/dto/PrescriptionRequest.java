@@ -20,6 +20,10 @@ public class PrescriptionRequest {
 
     private String diagnosis;
 
+    private Long diagnosisId;
+
+    private String overrideReason;
+
     private String symptoms;
 
     private String medicalHistory;

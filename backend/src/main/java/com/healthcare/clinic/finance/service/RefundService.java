@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +24,10 @@ public class RefundService {
     private final RefundRepository refundRepository;
     private final PaymentRepository paymentRepository;
     private final InvoiceRepository invoiceRepository;
+
+    public List<Refund> getAllRefunds() {
+        return refundRepository.findAll();
+    }
 
     @Transactional
     public Refund initiateRefund(Long paymentId, BigDecimal amount, String reason, Long requestedBy, String idempotencyKey) {

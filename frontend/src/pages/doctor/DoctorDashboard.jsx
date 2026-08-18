@@ -26,7 +26,7 @@ const EVENT_COLORS = [
   { bg: 'bg-blue-50', border: 'border-blue-500', name: 'text-blue-900', type: 'text-blue-700', time: 'text-blue-600' },
   { bg: 'bg-purple-50', border: 'border-purple-500', name: 'text-purple-900', type: 'text-purple-700', time: 'text-purple-600' },
   { bg: 'bg-pink-50', border: 'border-pink-500', name: 'text-pink-900', type: 'text-pink-700', time: 'text-pink-600' },
-  { bg: 'bg-indigo-50', border: 'border-indigo-500', name: 'text-indigo-900', type: 'text-indigo-700', time: 'text-indigo-600' },
+  { bg: 'bg-[#EFF4FF]', border: 'border-indigo-500', name: 'text-indigo-900', type: 'text-[#2B4AFE]', time: 'text-[#2B4AFE]' },
   { bg: 'bg-teal-50', border: 'border-teal-500', name: 'text-teal-900', type: 'text-teal-700', time: 'text-teal-600' },
   { bg: 'bg-amber-50', border: 'border-amber-500', name: 'text-amber-900', type: 'text-amber-700', time: 'text-amber-600' },
 ];
@@ -36,7 +36,7 @@ const LAB_ICON_COLORS = [
   { bgColor: 'bg-orange-50', textColor: 'text-orange-600' },
   { bgColor: 'bg-red-50', textColor: 'text-red-600' },
   { bgColor: 'bg-green-50', textColor: 'text-green-600' },
-  { bgColor: 'bg-indigo-50', textColor: 'text-indigo-600' },
+  { bgColor: 'bg-[#EFF4FF]', textColor: 'text-[#2B4AFE]' },
 ];
 
 const STATUS_MAP = {
@@ -79,7 +79,7 @@ const DoctorDashboard = () => {
   const closePanel = () => setSearchParams(new URLSearchParams());
   const closeTopPanel = () => {
     if (patientId) {
-      navigate(`/doctor/patients/${id}`); return;
+      const newParams = new URLSearchParams(searchParams);
       newParams.delete('patientId');
       setSearchParams(newParams);
     } else {
@@ -171,7 +171,7 @@ const DoctorDashboard = () => {
   }, [user?.id, queryClient, token]);
 
   const handlePatientClick = (id) => {
-    navigate(`/doctor/patients/${id}`); return;
+    const newParams = new URLSearchParams(searchParams);
     newParams.set('panel', 'patients');
     newParams.set('patientId', id);
     setSearchParams(newParams);
@@ -288,10 +288,10 @@ const DoctorDashboard = () => {
         {/* BEGIN: QuickActionsBar */}
         <section className="quick-actions-bar">
           <div onClick={() => setSearchParams({ panel: 'calendar' })} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
-            <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+            <div className="p-1.5 bg-[#EFF4FF] text-[#2B4AFE] rounded-lg">
               <CalendarIcon className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-semibold text-indigo-700">New Appointment</span>
+            <span className="text-[11px] font-semibold text-[#2B4AFE]">New Appointment</span>
           </div>
 
           <div onClick={() => setSearchParams({ panel: 'patients' })} className="bg-white p-2.5 rounded-xl border border-slate-100 custom-shadow flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 transition">
@@ -353,7 +353,7 @@ const DoctorDashboard = () => {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-slate-800 text-sm">Nurse OP Patients</h3>
-                <button onClick={() => setSearchParams({ panel: 'queue' })} className="text-[10px] font-bold text-indigo-600 uppercase">View All</button>
+                <button onClick={() => setSearchParams({ panel: 'queue' })} className="text-[10px] font-bold text-[#2B4AFE] uppercase">View All</button>
               </div>
               {loadingToday ? <Loading /> : opPatients.length === 0 ? <EmptyState text="No patients today" /> : (
                 <table className="w-full text-[11px]">
@@ -377,14 +377,14 @@ const DoctorDashboard = () => {
                   </tbody>
                 </table>
               )}
-              <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full mt-3 py-1.5 bg-slate-50 text-indigo-600 text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-indigo-50 transition">Go to Nurse Panel</button>
+              <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full mt-3 py-1.5 bg-slate-50 text-[#2B4AFE] text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-[#EFF4FF] transition">Go to Nurse Panel</button>
             </div>
 
             {/* Next Appointment */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-slate-800 text-sm">Next Appointment</h3>
-                <button onClick={() => setSearchParams({ panel: 'calendar' })} className="text-[10px] font-bold text-indigo-600 uppercase">View Calendar</button>
+                <button onClick={() => setSearchParams({ panel: 'calendar' })} className="text-[10px] font-bold text-[#2B4AFE] uppercase">View Calendar</button>
               </div>
               {loadingToday ? <Loading /> : !nextAppointment ? <EmptyState text="No upcoming appointments" /> : (
                 <>
@@ -395,7 +395,7 @@ const DoctorDashboard = () => {
                       <p className="text-[9px] font-bold text-slate-400 uppercase">{nextAptWeekday}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-indigo-600 mb-0.5">
+                      <p className="text-[10px] font-bold text-[#2B4AFE] mb-0.5">
                         {formatTime(nextAppointment.startTime)} - {formatTime(nextAppointment.endTime)}
                       </p>
                       <h4 className="font-bold text-slate-800 text-sm">
@@ -405,7 +405,7 @@ const DoctorDashboard = () => {
                       <p className="text-[9px] font-medium text-slate-400 uppercase tracking-wide">ID: {nextAppointment.patientId}</p>
                     </div>
                   </div>
-                  <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition">
+                  <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full py-2.5 bg-[#2B4AFE] hover:opacity-90 text-white rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition">
                     <Video className="w-4 h-4" />
                     Start Consultation
                   </button>
@@ -426,10 +426,10 @@ const DoctorDashboard = () => {
                     <h2 className="text-sm font-bold text-slate-800">{todayDate}</h2>
                     <button className="p-1 rounded-md border border-slate-200"><ChevronRight className="w-3.5 h-3.5" /></button>
                   </div>
-                  <button className="text-[10px] font-bold text-indigo-600 px-2.5 py-1 bg-indigo-50 rounded-md">Today</button>
+                  <button className="text-[10px] font-bold text-[#2B4AFE] px-2.5 py-1 bg-[#EFF4FF] rounded-md">Today</button>
                 </div>
                 <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
-                  <button className="px-3 py-1 text-[10px] font-bold bg-white text-indigo-600 rounded-md shadow-sm">Day</button>
+                  <button className="px-3 py-1 text-[10px] font-bold bg-white text-[#2B4AFE] rounded-md shadow-sm">Day</button>
                   <button className="px-3 py-1 text-[10px] font-bold text-slate-500">Week</button>
                   <button className="px-3 py-1 text-[10px] font-bold text-slate-500">Month</button>
                 </div>
@@ -494,7 +494,7 @@ const DoctorDashboard = () => {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-slate-800 text-sm">New Appointments</h3>
-                <button onClick={() => setSearchParams({ panel: 'calendar' })} className="text-[10px] font-bold text-indigo-600 uppercase">View Calendar</button>
+                <button onClick={() => setSearchParams({ panel: 'calendar' })} className="text-[10px] font-bold text-[#2B4AFE] uppercase">View Calendar</button>
               </div>
               {loadingAll ? <Loading /> : newAppointmentsList.length === 0 ? <EmptyState text="No new appointments" /> : (
                 <table className="w-full text-[11px]">
@@ -520,14 +520,14 @@ const DoctorDashboard = () => {
                   </tbody>
                 </table>
               )}
-              <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full mt-3 py-1.5 bg-slate-50 text-indigo-600 text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-indigo-50 transition">View All Appointments</button>
+              <button onClick={() => setSearchParams({ panel: 'queue' })} className="w-full mt-3 py-1.5 bg-slate-50 text-[#2B4AFE] text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-[#EFF4FF] transition">View All Appointments</button>
             </div>
 
             {/* Recent Lab Reports */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-slate-800 text-sm">Recent Lab Reports</h3>
-                <button onClick={() => setSearchParams({ panel: 'patients' })} className="text-[10px] font-bold text-indigo-600 uppercase">View All</button>
+                <button onClick={() => setSearchParams({ panel: 'patients' })} className="text-[10px] font-bold text-[#2B4AFE] uppercase">View All</button>
               </div>
               {loadingLab ? <Loading /> : labReports.length === 0 ? <EmptyState text="No lab reports" /> : (
                 <div className="space-y-3">
@@ -550,7 +550,7 @@ const DoctorDashboard = () => {
                   ))}
                 </div>
               )}
-              <button onClick={() => setSearchParams({ panel: 'patients' })} className="w-full mt-3 py-1.5 bg-slate-50 text-indigo-600 text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-indigo-50 transition">View All Lab Reports</button>
+              <button onClick={() => setSearchParams({ panel: 'patients' })} className="w-full mt-3 py-1.5 bg-slate-50 text-[#2B4AFE] text-[11px] font-bold rounded-lg border border-slate-100 hover:bg-[#EFF4FF] transition">View All Lab Reports</button>
             </div>
           </div>
           {/* END: RightColumn */}

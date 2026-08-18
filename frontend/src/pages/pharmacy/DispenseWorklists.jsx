@@ -29,6 +29,7 @@ export default function DispenseWorklists() {
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [idempotencyKey, setIdempotencyKey] = useState('');
   const [partialDispense, setPartialDispense] = useState(false);
+  const [dispenseItems, setDispenseItems] = useState([]);
 
   const dispenseMutation = useMutation({
     mutationFn: (data) => api.post(`/pharmacy/prescriptions/${selectedPrescription.id}/dispense`, data, {
@@ -68,6 +69,12 @@ export default function DispenseWorklists() {
             setSelectedPrescription(row); 
             setIdempotencyKey(uuidv4());
             setPartialDispense(false);
+            setDispenseItems(row.items?.map(item => ({
+              id: item.id,
+              medicineId: item.medicineId,
+              medicationName: item.medicationName,
+              quantity: item.prescribedQuantity || 1
+            })) || []);
             setIsModalOpen(true); 
           }}
           className="p-1.5 text-success hover:bg-green-50 rounded-lg transition-colors"
@@ -121,7 +128,7 @@ export default function DispenseWorklists() {
           <div className="flex w-full gap-3">
              <button onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all font-display">Cancel</button>
              <button 
-               onClick={() => dispenseMutation.mutate({ items: [], partialDispense })} 
+               onClick={() => dispenseMutation.mutate({ items: dispenseItems, partialDispense })} 
                disabled={dispenseMutation.isLoading}
                className="flex-1 px-6 py-2.5 bg-success text-white rounded-xl text-sm font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all font-display disabled:opacity-50"
              >
@@ -156,15 +163,34 @@ export default function DispenseWorklists() {
             </div>
 
             <div className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
-              <DataTable
-                columns={[
-                  { header: 'Medicine', render: () => <span className="font-bold text-slate-700">Prescribed Medicines (Items List)</span> },
-                  { header: 'Dispense Qty', render: () => <input type="number" defaultValue="1" className="w-full text-center border border-slate-200 rounded-lg py-1.5 outline-none focus:border-success font-bold text-success" /> }
-                ]}
-                data={[{ id: 1 }]}
-                hover
-                striped
-              />
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="px-4 py-3 text-sm font-bold text-slate-700">Prescribed Medicines</th>
+                    <th className="px-4 py-3 text-sm font-bold text-slate-700 w-32 text-center">Dispense Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dispenseItems.map((item, idx) => (
+                    <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="px-4 py-3 text-sm font-medium text-slate-700">{item.medicationName}</td>
+                      <td className="px-4 py-3">
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={item.quantity} 
+                          onChange={(e) => {
+                            const newItems = [...dispenseItems];
+                            newItems[idx].quantity = parseInt(e.target.value) || 0;
+                            setDispenseItems(newItems);
+                          }}
+                          className="w-full text-center border border-slate-200 rounded-lg py-1.5 outline-none focus:border-success font-bold text-success" 
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

@@ -138,6 +138,29 @@ public class PatientController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @AuditableAction(module = "PATIENT", action = "LIST", resourceType = "PatientList", sensitivityLevel = "NORMAL")
+    public ResponseEntity<org.springframework.data.domain.Page<java.util.Map<String, Object>>> getAllPatients(
+            @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<PatientProfile> patientsPage = patientRepository.findAll(pageable);
+        org.springframework.data.domain.Page<java.util.Map<String, Object>> dtoPage = patientsPage.map(p -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            com.healthcare.clinic.identity.entity.User u = p.getUserId() != null ? 
+                userRepository.findById(p.getUserId()).orElse(null) : null;
+            map.put("id", p.getId());
+            map.put("patientId", p.getUserId());
+            map.put("firstName", u != null && u.getFirstName() != null ? u.getFirstName() : "");
+            map.put("lastName", u != null && u.getLastName() != null ? u.getLastName() : "");
+            map.put("email", u != null && u.getEmail() != null ? u.getEmail() : "");
+            map.put("phone", u != null && u.getPhoneNumber() != null ? u.getPhoneNumber() : "");
+            map.put("gender", p.getGender());
+            map.put("dateOfBirth", p.getDateOfBirth());
+            return map;
+        });
+        return ResponseEntity.ok(dtoPage);
+    }
+
     @GetMapping("/{patientId}/vitals/latest")
     @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
     @AuditableAction(module = "PATIENT", action = "VIEW", resourceType = "Vitals", sensitivityLevel = "HIGH")

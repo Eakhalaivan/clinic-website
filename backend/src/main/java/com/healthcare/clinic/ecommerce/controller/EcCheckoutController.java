@@ -19,19 +19,25 @@ public class EcCheckoutController {
 
     private final CheckoutService checkoutService;
     private final PaymentService paymentService;
+    private final com.healthcare.clinic.ecommerce.service.CartService cartService;
 
     @PostMapping
-    public ResponseEntity<EcPayment> processCheckout(
+    public ResponseEntity<EcommerceOrder> processCheckout(
             @AuthenticationPrincipal User user,
-            @RequestParam Long cartId,
-            @RequestParam Long addressId) {
+            @RequestHeader(value = "X-Session-Key", required = false) String sessionKey,
+            @RequestBody java.util.Map<String, Object> request) {
+        
+        Long patientId = user != null ? user.getId() : null;
+        com.healthcare.clinic.ecommerce.entity.EcCart cart = cartService.getOrCreateCart(patientId, sessionKey);
+        
+        Long addressId = Long.valueOf(request.get("addressId").toString());
         
         // 1. Convert Cart to Order (locks cart, calculates totals)
-        EcommerceOrder order = checkoutService.processCheckout(user.getId(), cartId, addressId);
+        EcommerceOrder order = checkoutService.processCheckout(patientId, cart.getId(), addressId);
         
         // 2. Initiate Payment (generates idempotency key, provider ref)
-        EcPayment payment = paymentService.initiatePayment(order);
+        paymentService.initiatePayment(order);
         
-        return ResponseEntity.ok(payment);
+        return ResponseEntity.ok(order);
     }
 }

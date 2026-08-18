@@ -84,7 +84,7 @@ public class LabTestRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "encounter_id")
-    private com.healthcare.clinic.medicalrecord.entity.MedicalRecord encounter;
+    private com.healthcare.clinic.doctor.entity.ClinicalEncounter encounter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id")
@@ -93,4 +93,11 @@ public class LabTestRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")
     private com.healthcare.clinic.billing.entity.Invoice invoice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "acknowledged_by")
+    private User acknowledgedBy;
+
+    @Column(name = "acknowledged_at")
+    private ZonedDateTime acknowledgedAt;
 }

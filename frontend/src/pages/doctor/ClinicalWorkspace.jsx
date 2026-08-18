@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 import { Activity, FileText, AlertTriangle, List, CheckCircle, Save, Stethoscope, ArrowLeft, Lock, Pill, Send, Paperclip, MessageSquare, Plus, Video, Mic, MicOff } from 'lucide-react';
 
@@ -21,7 +22,9 @@ const ClinicalWorkspace = () => {
   const [error, setError] = useState(null);
 
   const [recordingField, setRecordingField] = useState(null);
+  const recognitionRef = useRef(null);
   const [teleconsultation, setTeleconsultation] = useState(null);
+  const [confirmFinalize, setConfirmFinalize] = useState(false);
 
   useEffect(() => {
     fetchWorkspaceData();
@@ -30,101 +33,140 @@ const ClinicalWorkspace = () => {
 
   const fetchTeleconsultation = async () => {
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.get(`/api/doctor/teleconsultations/encounter/${id}`, { headers });
+      const res = await axiosPrivate.get(`/v1/teleconsultations/encounter/${id}`);
       setTeleconsultation(res.data);
     } catch (err) {
-      console.log('No teleconsultation found or error', err);
+      // No teleconsultation for this encounter — expected
     }
   };
 
+  // Real browser speech-to-text using Web Speech API
   const handleDictate = (field) => {
-    setRecordingField(field);
-    setTimeout(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    // If already recording this field, stop it
+    if (recordingField === field && recognitionRef.current) {
+      recognitionRef.current.stop();
+      return;
+    }
+
+    // Stop any other ongoing recognition
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => setRecordingField(field);
+    recognition.onend = () => {
       setRecordingField(null);
-      const simulatedText = "Patient presents with a 3-day history of productive cough, fever, and chills. Denies shortness of breath.";
+      recognitionRef.current = null;
+    };
+    recognition.onerror = (e) => {
+      setRecordingField(null);
+      recognitionRef.current = null;
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        toast.error(`Dictation error: ${e.error}`);
+      }
+    };
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(r => r[0].transcript)
+        .join(' ');
       setSoapNote(prev => ({
         ...prev,
-        [field]: prev[field] + (prev[field] ? ' ' : '') + simulatedText
+        [field]: prev[field] + (prev[field] ? ' ' : '') + transcript
       }));
-    }, 2000);
+    };
+
+    recognition.start();
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.stop();
+    };
+  }, []);
 
   const startTeleconsultation = async () => {
     if (!teleconsultation) return;
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.put(`/api/doctor/teleconsultations/${teleconsultation.id}/status?status=IN_PROGRESS`, {}, { headers });
+      const res = await axiosPrivate.put(`/v1/teleconsultations/${teleconsultation.id}/status?status=IN_PROGRESS`, {});
       setTeleconsultation(res.data);
-      window.open(res.data.roomUrl, '_blank');
+      window.open(`/teleconsultation/room/${id}`, '_blank');
     } catch (err) {
-      alert('Failed to start teleconsultation');
+      toast.error('Failed to start teleconsultation. Please try again.');
     }
   };
 
   const handleAddPrescription = async () => {
     if (!newRx.medicationName) return;
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      
       // Safety check first
-      const safetyRes = await axios.post('/api/prescriptions/safety-check', {
+      const safetyRes = await axiosPrivate.post('/prescriptions/safety-check', {
         patientId: encounter.patientId,
         medicationNames: [newRx.medicationName]
-      }, { headers });
+      });
 
       if (!safetyRes.data.safe) {
         setSafetyAlerts(safetyRes.data.messages);
-        if (!window.confirm("Safety alerts detected. Do you want to proceed and override?")) {
-           return;
-        }
+        // Show alert via toast — user must manually dismiss and decide
+        toast.error('Safety alerts detected — review alerts below before proceeding.');
+        return;
       } else {
         setSafetyAlerts(null);
       }
 
-      // Add as draft
       const payload = {
         patientId: encounter.patientId,
         appointmentId: encounter.appointmentId,
         items: [newRx],
         encounterId: parseInt(id)
       };
-      
-      await axios.post('/api/prescriptions/draft', payload, { headers });
+
+      await axiosPrivate.post('/prescriptions/draft', payload);
       setNewRx({ medicationName: '', dosage: '', frequency: '', duration: '' });
       fetchWorkspaceData();
+      toast.success('Prescription item added successfully.');
     } catch (err) {
-      alert('Failed to add prescription draft.');
+      toast.error(err.response?.data?.message || 'Failed to add prescription draft.');
     }
   };
 
   const handleSignPrescription = async (rxId) => {
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      await axios.post(`/api/prescriptions/${rxId}/sign`, {}, { headers });
+      await axiosPrivate.post(`/prescriptions/${rxId}/sign`, {});
+      toast.success('Prescription signed successfully.');
       fetchWorkspaceData();
     } catch (err) {
-      alert('Failed to sign prescription.');
+      toast.error(err.response?.data?.message || 'Failed to sign prescription.');
     }
   };
 
   const fetchWorkspaceData = async () => {
     try {
       setLoading(true);
-      const headers = { Authorization: `Bearer ${token}` };
-      
-      const encounterRes = await axios.get(`/api/v1/doctor/encounters/${id}`, { headers });
+      const encounterRes = await axiosPrivate.get(`/v1/doctor/encounters/${id}`);
       setEncounter(encounterRes.data);
-      
+
       const patientId = encounterRes.data.patientId;
-      
+
       const [soapRes, diagRes, allergyRes, rxRes] = await Promise.all([
-        axios.get(`/api/v1/doctor/encounters/${id}/soap-note`, { headers }).catch(() => ({ data: null })),
-        axios.get(`/api/v1/doctor/patients/${patientId}/diagnoses`, { headers }),
-        axios.get(`/api/v1/doctor/patients/${patientId}/allergies`, { headers }),
-        axios.get(`/api/prescriptions/patient/${patientId}`, { headers })
+        axiosPrivate.get(`/v1/doctor/encounters/${id}/soap-note`).catch(() => ({ data: null })),
+        axiosPrivate.get(`/v1/doctor/patients/${patientId}/diagnoses`),
+        axiosPrivate.get(`/v1/doctor/patients/${patientId}/allergies`),
+        axiosPrivate.get(`/prescriptions/patient/${patientId}`)
       ]);
-      
+
       if (soapRes.data) setSoapNote(soapRes.data);
       setDiagnoses(diagRes.data);
       setAllergies(allergyRes.data);
@@ -139,25 +181,28 @@ const ClinicalWorkspace = () => {
   const handleSaveSoapNote = async () => {
     setSaving(true);
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post(`/api/v1/doctor/encounters/${id}/soap-note`, soapNote, { headers });
+      const res = await axiosPrivate.post(`/v1/doctor/encounters/${id}/soap-note`, soapNote);
       setSoapNote(res.data);
-      alert('SOAP Note saved successfully');
+      toast.success('SOAP Note saved successfully.');
     } catch (err) {
-      alert('Failed to save SOAP note');
+      toast.error(err.response?.data?.message || 'Failed to save SOAP note.');
     } finally {
       setSaving(false);
     }
   };
 
   const handleFinalize = async () => {
-    if (!window.confirm("Are you sure you want to finalize this encounter? No further changes can be made.")) return;
+    if (!confirmFinalize) {
+      setConfirmFinalize(true);
+      return;
+    }
+    setConfirmFinalize(false);
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      await axios.post(`/api/v1/doctor/encounters/${id}/finalize`, {}, { headers });
+      await axiosPrivate.post(`/v1/doctor/encounters/${id}/finalize`, {});
+      toast.success('Encounter finalized successfully.');
       fetchWorkspaceData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to finalize encounter');
+      toast.error(err.response?.data?.message || 'Failed to finalize encounter.');
     }
   };
 
@@ -197,13 +242,33 @@ const ClinicalWorkspace = () => {
           >
             <Save size={16} /> {saving ? 'Saving...' : 'Save Draft'}
           </button>
-          <button 
-            onClick={handleFinalize}
-            disabled={isFinalized}
-            className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-indigo-700 transition shadow-sm disabled:opacity-50"
-          >
-            <CheckCircle size={16} /> Finalize
-          </button>
+          {confirmFinalize ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-red-700 bg-red-50 px-3 py-2 rounded-xl border border-red-200">
+                Finalize? Cannot undo.
+              </span>
+              <button
+                onClick={handleFinalize}
+                className="px-4 py-2 bg-red-600 text-white font-bold rounded-xl text-sm hover:bg-red-700 transition shadow-sm"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setConfirmFinalize(false)}
+                className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-200 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleFinalize}
+              disabled={isFinalized}
+              className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-indigo-700 transition shadow-sm disabled:opacity-50"
+            >
+              <CheckCircle size={16} /> Finalize
+            </button>
+          )}
         </div>
       </div>
 

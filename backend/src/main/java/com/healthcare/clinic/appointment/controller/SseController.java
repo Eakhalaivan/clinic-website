@@ -59,15 +59,17 @@ public class SseController {
     }
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@RequestParam("ticket") String ticket) {
-        SseTicketService.TicketDetails details = sseTicketService.consumeTicket(ticket);
-        if (details == null) {
-            throw new org.springframework.security.access.AccessDeniedException("Invalid or expired SSE ticket");
+    public SseEmitter subscribe(@AuthenticationPrincipal UserPrincipal user) {
+        if (user == null) {
+            throw new org.springframework.security.access.AccessDeniedException("Missing or invalid authentication token");
         }
+
+        boolean isAdminOrReceptionist = user.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_RECEPTIONIST"));
 
         SseEmitter emitter = new SseEmitter(60 * 60 * 1000L); // 1 hour timeout
         
-        ClientConnection connection = new ClientConnection(emitter, details.userId(), details.isAdminOrReceptionist());
+        ClientConnection connection = new ClientConnection(emitter, user.getUserId(), isAdminOrReceptionist);
         connections.add(connection);
 
         emitter.onCompletion(() -> connections.remove(connection));

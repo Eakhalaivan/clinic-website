@@ -2,100 +2,37 @@ import React, { useState } from 'react';
 import { Search, ChevronDown, Filter, Plus, Eye, Edit2, Download, MoreVertical, FileText, ArrowUp, Activity, HeartPulse } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+import { axiosPrivate } from '../../api/axios';
+import useAuthStore from '../../store/authStore';
+
 const DoctorPrescriptions = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('All Prescriptions');
 
-  const prescriptions = [
-    {
-      id: 'RX-0001',
-      subId: '#101',
-      patient: { name: 'Robert Williams', details: '45 Years, Male', id: 1 },
-      date: '21 May 2024',
-      time: '10:30 AM',
-      diagnosis: 'Hypertension',
-      medicines: '3 Medicines',
-      status: 'Active',
-      statusColor: 'green'
+  const { data: rawPrescriptions = [], isLoading } = useQuery({
+    queryKey: ['doctorPrescriptions', user?.id],
+    queryFn: async () => {
+      const res = await axiosPrivate.get(`/prescriptions`);
+      // This might fetch all prescriptions for the clinic. We can filter if needed.
+      return res.data;
     },
-    {
-      id: 'RX-0002',
-      subId: '#102',
-      patient: { name: 'Emily Davis', details: '36 Years, Female', id: 2 },
-      date: '20 May 2024',
-      time: '09:15 AM',
-      diagnosis: 'Diabetes Type 2',
-      medicines: '4 Medicines',
-      status: 'Active',
-      statusColor: 'green'
-    },
-    {
-      id: 'RX-0003',
-      subId: '#103',
-      patient: { name: 'Michael Johnson', details: '50 Years, Male', id: 3 },
-      date: '19 May 2024',
-      time: '11:00 AM',
-      diagnosis: 'Acute Bronchitis',
-      medicines: '5 Medicines',
-      status: 'Completed',
-      statusColor: 'blue'
-    },
-    {
-      id: 'RX-0004',
-      subId: '#104',
-      patient: { name: 'Sarah Wilson', details: '34 Years, Female', id: 4 },
-      date: '18 May 2024',
-      time: '02:30 PM',
-      diagnosis: 'Thyroid Disorder',
-      medicines: '2 Medicines',
-      status: 'Active',
-      statusColor: 'green'
-    },
-    {
-      id: 'RX-0005',
-      subId: '#105',
-      patient: { name: 'David Brown', details: '47 Years, Male', id: 5 },
-      date: '17 May 2024',
-      time: '03:45 PM',
-      diagnosis: 'Gastritis',
-      medicines: '3 Medicines',
-      status: 'Completed',
-      statusColor: 'blue'
-    },
-    {
-      id: 'RX-0006',
-      subId: '#106',
-      patient: { name: 'Linda Taylor', details: '40 Years, Female', id: 6 },
-      date: '16 May 2024',
-      time: '10:20 AM',
-      diagnosis: 'Migraine',
-      medicines: '2 Medicines',
-      status: 'Discontinued',
-      statusColor: 'red'
-    },
-    {
-      id: 'RX-0007',
-      subId: '#107',
-      patient: { name: 'Daniel Martinez', details: '41 Years, Male', id: 7 },
-      date: '15 May 2024',
-      time: '01:10 PM',
-      diagnosis: 'Allergic Rhinitis',
-      medicines: '3 Medicines',
-      status: 'Active',
-      statusColor: 'green'
-    },
-    {
-      id: 'RX-0008',
-      subId: '#108',
-      patient: { name: 'Patricia Harris', details: '38 Years, Female', id: 8 },
-      date: '14 May 2024',
-      time: '09:05 AM',
-      diagnosis: 'Vitamin D Deficiency',
-      medicines: '1 Medicine',
-      status: 'Completed',
-      statusColor: 'blue'
-    }
-  ];
+    enabled: !!user?.id
+  });
+
+  const prescriptions = rawPrescriptions.map(rx => ({
+    id: `RX-${rx.id}`,
+    subId: `#${rx.id}`,
+    patient: { name: rx.patientName, details: `PID: ${rx.patientId}`, id: rx.patientId },
+    date: new Date(rx.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    time: new Date(rx.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    diagnosis: rx.diagnosis || 'N/A',
+    medicines: `${rx.items?.length || 0} Medicines`,
+    status: rx.pharmacyStatus === 'DISPENSED' ? 'Dispensed' : (rx.pharmacyStatus === 'PENDING' ? 'Pending Pharmacy' : rx.status),
+    statusColor: rx.pharmacyStatus === 'DISPENSED' ? 'green' : (rx.pharmacyStatus === 'PENDING' ? 'blue' : 'gray'),
+    raw: rx
+  }));
 
   const getStatusBadgeClasses = (color) => {
     switch (color) {

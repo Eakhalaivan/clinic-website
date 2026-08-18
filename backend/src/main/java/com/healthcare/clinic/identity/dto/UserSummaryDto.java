@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data
@@ -13,9 +15,17 @@ import java.util.List;
 @AllArgsConstructor
 public class UserSummaryDto {
     private Long id;
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+    
+    @NotBlank(message = "First name is required")
     private String firstName;
+    
+    @NotBlank(message = "Last name is required")
     private String lastName;
+    
     private String phone;
     private boolean enabled;
     private List<String> roleNames;

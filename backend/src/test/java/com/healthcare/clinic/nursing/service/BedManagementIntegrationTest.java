@@ -63,6 +63,9 @@ class BedManagementIntegrationTest {
     private Bed bed2;
     private MockedStatic<SecurityUtils> mockedSecurityUtils;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     @BeforeEach
     void setUp() {
         Role chargeNurseRole = roleRepository.findByName("ROLE_CHARGE_NURSE")
@@ -91,17 +94,26 @@ class BedManagementIntegrationTest {
                 .build();
         wardRepository.save(ward);
 
+        try {
+            entityManager.createNativeQuery("INSERT INTO rooms (id, room_number, ward_id, room_type, capacity) VALUES (1, '101', :wardId, 'GENERAL', 2)")
+                .setParameter("wardId", ward.getId())
+                .executeUpdate();
+        } catch (Exception e) {
+            System.err.println("Failed to insert room: " + e.getMessage());
+        }
+
+
         bed1 = Bed.builder()
                 .wardId(ward.getId())
                 .bedNumber("A-01")
                 .build();
-        bedRepository.save(bed1);
+        bed1 = bedRepository.save(bed1);
 
         bed2 = Bed.builder()
                 .wardId(ward.getId())
                 .bedNumber("A-02")
                 .build();
-        bedRepository.save(bed2);
+        bed2 = bedRepository.save(bed2);
     }
 
     @AfterEach

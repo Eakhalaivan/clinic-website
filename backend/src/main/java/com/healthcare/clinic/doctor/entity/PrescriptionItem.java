@@ -43,4 +43,23 @@ public class PrescriptionItem {
 
     @Column(length = 50)
     private String timing;
+
+    @Column(name = "medicine_id")
+    private Long medicineId;
+
+    @Column(name = "prescribed_quantity")
+    @Builder.Default
+    private Integer prescribedQuantity = 1;
+
+    @Column(name = "dispensed_quantity")
+    @Builder.Default
+    private Integer dispensedQuantity = 0;
+
+    @Column(name = "remaining_quantity")
+    @Builder.Default
+    private Integer remainingQuantity = 1;
+
+    @Column(name = "substitution_allowed")
+    @Builder.Default
+    private Boolean substitutionAllowed = false;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Plus, ArrowLeft, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,9 +8,11 @@ import Button from '../../components/ui/Button';
 import FormField from '../../components/ui/FormField';
 import { fadeIn } from '../../components/ui/motion';
 import EmptyState from '../../components/ui/EmptyState';
+import { axiosPrivate } from '../../api/axios';
 
 const EcommerceAdmin = () => {
   const [showAdd, setShowAdd] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
@@ -18,13 +20,23 @@ const EcommerceAdmin = () => {
     category: 'WELLNESS'
   });
 
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Vitamin C 1000mg', price: 15.99, stock: 120, category: 'WELLNESS', status: 'ACTIVE' },
-    { id: 2, name: 'First Aid Kit (Large)', price: 45.00, stock: 35, category: 'MEDICAL_SUPPLIES', status: 'ACTIVE' },
-    { id: 3, name: 'Digital Thermometer', price: 22.50, stock: 0, category: 'DEVICES', status: 'OUT_OF_STOCK' }
-  ]);
+  const [products, setProducts] = useState([]);
 
-  const handleAddSubmit = (e) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosPrivate.get('/ecommerce/products');
+        setProducts(res.data);
+      } catch (err) {
+        toast.error('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!productForm.name || !productForm.price) {
       toast.error('Name and price are required');
@@ -32,17 +44,21 @@ const EcommerceAdmin = () => {
     }
     
     const newProduct = {
-      id: products.length + 1,
       ...productForm,
       price: Number(productForm.price),
       stock: Number(productForm.stock),
       status: Number(productForm.stock) > 0 ? 'ACTIVE' : 'OUT_OF_STOCK'
     };
     
-    setProducts([newProduct, ...products]);
-    toast.success('Product added successfully (Mock)');
-    setShowAdd(false);
-    setProductForm({ name: '', price: '', stock: '', category: 'WELLNESS' });
+    try {
+      const res = await axiosPrivate.post('/ecommerce/products', newProduct);
+      setProducts([res.data, ...products]);
+      toast.success('Product added successfully');
+      setShowAdd(false);
+      setProductForm({ name: '', price: '', stock: '', category: 'WELLNESS' });
+    } catch (err) {
+      toast.error('Failed to add product');
+    }
   };
 
   return (

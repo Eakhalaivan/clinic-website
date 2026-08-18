@@ -131,17 +131,17 @@ public class HrController {
     }
 
     // Document Endpoints
-    @PostMapping("/documents")
+    @PostMapping("/employee-documents")
     public ResponseEntity<EmployeeDocument> uploadDocument(@RequestBody EmployeeDocument document) {
         return ResponseEntity.ok(hrDocumentService.uploadDocument(document));
     }
 
-    @GetMapping("/documents/{employeeId}")
+    @GetMapping("/employee-documents/{employeeId}")
     public ResponseEntity<List<EmployeeDocument>> getEmployeeDocuments(@PathVariable Long employeeId) {
         return ResponseEntity.ok(hrDocumentService.getEmployeeDocuments(employeeId));
     }
 
-    @PutMapping("/documents/{documentId}/verify")
+    @PutMapping("/employee-documents/{documentId}/verify")
     public ResponseEntity<EmployeeDocument> verifyDocument(@PathVariable Long documentId, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(hrDocumentService.verifyDocument(documentId, user.getId()));
     }

@@ -13,8 +13,18 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
 jwt:
   secret: default_dev_secret_key_that_is_long_enough_for_hs256_algorithm_12345
   access-token-expiration-ms: 86400000
+
+stripe:
+  secret-key: dummy_stripe_key
+  webhook-secret: dummy_webhook_secret
+  publishable-key: dummy_publishable_key
+
+twilio:
+  account-sid: dummy_twilio_sid
+  auth-token: dummy_twilio_token
+  from-number: dummy_twilio_number

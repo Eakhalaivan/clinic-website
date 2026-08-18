@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="PatientAiChatMessage")
 @Table(name = "ai_chat_messages")
 @Data
 public class AiChatMessage {
@@ -23,8 +23,10 @@ public class AiChatMessage {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+    
+    private Boolean containsSafetyFlag = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private ZonedDateTime createdAt;
+    @Column(name = "sent_at", updatable = false)
+    private ZonedDateTime sentAt;
 }

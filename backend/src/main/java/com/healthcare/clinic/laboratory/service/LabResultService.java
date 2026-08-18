@@ -35,10 +35,16 @@ public class LabResultService {
             throw new IllegalStateException("Test must be in IN_PROGRESS status to enter results");
         }
 
+        LabResult existingResult = resultRepository.findByRequestId(requestId).orElse(null);
+        if (existingResult != null) {
+            result.setId(existingResult.getId());
+            result.setEnteredAt(existingResult.getEnteredAt()); // Preserve original entry time
+        } else {
+            result.setEnteredAt(ZonedDateTime.now());
+        }
+
         result.setRequest(request);
         result.setLabTech(labTech);
-        result.setEnteredAt(ZonedDateTime.now());
-        result.setIsDraft(false);
 
         LabTestCatalog catalog = request.getTestCatalog();
         if (catalog != null) {
@@ -57,9 +63,11 @@ public class LabResultService {
 
         LabResult savedResult = resultRepository.save(result);
 
-        // Update Request Status
-        request.setStatus("PENDING_VERIFICATION");
-        requestRepository.save(request);
+        // Update Request Status if not a draft
+        if (!Boolean.TRUE.equals(result.getIsDraft())) {
+            request.setStatus("PENDING_VERIFICATION");
+            requestRepository.save(request);
+        }
 
         // Notify if Critical
         if (Boolean.TRUE.equals(result.getIsCritical())) {
@@ -153,5 +161,19 @@ public class LabResultService {
                 "Critical result entered for test " + request.getTestCatalog().getTestName() + " (Request #" + request.getLabRequestNumber() + ")",
                 "LAB_RESULT_CRITICAL",
                 request.getId());
+    }
+
+    @Transactional
+    public LabTestRequest acknowledgeLabOrder(Long requestId, Long doctorId) {
+        LabTestRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Request not found"));
+        
+        com.healthcare.clinic.identity.entity.User doctor = new com.healthcare.clinic.identity.entity.User();
+        doctor.setId(doctorId);
+        
+        request.setAcknowledgedBy(doctor);
+        request.setAcknowledgedAt(ZonedDateTime.now());
+        
+        return requestRepository.save(request);
     }
 }

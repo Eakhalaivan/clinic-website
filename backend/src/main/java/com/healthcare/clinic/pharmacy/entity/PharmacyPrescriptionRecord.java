@@ -53,7 +53,7 @@ public class PharmacyPrescriptionRecord extends BaseEntity {
     private LocalDateTime verifiedAt;
 
     /** FK back to the clinical prescriptions table — the source of truth */
-    @Column(name = "clinical_prescription_id")
+    @Column(name = "clinical_prescription_id", unique = true)
     private Long clinicalPrescriptionId;
 
     @Column(name = "assigned_pharmacy_user_id")
@@ -69,6 +69,24 @@ public class PharmacyPrescriptionRecord extends BaseEntity {
 
     @Column(name = "dispensed_by")
     private String dispensedBy;
+
+    @Column(name = "valid_until")
+    private LocalDateTime validUntil;
+
+    @Builder.Default
+    @Column(name = "refills_allowed")
+    private Integer refillsAllowed = 0;
+
+    @Builder.Default
+    @Column(name = "refills_remaining")
+    private Integer refillsRemaining = 0;
+
+    @Builder.Default
+    @Column(name = "refill_interval_days")
+    private Integer refillIntervalDays = 0;
+
+    @Column(name = "doctor_registration_number")
+    private String doctorRegistrationNumber;
 
     // ── helpers ────────────────────────────────────────────────────────────────
     public void addItem(PharmacyPrescriptionItem item) {

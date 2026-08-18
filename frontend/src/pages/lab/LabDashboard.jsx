@@ -13,7 +13,7 @@ import LabRecentRequests from '../../components/lab/LabRecentRequests';
 import LabStatusSidebar from '../../components/lab/LabStatusSidebar';
 
 const LabDashboard = () => {
-  const { auth } = useAuth();
+  const { user } = useAuth();
   const [filter, setFilter] = React.useState('ALL');
 
   const { data: summaryResponse, isLoading: summaryLoading } = useQuery({
@@ -42,7 +42,7 @@ const LabDashboard = () => {
       <div className="flex justify-between items-end mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Laboratory Dashboard</h1>
-          <p className="text-sm font-medium text-gray-500">Welcome back, {auth?.user?.name || 'Lab Admin'}!</p>
+          <p className="text-sm font-medium text-gray-500">Welcome back, {user?.name || user?.firstName || 'Lab Admin'}!</p>
         </div>
       </div>
 

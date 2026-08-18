@@ -6,7 +6,7 @@ const ChartBanner = ({ patientId }) => {
   const { data: summary, isLoading, error } = useQuery({
     queryKey: ['chartSummary', patientId],
     queryFn: async () => {
-      const res = await axiosPrivate.get(`/api/emr/patients/${patientId}/chart-summary`);
+      const res = await axiosPrivate.get(`/emr/patients/${patientId}/chart-summary`);
       return res.data;
     },
     enabled: !!patientId,

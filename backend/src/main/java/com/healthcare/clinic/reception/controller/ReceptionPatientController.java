@@ -40,11 +40,7 @@ public class ReceptionPatientController {
     @PostMapping("/patients/register")
     @PreAuthorize("hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> registerPatient(@RequestBody Map<String, Object> request) {
-        // Dummy implementation for now, should call ReceptionPatientService.registerPatient
-        Map<String, Object> response = new java.util.HashMap<>(request);
-        response.put("id", 999L);
-        response.put("opNumber", "OP-2026-999");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(patientService.registerPatient(request));
     }
 
     @GetMapping("/patients/{patientId}/identity-verifications")

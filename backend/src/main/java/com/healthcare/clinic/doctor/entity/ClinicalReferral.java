@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="DoctorClinicalReferral")
 @Table(name = "clinical_referrals")
 @Data
 public class ClinicalReferral {
@@ -34,10 +34,13 @@ public class ClinicalReferral {
     @Column(name = "reason_for_referral", nullable = false)
     private String reasonForReferral;
 
+    @Column(name = "referral_reason", nullable = false)
+    private String referralReason;
+
     @Column(name = "clinical_notes")
     private String clinicalNotes;
 
-    @Column(name = "priority")
+    @Column(name = "urgency", nullable = false)
     private String priority = "Routine";
 
     @Column(name = "status")

@@ -9,7 +9,7 @@ import com.healthcare.clinic.laboratory.entity.LabTestRequest;
 import com.healthcare.clinic.laboratory.repository.LabResultRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestCatalogRepository;
 import com.healthcare.clinic.laboratory.repository.LabTestRequestRepository;
-import com.healthcare.clinic.laboratory.service.LabResultService;
+
 import com.healthcare.clinic.notification.event.LabResultReleasedEvent;
 import com.healthcare.clinic.patient.entity.PatientProfile;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
@@ -27,6 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import com.healthcare.clinic.laboratory.service.LabWorklistService;
+import com.healthcare.clinic.laboratory.entity.LabBarcode;
+import com.healthcare.clinic.laboratory.service.LabBarcodeService;
 
 @RestController
 @RequestMapping("/api/lab")
@@ -43,6 +49,8 @@ public class LabController {
     private final com.healthcare.clinic.laboratory.service.LabReportVerificationService verificationService;
     private final com.healthcare.clinic.laboratory.service.LabReportPdfGenerator pdfGenerator;
     private final LabPdfService labPdfService;
+    private final LabWorklistService worklistService;
+    private final LabBarcodeService barcodeService;
 
     // ─── Patient: own lab reports ─────────────────────────────────────────────
 
@@ -62,7 +70,37 @@ public class LabController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Patient profile not found for user " + userId));
         return ResponseEntity.ok(
-                requestRepository.findByPatientIdOrderByRequestedAtDesc(profile.getId()));
+                requestRepository.findByPatientIdAndAcknowledgedAtIsNotNullOrderByRequestedAtDesc(profile.getId()));
+    }
+
+    /**
+     * POST /api/lab/patient/requests/{id}/book
+     * Allows a patient to schedule their lab test request.
+     */
+    @PostMapping("/patient/requests/{id}/book")
+    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
+    @AuditableAction(module = "LABORATORY", action = "SCHEDULE", resourceType = "LabTestRequest", sensitivityLevel = "NORMAL")
+    public ResponseEntity<LabTestRequest> bookLabTest(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> payload) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        
+        LabTestRequest request = requestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
+                
+        if (!request.getPatient().getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your lab test request");
+        }
+
+        String scheduledAtStr = payload.get("scheduledAt");
+        if (scheduledAtStr == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "scheduledAt is required");
+        }
+
+        request.setScheduledAt(ZonedDateTime.parse(scheduledAtStr));
+        request.setStatus("SCHEDULED");
+        
+        return ResponseEntity.ok(requestRepository.save(request));
     }
 
     // ─── Doctor: lab requests I ordered ────────────────────────────────────────
@@ -83,11 +121,61 @@ public class LabController {
                 requestRepository.findByDoctorUserIdOrderByRequestedAtDesc(userId));
     }
 
+    /**
+     * GET /api/lab/doctor/unacknowledged
+     * Returns all lab test requests ordered by the currently logged-in doctor that have not been acknowledged.
+     */
+    @GetMapping("/doctor/unacknowledged")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "VIEW_UNACKNOWLEDGED", resourceType = "LabTestRequest", sensitivityLevel = "NORMAL")
+    public ResponseEntity<List<LabTestRequest>> getUnacknowledgedDoctorLabRequests() {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        return ResponseEntity.ok(
+                requestRepository.findByDoctorUserIdAndAcknowledgedAtIsNullAndStatusOrderByRequestedAtDesc(userId, "RELEASED"));
+    }
+
     // ─── Catalog ──────────────────────────────────────────────────────────────
 
     @GetMapping("/catalog")
     public ResponseEntity<List<LabTestCatalog>> getCatalog() {
         return ResponseEntity.ok(catalogRepository.findByIsActiveTrue());
+    }
+
+    // ─── Worklist ─────────────────────────────────────────────────────────────
+
+    /**
+     * GET /api/lab/worklist
+     * Returns a paginated, filterable worklist of all lab requests.
+     * Used by LabWorklist.jsx frontend component.
+     */
+    @GetMapping("/worklist")
+    @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<Page<LabTestRequest>> getWorklist(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        Page<LabTestRequest> result = worklistService.getWorklist(
+                status != null && !status.equals("ALL") ? status : null,
+                null, null, null, null, null, null, null, null,
+                search,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestedAt")));
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * POST /api/lab/requests/generate-barcodes
+     * Generates barcodes for a list of lab request IDs.
+     * Used by LabWorklist.jsx frontend component.
+     */
+    @PostMapping("/requests/generate-barcodes")
+    @PreAuthorize("hasRole('LAB_TECH') or hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<List<LabBarcode>> generateBarcodes(@RequestBody List<Long> requestIds) {
+        List<LabBarcode> barcodes = barcodeService.generateBarcodesForRequests(requestIds);
+        return ResponseEntity.ok(barcodes);
     }
 
     @PostMapping("/requests")
@@ -97,6 +185,12 @@ public class LabController {
         request.setStatus("REQUESTED");
         request.setRequestedAt(ZonedDateTime.now());
         return ResponseEntity.ok(requestRepository.save(request));
+    }
+
+    @GetMapping("/doctor/patient-reports/{patientId}")
+    @PreAuthorize("hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<LabTestRequest>> getPatientLabReportsForDoctor(@PathVariable Long patientId) {
+        return ResponseEntity.ok(requestRepository.findByPatientIdOrderByRequestedAtDesc(patientId));
     }
 
     @GetMapping("/requests/status/{status}")
@@ -133,6 +227,14 @@ public class LabController {
                     .build());
         }
         return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/requests/{requestId}/acknowledge")
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('SUPER_ADMIN')")
+    @AuditableAction(module = "LABORATORY", action = "ACKNOWLEDGE_RESULT", resourceType = "LabTestRequest", sensitivityLevel = "HIGH")
+    public ResponseEntity<LabTestRequest> acknowledgeResult(@PathVariable Long requestId) {
+        Long doctorId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(resultService.acknowledgeLabOrder(requestId, doctorId));
     }
 
     @PostMapping(value = "/requests/{requestId}/result", consumes = {"multipart/form-data", "application/json"})

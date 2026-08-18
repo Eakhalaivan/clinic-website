@@ -42,7 +42,7 @@ const HealthTimeline = () => {
     const { data: timelineEvents, isLoading } = useQuery({
         queryKey: ['healthTimeline'],
         queryFn: async () => {
-            const res = await axiosPrivate.get('/api/v1/patient/timeline');
+            const res = await axiosPrivate.get('/v1/patient/timeline');
             return res.data;
         }
     });

@@ -29,14 +29,14 @@ public class WardReplacementReturnController {
         return ResponseEntity.ok(ApiResponse.success(service.getAllReturns(), "All return requests fetched"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_SUPERVISOR')")
     @PostMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<Void>> approve(@PathVariable Long id) {
         service.approve(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Return request approved"));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACY_STAFF','ROLE_SUPERVISOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_PHARMACIST','ROLE_SUPERVISOR')")
     @PostMapping("/{id}/reject")
     public ResponseEntity<ApiResponse<Void>> reject(@PathVariable Long id) {
         service.reject(id);

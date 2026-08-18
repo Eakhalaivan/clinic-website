@@ -51,6 +51,9 @@ class PrescriptionServiceTest {
     private CdsSafetyCheckService cdsSafetyCheckService;
 
     @Mock
+    private com.healthcare.clinic.clinicaldecision.service.DrugInteractionService drugInteractionService;
+
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     @Mock

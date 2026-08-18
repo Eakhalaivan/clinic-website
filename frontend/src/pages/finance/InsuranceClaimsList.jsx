@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageHeader from '../../components/ui/PageHeader';
 import { Shield, CheckCircle, Clock, XCircle, Search } from 'lucide-react';
 
 export default function InsuranceClaimsList() {
@@ -10,12 +9,12 @@ export default function InsuranceClaimsList() {
 
     const { data: claims = [], isLoading } = useQuery({ 
         queryKey: ['finance-claims'], 
-        queryFn: async () => (await axiosPrivate.get('/api/finance/claims')).data 
+        queryFn: async () => (await axiosPrivate.get('/finance/claims')).data 
     });
 
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }) => {
-            return await axiosPrivate.patch(`/api/finance/claims/${id}/status?status=${status}`);
+            return await axiosPrivate.patch(`/finance/claims/${id}/status?status=${status}`);
         },
         onSuccess: () => queryClient.invalidateQueries(['finance-claims'])
     });
@@ -27,7 +26,10 @@ export default function InsuranceClaimsList() {
 
     return (
         <div className="p-6">
-            <PageHeader title="Insurance Claims" subtitle="Track and process patient insurance claims" />
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-slate-900">Insurance Claims</h1>
+                <p className="text-sm text-slate-500 mt-1">Track and process patient insurance claims</p>
+            </div>
             
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mt-6 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex justify-between bg-slate-50">

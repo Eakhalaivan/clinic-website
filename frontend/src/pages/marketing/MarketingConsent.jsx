@@ -12,7 +12,7 @@ export default function MarketingConsent() {
   const { data: consents = [], isLoading, refetch } = useQuery({
     queryKey: ['marketing-consents', searched],
     queryFn: async () =>
-      (await axiosPrivate.get(`/api/marketing/consent/patient/${searched}`)).data,
+      (await axiosPrivate.get(`/marketing/consent/patient/${searched}`)).data,
     enabled: !!searched,
   });
 
@@ -30,7 +30,7 @@ export default function MarketingConsent() {
     if (!searched) return;
     setCapturing(true);
     try {
-      await axiosPrivate.post('/api/marketing/consent', null, {
+      await axiosPrivate.post('/marketing/consent', null, {
         params: {
           patientId: searched,
           channel,
@@ -51,7 +51,7 @@ export default function MarketingConsent() {
   const handleWithdraw = async (ch) => {
     setWithdrawing(ch);
     try {
-      await axiosPrivate.post('/api/marketing/consent/withdraw', null, {
+      await axiosPrivate.post('/marketing/consent/withdraw', null, {
         params: { patientId: searched, channel: ch, branchId: 1 },
       });
       refetch();

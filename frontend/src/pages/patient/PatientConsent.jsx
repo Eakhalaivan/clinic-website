@@ -9,7 +9,7 @@ const PatientConsent = () => {
   const { data: versions, isLoading: loadingVersions } = useQuery({
     queryKey: ['consent-versions'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/settings/consents/versions');
+      const res = await axiosPrivate.get('/v1/patient/settings/consents/versions');
       return res.data;
     }
   });
@@ -17,21 +17,21 @@ const PatientConsent = () => {
   const { data: consents, isLoading: loadingConsents } = useQuery({
     queryKey: ['patient-consents'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/settings/consents');
+      const res = await axiosPrivate.get('/v1/patient/settings/consents');
       return res.data;
     }
   });
 
   const grantMutation = useMutation({
     mutationFn: async (consentType) => {
-      await axiosPrivate.post(`/api/v1/patient/settings/consents/${consentType}`);
+      await axiosPrivate.post(`/v1/patient/settings/consents/${consentType}`);
     },
     onSuccess: () => queryClient.invalidateQueries(['patient-consents'])
   });
 
   const revokeMutation = useMutation({
     mutationFn: async (consentType) => {
-      await axiosPrivate.delete(`/api/v1/patient/settings/consents/${consentType}`);
+      await axiosPrivate.delete(`/v1/patient/settings/consents/${consentType}`);
     },
     onSuccess: () => queryClient.invalidateQueries(['patient-consents'])
   });

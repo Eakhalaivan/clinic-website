@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import { Shield, Plus, Loader2, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 const Insurance = () => {
@@ -17,14 +18,14 @@ const Insurance = () => {
     const { data: claims, isLoading } = useQuery({
         queryKey: ['insuranceClaims'],
         queryFn: async () => {
-            const res = await axiosPrivate.get('/api/v1/patient/insurance');
+            const res = await axiosPrivate.get('/v1/patient/insurance');
             return res.data;
         }
     });
 
     const submitMutation = useMutation({
         mutationFn: async (newClaim) => {
-            const res = await axiosPrivate.post('/api/v1/patient/insurance', newClaim);
+            const res = await axiosPrivate.post('/v1/patient/insurance', newClaim);
             return res.data;
         },
         onSuccess: () => {
@@ -34,7 +35,7 @@ const Insurance = () => {
             setPolicyNumber('');
             setClaimAmount('');
             setNotes('');
-            alert('Claim submitted successfully');
+            toast.success('Claim submitted successfully.');
         }
     });
 

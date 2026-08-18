@@ -12,14 +12,14 @@ const HomeVisit = () => {
   const { data: requests, isLoading } = useQuery({
     queryKey: ['myHomeVisits'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/home-visits/my-requests');
+      const res = await axiosPrivate.get('/home-visits/my-requests');
       return res.data;
     }
   });
 
   const requestMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axiosPrivate.post('/api/home-visits/request', data);
+      const res = await axiosPrivate.post('/home-visits/request', data);
       return res.data;
     },
     onSuccess: () => {

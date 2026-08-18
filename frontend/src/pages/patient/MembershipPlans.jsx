@@ -9,7 +9,7 @@ const MembershipPlans = () => {
   const { data: plans, isLoading: plansLoading } = useQuery({
     queryKey: ['membershipPlans'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/marketing/membership/plans');
+      const res = await axiosPrivate.get('/marketing/membership/plans');
       return res.data;
     }
   });
@@ -17,7 +17,7 @@ const MembershipPlans = () => {
   const { data: myMembership, isLoading: membershipLoading } = useQuery({
     queryKey: ['myMembership'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/marketing/membership/my-membership');
+      const res = await axiosPrivate.get('/marketing/membership/my-membership');
       return res.data;
     },
     retry: false // Don't retry if 404
@@ -25,7 +25,7 @@ const MembershipPlans = () => {
 
   const subscribeMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axiosPrivate.post('/api/marketing/membership/subscribe', data);
+      const res = await axiosPrivate.post('/marketing/membership/subscribe', data);
       return res.data;
     },
     onSuccess: () => {

@@ -90,6 +90,10 @@ public class ClinicPrescriptionSyncWorker {
                 .instructions(item.getInstructions())
                 .strength(item.getStrength())
                 .timing(item.getTiming())
+                .medicineId(item.getMedicineId())
+                .prescribedQuantity(item.getPrescribedQuantity())
+                .dispensedQuantity(item.getDispensedQuantity())
+                .remainingQuantity(item.getRemainingQuantity())
                 .build()).collect(Collectors.toList());
     }
 }

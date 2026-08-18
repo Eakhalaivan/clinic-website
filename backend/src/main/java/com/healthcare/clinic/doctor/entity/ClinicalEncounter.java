@@ -37,6 +37,12 @@ public class ClinicalEncounter {
     @Column(name = "finalized_at")
     private ZonedDateTime finalizedAt;
 
+    @Column(name = "opened_at")
+    private ZonedDateTime openedAt;
+
+    @Column(name = "closed_at")
+    private ZonedDateTime closedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private ZonedDateTime createdAt;

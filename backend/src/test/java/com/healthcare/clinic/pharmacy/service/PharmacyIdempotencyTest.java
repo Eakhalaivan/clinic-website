@@ -99,6 +99,16 @@ public class PharmacyIdempotencyTest {
         testRecord.setPrescriptionDate(LocalDateTime.now());
         testRecord = prescriptionRepository.save(testRecord);
 
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem item1 = new com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem();
+        item1.setPharmacyPrescription(testRecord);
+        item1.setMedicationName(testMedicine.getName());
+        item1.setMedicineId(testMedicine.getId());
+        item1.setPrescribedQuantity(10);
+        item1.setDosage("1x1");
+        item1.setFrequency("Daily");
+        item1.setDuration("10 days");
+        testRecord.setItems(List.of(item1));
+        prescriptionRepository.save(testRecord);
     }
 
     @AfterEach

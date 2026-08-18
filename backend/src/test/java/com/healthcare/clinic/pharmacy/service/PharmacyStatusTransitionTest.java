@@ -103,20 +103,30 @@ public class PharmacyStatusTransitionTest {
         userRepository.deleteAll();
     }
 
-    private PharmacyPrescriptionRecord createVerifiedPrescription(Long clinicalId) {
+    private PharmacyPrescriptionRecord createVerifiedPrescription() {
         PharmacyPrescriptionRecord rec = new PharmacyPrescriptionRecord();
         rec.setPatientName("Status Patient");
         rec.setDoctorName("Dr. Status");
         rec.setVerificationStatus("VERIFIED");
         rec.setStatus("PENDING");
-        rec.setClinicalPrescriptionId(clinicalId);
+        rec.setClinicalPrescriptionId(System.nanoTime());
         rec.setPrescriptionDate(LocalDateTime.now());
+        
+        com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem item = new com.healthcare.clinic.pharmacy.entity.PharmacyPrescriptionItem();
+        item.setMedicineId(testMedicine.getId());
+        item.setPrescribedQuantity(300);
+        item.setMedicationName(testMedicine.getName());
+        item.setDosage("1 tablet");
+        item.setRemainingQuantity(300);
+        item.setPharmacyPrescription(rec);
+        rec.getItems().add(item);
+        
         return prescriptionRepository.save(rec);
     }
 
     @Test
     void testFullDispense_setsStatusDISPENSED() {
-        PharmacyPrescriptionRecord rec = createVerifiedPrescription(555L);
+        PharmacyPrescriptionRecord rec = createVerifiedPrescription();
 
         DispenseRequest req = DispenseRequest.builder()
                 .prescriptionId(rec.getId())
@@ -136,7 +146,7 @@ public class PharmacyStatusTransitionTest {
 
     @Test
     void testPartialDispense_setsStatusPARTIALLY_DISPENSED() {
-        PharmacyPrescriptionRecord rec = createVerifiedPrescription(556L);
+        PharmacyPrescriptionRecord rec = createVerifiedPrescription();
 
         DispenseRequest req = DispenseRequest.builder()
                 .prescriptionId(rec.getId())
@@ -155,7 +165,7 @@ public class PharmacyStatusTransitionTest {
 
     @Test
     void testAlreadyDispensed_throwsException() {
-        PharmacyPrescriptionRecord rec = createVerifiedPrescription(555L);
+        PharmacyPrescriptionRecord rec = createVerifiedPrescription();
 
         DispenseRequest req = DispenseRequest.builder()
                 .prescriptionId(rec.getId())

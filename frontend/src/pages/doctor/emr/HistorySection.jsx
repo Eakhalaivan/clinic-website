@@ -12,7 +12,7 @@ const HistorySection = ({ patientId, title, endpoint, icon: Icon, columns, formF
   const { data: records, isLoading } = useQuery({
     queryKey: [title, patientId],
     queryFn: async () => {
-      const res = await axiosPrivate.get(`/api/emr/${endpoint}/patient/${patientId}`);
+      const res = await axiosPrivate.get(`/emr/${endpoint}/patient/${patientId}`);
       return res.data;
     },
     enabled: !!patientId,
@@ -21,7 +21,7 @@ const HistorySection = ({ patientId, title, endpoint, icon: Icon, columns, formF
   const mutation = useMutation({
     mutationFn: async (newRecord) => {
       const payload = { ...newRecord, patientId, recordedByUserId: 1, recordedAt: new Date().toISOString() };
-      return await axiosPrivate.post(`/api/emr/${endpoint}`, payload);
+      return await axiosPrivate.post(`/emr/${endpoint}`, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries([title, patientId]);

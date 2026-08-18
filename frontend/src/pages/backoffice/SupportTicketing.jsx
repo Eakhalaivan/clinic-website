@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { axiosPrivate } from '../../api/axios';
 import { LifeBuoy, ArrowLeft, MessageSquare, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,17 +12,33 @@ import EmptyState from '../../components/ui/EmptyState';
 const SupportTicketing = () => {
   const [filter, setFilter] = useState('ALL');
   
-  const [tickets, setTickets] = useState([
-    { id: 'TKT-1042', subject: 'Login issue with patient portal', user: 'Sarah Jenkins', type: 'TECHNICAL', status: 'OPEN', priority: 'HIGH', date: '2026-08-12T09:30:00Z' },
-    { id: 'TKT-1041', subject: 'Billing discrepancy on invoice #4029', user: 'Mike Ross', type: 'BILLING', status: 'IN_PROGRESS', priority: 'MEDIUM', date: '2026-08-11T14:15:00Z' },
-    { id: 'TKT-1040', subject: 'How to reschedule an appointment?', user: 'Emily Davis', type: 'GENERAL', status: 'RESOLVED', priority: 'LOW', date: '2026-08-10T11:20:00Z' }
-  ]);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const res = await axiosPrivate.get('/support/tickets');
+        setTickets(res.data);
+      } catch (err) {
+        toast.error('Failed to load support tickets');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTickets();
+  }, []);
 
   const filteredTickets = tickets.filter(t => filter === 'ALL' || t.status === filter);
 
-  const resolveTicket = (id) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: 'RESOLVED' } : t));
-    toast.success(`Ticket ${id} marked as resolved`);
+  const resolveTicket = async (id) => {
+    try {
+      await axiosPrivate.patch(`/support/tickets/${id}/status?status=RESOLVED`);
+      setTickets(tickets.map(t => t.id === id ? { ...t, status: 'RESOLVED' } : t));
+      toast.success(`Ticket ${id} marked as resolved`);
+    } catch (err) {
+      toast.error('Failed to resolve ticket');
+    }
   };
 
   return (

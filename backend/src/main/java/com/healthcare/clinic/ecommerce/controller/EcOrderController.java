@@ -19,17 +19,27 @@ public class EcOrderController {
     private final OrderService orderService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
-    public ResponseEntity<List<EcommerceOrder>> getMyOrders(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(orderService.getPatientOrders(user.getId()));
+    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN', 'SUPER_ADMIN', 'PHARMACIST')")
+    public ResponseEntity<List<EcommerceOrder>> getOrders(@AuthenticationPrincipal User user) {
+        boolean isPatient = user.getRoles().stream().anyMatch(r -> r.getName().equals("PATIENT"));
+        if (isPatient) {
+            return ResponseEntity.ok(orderService.getPatientOrders(user.getId()));
+        } else {
+            return ResponseEntity.ok(orderService.getAllOrders());
+        }
     }
 
     @GetMapping("/{orderId}")
-    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
+    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN', 'SUPER_ADMIN', 'PHARMACIST')")
     public ResponseEntity<EcommerceOrder> getOrderDetails(
             @AuthenticationPrincipal User user,
             @PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.getOrderDetails(orderId, user.getId()));
+        boolean isPatient = user.getRoles().stream().anyMatch(r -> r.getName().equals("PATIENT"));
+        if (isPatient) {
+            return ResponseEntity.ok(orderService.getOrderDetails(orderId, user.getId()));
+        } else {
+            return ResponseEntity.ok(orderService.getOrderDetailsForAdmin(orderId));
+        }
     }
 
     @PostMapping("/{orderId}/status")
@@ -40,6 +50,16 @@ public class EcOrderController {
             @RequestParam String status,
             @RequestParam(required = false) String note) {
         orderService.updateOrderStatus(orderId, status, user.getId(), user.getRoles().stream().findFirst().map(com.healthcare.clinic.identity.entity.Role::getName).orElse("USER"), note);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PatchMapping("/{orderId}/shipping")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('PHARMACIST')")
+    public ResponseEntity<Void> updateShipping(
+            @PathVariable Long orderId,
+            @RequestParam String status,
+            @RequestParam(required = false) String trackingNumber) {
+        orderService.updateShipping(orderId, status, trackingNumber);
         return ResponseEntity.ok().build();
     }
 }

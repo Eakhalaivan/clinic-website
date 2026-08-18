@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.cache.annotation.EnableCaching;
 
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
+
 @EnableCaching
 @SpringBootApplication(excludeName = {
     "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
@@ -15,6 +18,7 @@ import org.springframework.cache.annotation.EnableCaching;
     "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration",
     "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration"
 })
+@ComponentScan(nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
 @EnableAsync
 public class ClinicApplication {
 

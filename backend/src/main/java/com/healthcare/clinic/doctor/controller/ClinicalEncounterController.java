@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.healthcare.clinic.audit.annotation.AuditableAction;
 
 import java.util.List;
 
@@ -28,12 +29,14 @@ public class ClinicalEncounterController {
     }
 
     @PostMapping
+    @AuditableAction(module = "CLINICAL_ENCOUNTER", action = "OPEN", resourceType = "ClinicalEncounter", sensitivityLevel = "HIGH")
     public ResponseEntity<ClinicalEncounter> startEncounter(@AuthenticationPrincipal User user, @RequestBody ClinicalEncounter encounter) {
         return ResponseEntity.ok(encounterService.startEncounter(user, encounter));
     }
 
-    @PostMapping("/{id}/finalize")
-    public ResponseEntity<ClinicalEncounter> finalizeEncounter(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        return ResponseEntity.ok(encounterService.finalizeEncounter(user, id));
+    @PostMapping("/{id}/close")
+    @AuditableAction(module = "CLINICAL_ENCOUNTER", action = "CLOSE", resourceType = "ClinicalEncounter", sensitivityLevel = "HIGH")
+    public ResponseEntity<ClinicalEncounter> closeEncounter(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        return ResponseEntity.ok(encounterService.closeEncounter(user, id));
     }
 }

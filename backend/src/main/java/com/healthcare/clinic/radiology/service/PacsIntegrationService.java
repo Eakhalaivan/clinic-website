@@ -8,18 +8,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Base64;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +31,16 @@ public class PacsIntegrationService {
     private final DicomStudyRepository studyRepository;
     private final ImagingRequestRepository requestRepository;
 
-    @Value("${pacs.storage.path:/tmp/pacs}")
-    private String pacsStoragePath;
+    @Value("${orthanc.url:http://localhost:8042}")
+    private String orthancUrl;
+
+    @Value("${orthanc.username:orthanc}")
+    private String orthancUsername;
+
+    @Value("${orthanc.password:orthanc}")
+    private String orthancPassword;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
     public DicomStudy ingestDicomFile(Long requestId, MultipartFile file, String technicianId) {
@@ -41,16 +51,43 @@ public class PacsIntegrationService {
             throw new IllegalStateException("Cannot ingest DICOM for request in status: " + request.getStatus());
         }
 
-        // Basic DICOM validation could happen here (magic number "DICM" check at offset 128)
-        
-        String studyInstanceUid = UUID.randomUUID().toString(); // In real world, extract from DICOM
-        
-        Path storageDir = Paths.get(pacsStoragePath, studyInstanceUid);
         try {
-            Files.createDirectories(storageDir);
-            String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : UUID.randomUUID().toString() + ".dcm";
-            Path targetPath = storageDir.resolve(filename);
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            // Push DICOM to Orthanc
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            if (orthancUsername != null && !orthancUsername.isEmpty()) {
+                String auth = orthancUsername + ":" + orthancPassword;
+                byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes());
+                headers.add("Authorization", "Basic " + new String(encodedAuth));
+            }
+
+            HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    orthancUrl + "/instances",
+                    HttpMethod.POST,
+                    requestEntity,
+                    Map.class
+            );
+
+            Map<String, Object> body = response.getBody();
+            if (body == null || !body.containsKey("ParentStudy")) {
+                throw new RuntimeException("Invalid response from Orthanc: " + body);
+            }
+
+            String orthancStudyId = (String) body.get("ParentStudy");
+
+            // Fetch actual StudyInstanceUID from Orthanc
+            HttpEntity<Void> getEntity = new HttpEntity<>(headers);
+            ResponseEntity<Map> studyResponse = restTemplate.exchange(
+                    orthancUrl + "/studies/" + orthancStudyId,
+                    HttpMethod.GET,
+                    getEntity,
+                    Map.class
+            );
+
+            Map<String, Object> studyBody = studyResponse.getBody();
+            Map<String, String> mainDicomTags = (Map<String, String>) studyBody.get("MainDicomTags");
+            String studyInstanceUid = mainDicomTags.get("StudyInstanceUID");
             
             // Check if study already exists for this request
             DicomStudy study = studyRepository.findByRequestId(requestId).orElse(null);
@@ -61,7 +98,7 @@ public class PacsIntegrationService {
                         .patient(request.getPatient())
                         .modality(request.getProcedure().getModality())
                         .status("AVAILABLE_FOR_REPORTING")
-                        .storagePath(storageDir.toString())
+                        .storagePath(orthancStudyId) // store internal ID just in case
                         .build();
                 study = studyRepository.save(study);
             } else {
@@ -73,23 +110,61 @@ public class PacsIntegrationService {
             requestRepository.save(request);
 
             return study;
-        } catch (IOException e) {
-            log.error("Failed to store DICOM file", e);
-            throw new RuntimeException("Failed to store DICOM file", e);
+        } catch (Exception e) {
+            log.error("Failed to store DICOM file to Orthanc", e);
+            throw new RuntimeException("Failed to store DICOM file to Orthanc", e);
         }
     }
 
     public Resource loadDicomAsResource(String studyInstanceUid, String filename) {
         try {
-            Path file = Paths.get(pacsStoragePath, studyInstanceUid).resolve(filename).normalize();
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            } else {
-                throw new RuntimeException("Could not read file: " + filename);
+            // Here studyInstanceUid is actually our Orthanc ParentStudy internal ID we stored in storagePath.
+            // But wait, the parameter might be the actual StudyInstanceUID from DICOM tags if the controller passes that.
+            // Let's assume we can fetch the study archive from Orthanc using the orthanc internal ID, which we stored in storagePath.
+            // We need to fetch the study entity to get the storagePath (which is the orthanc internal ID).
+            DicomStudy study = studyRepository.findByStudyInstanceUid(studyInstanceUid).orElse(null);
+            if (study == null) {
+                 throw new RuntimeException("Study not found: " + studyInstanceUid);
             }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Could not read file: " + filename, e);
+            String orthancStudyId = study.getStoragePath();
+
+            // To get a specific instance, we could query Orthanc for instances in the study.
+            // For simplicity, let's download the entire study archive (ZIP) or just the first instance.
+            // The viewer might just need a valid DICOM file. Let's fetch the instances list.
+            HttpHeaders headers = new HttpHeaders();
+            if (orthancUsername != null && !orthancUsername.isEmpty()) {
+                String auth = orthancUsername + ":" + orthancPassword;
+                byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes());
+                headers.add("Authorization", "Basic " + new String(encodedAuth));
+            }
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            
+            // Get instances for the study
+            ResponseEntity<java.util.List> instancesResponse = restTemplate.exchange(
+                orthancUrl + "/studies/" + orthancStudyId + "/instances",
+                HttpMethod.GET,
+                requestEntity,
+                java.util.List.class
+            );
+            
+            java.util.List<Map> instances = instancesResponse.getBody();
+            if (instances == null || instances.isEmpty()) {
+                throw new RuntimeException("No instances found for study");
+            }
+            
+            String instanceId = (String) instances.get(0).get("ID");
+            
+            // Download the instance DICOM file
+            ResponseEntity<byte[]> fileResponse = restTemplate.exchange(
+                orthancUrl + "/instances/" + instanceId + "/file",
+                HttpMethod.GET,
+                requestEntity,
+                byte[].class
+            );
+            
+            return new org.springframework.core.io.ByteArrayResource(fileResponse.getBody());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not read file from Orthanc for study: " + studyInstanceUid, e);
         }
     }
 

@@ -44,6 +44,7 @@ public class Batch1ClinicalWorkflowTest {
     @Autowired private BranchRepository branchRepository;
     @Autowired private DoctorProfileRepository doctorProfileRepository;
     @Autowired private PatientProfileRepository patientProfileRepository;
+    @Autowired private com.healthcare.clinic.tenant.repository.TenantRepository tenantRepository;
 
     private User doctorUser;
     private User patientUser;
@@ -86,6 +87,12 @@ public class Batch1ClinicalWorkflowTest {
         branch.setCountry("Country");
         branch.setPostalCode("00000");
         branch.setTimezone("UTC");
+        
+        com.healthcare.clinic.tenant.entity.Tenant tenant = new com.healthcare.clinic.tenant.entity.Tenant();
+        tenant.setName("Test Tenant");
+        tenant = tenantRepository.save(tenant);
+        
+        branch.setTenant(tenant);
         branch = branchRepository.save(branch);
 
         DoctorProfile docProfile = new DoctorProfile();
@@ -120,7 +127,9 @@ public class Batch1ClinicalWorkflowTest {
         // 2. Add SOAP Note
         SoapNote note = new SoapNote();
         note.setSubjective("Patient complains of headache");
+        note.setObjective("Vitals normal");
         note.setAssessment("Tension headache");
+        note.setPlan("Rest and hydration");
         SoapNote savedNote = soapNoteService.saveSoapNote(doctorUser, savedEncounter.getId(), note);
         assertThat(savedNote.getId()).isNotNull();
 
@@ -144,9 +153,9 @@ public class Batch1ClinicalWorkflowTest {
         assertThat(savedAllergy.getId()).isNotNull();
 
         // 5. Finalize Encounter
-        ClinicalEncounter finalized = encounterService.finalizeEncounter(doctorUser, savedEncounter.getId());
-        assertThat(finalized.getStatus()).isEqualTo("Completed");
-        assertThat(finalized.getFinalizedAt()).isNotNull();
+        ClinicalEncounter closedEncounter = encounterService.closeEncounter(doctorUser, savedEncounter.getId());
+        assertThat(closedEncounter.getStatus()).isEqualTo("CLOSED");
+        assertThat(closedEncounter.getFinalizedAt()).isNotNull();
 
         // 6. Attempt to edit SOAP note after finalization (should fail)
         SoapNote updateNote = new SoapNote();

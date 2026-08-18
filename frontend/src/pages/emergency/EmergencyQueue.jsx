@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { AlertCircle, UserPlus, Clock, ArrowRight, Ambulance, Syringe } from 'lucide-react';
+import { AlertCircle, UserPlus, Clock, ArrowRight, Ambulance, Syringe, X } from 'lucide-react';
 import EmptyState from '../../components/common/EmptyState';
 import { formatDistanceToNow } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const TRIAGE_COLORS = {
   CRITICAL: 'bg-red-100 text-red-700 border-red-300',
@@ -15,6 +16,11 @@ const TRIAGE_COLORS = {
 
 const EmergencyQueue = () => {
   const [filter, setFilter] = useState('ALL');
+  const [activeModal, setActiveModal] = useState(null); // 'REGISTER', 'TRIAGE', 'ASSIGN_MD', 'DISPOSITION'
+  const [selectedEncounter, setSelectedEncounter] = useState(null);
+  
+  const [formData, setFormData] = useState({});
+  const queryClient = useQueryClient();
 
   const { data: encounters, isLoading } = useQuery({
     queryKey: ['emergency-encounters', filter],
@@ -24,13 +30,92 @@ const EmergencyQueue = () => {
         url += `?status=${filter}`;
       }
       const res = await axiosPrivate.get(url);
-      
-      // We need to fetch triage assessments for these if possible, 
-      // but assuming the backend can include it or we just show status.
       return res.data;
     },
-    refetchInterval: 30000 // auto refresh ED queue every 30s
+    refetchInterval: 30000 
   });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post('/emergency/encounters', data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Patient registered in ED');
+      queryClient.invalidateQueries({ queryKey: ['emergency-encounters'] });
+      closeModal();
+    }
+  });
+
+  const triageMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post(`/emergency/encounters/${selectedEncounter.id}/triage`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Triage completed');
+      queryClient.invalidateQueries({ queryKey: ['emergency-encounters'] });
+      closeModal();
+    }
+  });
+
+  const assignMdMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post(`/emergency/encounters/${selectedEncounter.id}/assign-doctor`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Doctor assigned');
+      queryClient.invalidateQueries({ queryKey: ['emergency-encounters'] });
+      closeModal();
+    }
+  });
+
+  const dispositionMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosPrivate.post(`/emergency/encounters/${selectedEncounter.id}/disposition`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Disposition saved');
+      queryClient.invalidateQueries({ queryKey: ['emergency-encounters'] });
+      closeModal();
+    }
+  });
+
+  const openModal = (type, encounter = null) => {
+    setSelectedEncounter(encounter);
+    setActiveModal(type);
+    setFormData({});
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedEncounter(null);
+    setFormData({});
+  };
+
+  const handleAction = () => {
+    if (activeModal === 'REGISTER') {
+      registerMutation.mutate({
+        patientId: formData.patientId || null,
+        arrivalMode: formData.arrivalMode || 'WALK_IN'
+      });
+    } else if (activeModal === 'TRIAGE') {
+      triageMutation.mutate({
+        triageLevel: formData.triageLevel || 'URGENT',
+        chiefComplaint: formData.chiefComplaint || ''
+      });
+    } else if (activeModal === 'ASSIGN_MD') {
+      assignMdMutation.mutate({
+        doctorId: formData.doctorId || 1 // Assuming 1 as default doctor ID for now
+      });
+    } else if (activeModal === 'DISPOSITION') {
+      dispositionMutation.mutate({
+        disposition: formData.disposition || 'ADMITTED'
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="p-10 flex justify-center text-slate-400">Loading emergency queue...</div>;
@@ -50,7 +135,10 @@ const EmergencyQueue = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm">
+          <button 
+            onClick={() => openModal('REGISTER')}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm"
+          >
             <UserPlus size={18} /> Register Patient
           </button>
         </div>
@@ -138,7 +226,6 @@ const EmergencyQueue = () => {
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {/* Placeholder triage logic since we don't have nested triage assessment in encounter yet */}
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
                         encounter.status === 'REGISTERED' ? TRIAGE_COLORS.PENDING : TRIAGE_COLORS.URGENT
                       }`}>
@@ -152,12 +239,18 @@ const EmergencyQueue = () => {
                     
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       {encounter.status === 'REGISTERED' && (
-                        <button className="text-sm font-medium text-orange-600 hover:text-orange-800 flex items-center justify-end gap-1 ml-auto">
+                        <button 
+                          onClick={() => openModal('TRIAGE', encounter)}
+                          className="text-sm font-medium text-orange-600 hover:text-orange-800 flex items-center justify-end gap-1 ml-auto"
+                        >
                           Triage <ArrowRight size={14} />
                         </button>
                       )}
                       {encounter.status === 'IN_TRIAGE' && (
-                        <button className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center justify-end gap-1 ml-auto">
+                        <button 
+                          onClick={() => openModal('ASSIGN_MD', encounter)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center justify-end gap-1 ml-auto"
+                        >
                           Assign MD <ArrowRight size={14} />
                         </button>
                       )}
@@ -166,7 +259,10 @@ const EmergencyQueue = () => {
                           <button className="text-sm font-medium text-slate-600 hover:text-slate-800 flex items-center gap-1" title="Orders">
                             <Syringe size={16} />
                           </button>
-                          <button className="text-sm font-medium text-green-600 hover:text-green-800 flex items-center gap-1">
+                          <button 
+                            onClick={() => openModal('DISPOSITION', encounter)}
+                            className="text-sm font-medium text-green-600 hover:text-green-800 flex items-center gap-1"
+                          >
                             Disposition <ArrowRight size={14} />
                           </button>
                         </div>
@@ -179,6 +275,131 @@ const EmergencyQueue = () => {
           </table>
         </div>
       </div>
+
+      {/* Modals */}
+      {activeModal && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="font-bold text-lg text-slate-800">
+                {activeModal === 'REGISTER' && 'Register ER Patient'}
+                {activeModal === 'TRIAGE' && 'Perform Triage'}
+                {activeModal === 'ASSIGN_MD' && 'Assign Doctor'}
+                {activeModal === 'DISPOSITION' && 'Set Disposition'}
+              </h3>
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 flex-1 overflow-y-auto space-y-4">
+              {activeModal === 'REGISTER' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Patient ID (Optional for Unknown)</label>
+                    <input 
+                      type="number" 
+                      value={formData.patientId || ''}
+                      onChange={(e) => setFormData({...formData, patientId: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2" 
+                      placeholder="e.g. 101"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Arrival Mode</label>
+                    <select 
+                      value={formData.arrivalMode || 'WALK_IN'}
+                      onChange={(e) => setFormData({...formData, arrivalMode: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2"
+                    >
+                      <option value="WALK_IN">Walk In</option>
+                      <option value="AMBULANCE">Ambulance</option>
+                      <option value="POLICE">Police</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {activeModal === 'TRIAGE' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Triage Level</label>
+                    <select 
+                      value={formData.triageLevel || 'URGENT'}
+                      onChange={(e) => setFormData({...formData, triageLevel: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2"
+                    >
+                      <option value="CRITICAL">Critical</option>
+                      <option value="URGENT">Urgent</option>
+                      <option value="SEMI_URGENT">Semi-Urgent</option>
+                      <option value="NON_URGENT">Non-Urgent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Chief Complaint</label>
+                    <textarea 
+                      value={formData.chiefComplaint || ''}
+                      onChange={(e) => setFormData({...formData, chiefComplaint: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2" 
+                      rows="3"
+                    />
+                  </div>
+                </>
+              )}
+
+              {activeModal === 'ASSIGN_MD' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Doctor ID</label>
+                    <input 
+                      type="number" 
+                      value={formData.doctorId || ''}
+                      onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2" 
+                      placeholder="e.g. 1"
+                    />
+                  </div>
+                </>
+              )}
+
+              {activeModal === 'DISPOSITION' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Disposition Outcome</label>
+                    <select 
+                      value={formData.disposition || 'ADMITTED'}
+                      onChange={(e) => setFormData({...formData, disposition: e.target.value})}
+                      className="w-full border border-slate-300 rounded px-3 py-2"
+                    >
+                      <option value="ADMITTED">Admitted (Inpatient)</option>
+                      <option value="DISCHARGED">Discharged Home</option>
+                      <option value="TRANSFERRED">Transferred to another facility</option>
+                      <option value="DECEASED">Deceased</option>
+                      <option value="LAMA">Left Against Medical Advice</option>
+                    </select>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
+              <button 
+                onClick={closeModal}
+                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleAction}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

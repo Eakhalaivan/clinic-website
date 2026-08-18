@@ -11,10 +11,8 @@ const ReportVerification = () => {
   const { data: requests, isLoading } = useQuery({
     queryKey: ['lab-requests-verification'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/lab/worklist/search', {
-        params: { status: 'PENDING_VERIFICATION' }
-      });
-      return res.data.content;
+      const res = await axiosPrivate.get('/lab/requests/status/PENDING_VERIFICATION');
+      return res.data;
     }
   });
 

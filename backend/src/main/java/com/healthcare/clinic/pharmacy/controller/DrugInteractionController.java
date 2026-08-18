@@ -52,7 +52,7 @@ public class DrugInteractionController {
     }
 
     @GetMapping("/incident-report")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_AUDIT_COMPLIANCE','ROLE_SUPERVISOR','ROLE_PHARMACY_OWNER','ROLE_PHARMACY_STAFF')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYSTEM_ADMIN','ROLE_AUDIT_COMPLIANCE','ROLE_SUPERVISOR','ROLE_PHARMACY_OWNER','ROLE_PHARMACIST')")
     public ResponseEntity<ApiResponse<PageResponse<DrugInteractionCheck>>> getIncidents(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,

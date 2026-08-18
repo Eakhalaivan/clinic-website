@@ -22,7 +22,8 @@ import java.util.HashMap;
 @EnableJpaRepositories(
         basePackages = "com.healthcare.clinic.pharmacy",
         entityManagerFactoryRef = "pharmacyEntityManagerFactory",
-        transactionManagerRef = "pharmacyTransactionManager"
+        transactionManagerRef = "pharmacyTransactionManager",
+        nameGenerator = org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator.class
 )
 public class PharmacyDatabaseConfig {
 
@@ -36,7 +37,6 @@ public class PharmacyDatabaseConfig {
     }
 
     @Bean(name = "pharmacyEntityManagerFactory")
-    @org.springframework.context.annotation.DependsOn("pharmacyFlyway")
     public LocalContainerEntityManagerFactoryBean pharmacyEntityManagerFactory(
             @Qualifier("pharmacyDataSource") DataSource dataSource,
             org.springframework.core.env.Environment env) {

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -113,7 +113,7 @@ public class AppointmentE2ETest {
     @Test
     void testEndToEndWorkflow() {
         // 1. Patient Books Appointment (Patient Registration is auto-handled)
-        Appointment appointment = appointmentService.bookAppointment(patientUser.getId(), testSlot.getId(), "Checkup");
+        Appointment appointment = appointmentService.bookAppointment(patientUser.getId(), testSlot.getId(), "General Checkup", null, null);
         assertThat(appointment).isNotNull();
         assertThat(appointment.getPatient()).isNotNull();
         assertThat(appointment.getPatient().getUserId()).isEqualTo(patientUser.getId());
@@ -128,7 +128,7 @@ public class AppointmentE2ETest {
                 .build());
                 
         assertThrows(IllegalArgumentException.class, () -> {
-            appointmentService.bookAppointment(patientUser.getId(), nextSlot.getId(), "Second checkup");
+            appointmentService.bookAppointment(patientUser.getId(), nextSlot.getId(), "Second checkup", null, null);
         });
 
         // 2. Reception Generates Queue Token for Walk-in

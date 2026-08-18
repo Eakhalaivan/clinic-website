@@ -18,7 +18,7 @@ public class AuditDashboardController {
     private final AuditRecordRepository auditRecordRepository;
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'SUPER_ADMIN', 'COMPLIANCE_OFFICER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<Page<AuditRecord>> searchAuditLogs(
             @RequestParam(required = false) Long patientId,
             @RequestParam(required = false) Long actorId,

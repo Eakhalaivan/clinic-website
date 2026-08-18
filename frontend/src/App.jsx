@@ -40,6 +40,9 @@ const Teleconsultations = lazy(() => import('./pages/patient/Teleconsultations')
 const AiAssistant = lazy(() => import('./pages/patient/AiAssistant'));
 const PatientDocuments = lazy(() => import('./pages/patient/PatientDocuments'));
 
+// Shared pages
+const TeleconsultationRoom = lazy(() => import('./pages/common/TeleconsultationRoom'));
+
 // Doctor pages
 const DoctorDashboard = lazy(() => import('./pages/doctor/DoctorDashboard'));
 const AppointmentListToday = lazy(() => import('./pages/doctor/AppointmentListToday'));
@@ -74,7 +77,10 @@ const NurseDashboard = lazy(() => import('./pages/nurse/NurseDashboard'));
 const NurseAssignedPatients = lazy(() => import('./pages/nurse/NurseAssignedPatients'));
 const VitalSignsEntry = lazy(() => import('./pages/nurse/VitalSignsEntry'));
 const MedicationAdministration = lazy(() => import('./pages/nurse/MedicationAdministration'));
+const NursingNotes = lazy(() => import('./pages/nurse/NursingNotes'));
+const PatientMonitoring = lazy(() => import('./pages/nurse/PatientMonitoring'));
 const WardManagement = lazy(() => import('./pages/nurse/WardManagement'));
+const TaskManagement = lazy(() => import('./pages/nurse/TaskManagement'));
 const NurseWorkspace = lazy(() => import('./pages/nurse/NurseWorkspace'));
 const ReceptionDashboard = lazy(() => import('./pages/reception/ReceptionDashboard'));
 const QueueManagement = lazy(() => import('./pages/reception/QueueManagement'));
@@ -85,11 +91,13 @@ const ReceptionBilling = lazy(() => import('./pages/reception/ReceptionBilling')
 const InsuranceVerificationPage = lazy(() => import('./pages/reception/InsuranceVerificationPage'));
 const DocumentScanning = lazy(() => import('./pages/reception/DocumentScanning'));
 const CheckInKiosk = lazy(() => import('./pages/reception/CheckInKiosk'));
+const PatientSearch = lazy(() => import('./pages/reception/PatientSearch'));
 const PharmacistDashboard = lazy(() => import('./pages/pharmacist/PharmacistDashboard'));
 const LabDashboard = lazy(() => import('./pages/lab/LabDashboard'));
 const LabWorklist = lazy(() => import('./pages/lab/LabWorklist'));
 const ReportVerification = lazy(() => import('./pages/lab/ReportVerification'));
 const LabCatalogManagement = lazy(() => import('./pages/lab/LabCatalogManagement'));
+const LabNotifications = lazy(() => import('./pages/lab/LabNotifications'));
 // Lab Reports for patients/doctors (can reuse or specific)
 const AccountantDashboard = lazy(() => import('./pages/accountant/AccountantDashboard'));
 const RadiologistDashboard = lazy(() => import('./pages/radiologist/RadiologistDashboard'));
@@ -101,9 +109,19 @@ const LeaveManagement = lazy(() => import('./pages/hr/LeaveManagement'));
 const FinanceDashboard = lazy(() => import('./pages/finance/FinanceDashboard'));
 const InvoicesList = lazy(() => import('./pages/finance/InvoicesList'));
 const PnLStatement = lazy(() => import('./pages/finance/PnLStatement'));
+const FinancePayments = lazy(() => import('./pages/finance/FinancePayments'));
+const InsuranceClaimsList = lazy(() => import('./pages/finance/InsuranceClaimsList'));
+const FinanceRefunds = lazy(() => import('./pages/finance/FinanceRefunds'));
+const FinanceDailyCash = lazy(() => import('./pages/finance/FinanceDailyCash'));
 const InventoryDashboard = lazy(() => import('./pages/inventory/InventoryDashboard'));
 const WarehousesList = lazy(() => import('./pages/inventory/WarehousesList'));
 const StockTransfers = lazy(() => import('./pages/inventory/StockTransfers'));
+const InventoryPurchaseOrders = lazy(() => import('./pages/pharmacy/PurchaseOrders'));
+const InventorySuppliers = lazy(() => import('./pages/pharmacy/Suppliers'));
+const InventoryBatches = lazy(() => import('./pages/pharmacy/MedicineStock'));
+const InventoryExpiry = lazy(() => import('./pages/pharmacy/ExpiryTracker'));
+const InventoryReports = lazy(() => import('./pages/pharmacy/Reports'));
+const InventoryBranches = lazy(() => import('./pages/admin/BranchManagement'));
 
 // Phase 4 portal dashboard pages
 const MarketingDashboard = lazy(() => import('./pages/marketing/MarketingDashboard'));
@@ -112,6 +130,8 @@ const MarketingLeads = lazy(() => import('./pages/marketing/MarketingLeads'));
 const MarketingLoyalty = lazy(() => import('./pages/marketing/MarketingLoyalty'));
 const MarketingNps = lazy(() => import('./pages/marketing/MarketingNps'));
 const MarketingConsent = lazy(() => import('./pages/marketing/MarketingConsent'));
+const MarketingAnalytics = lazy(() => import('./pages/marketing/MarketingAnalytics'));
+const MarketingCommunications = lazy(() => import('./pages/marketing/MarketingCommunications'));
 const EcommerceDashboard = lazy(() => import('./pages/ecommerce/EcommerceDashboard'));
 const ProductCatalog = lazy(() => import('./pages/ecommerce/ProductCatalog'));
 const ShoppingCart = lazy(() => import('./pages/ecommerce/ShoppingCart'));
@@ -125,6 +145,36 @@ const BranchManagement = lazy(() => import('./pages/admin/BranchManagement'));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const DicomViewer = lazy(() => import('./pages/radiologist/DicomViewer'));
 const RadiologyReporting = lazy(() => import('./pages/radiologist/RadiologyReporting'));
+const RadiologyRequests = lazy(() => import('./pages/radiologist/RadiologyRequests'));
+const RadiologyUpload = lazy(() => import('./pages/radiologist/RadiologyUpload'));
+const RadiologyArchive = lazy(() => import('./pages/radiologist/RadiologyArchive'));
+
+// Inpatient module
+const InpatientDashboard = lazy(() => import('./pages/inpatient/InpatientDashboard'));
+const BedStatusBoard = lazy(() => import('./pages/inpatient/BedStatusBoard'));
+const NursingStationDashboard = lazy(() => import('./pages/inpatient/NursingStationDashboard'));
+const AdmissionWorkflow = lazy(() => import('./pages/inpatient/AdmissionWorkflow'));
+
+// Emergency module
+const EmergencyQueue = lazy(() => import('./pages/emergency/EmergencyQueue'));
+
+// Surgery module
+const OtSchedulingCalendar = lazy(() => import('./pages/surgery/OtSchedulingCalendar'));
+
+// Branch Admin module
+const BranchPerformance = lazy(() => import('./pages/branch-admin/BranchPerformance'));
+const BranchLocalHR = lazy(() => import('./pages/branch-admin/BranchLocalHR'));
+const BranchFacility = lazy(() => import('./pages/branch-admin/BranchFacility'));
+
+// Backoffice module
+const SupportTicketing = lazy(() => import('./pages/backoffice/SupportTicketing'));
+const EcommerceAdmin = lazy(() => import('./pages/backoffice/EcommerceAdmin'));
+const VendorManagement = lazy(() => import('./pages/backoffice/VendorManagement'));
+
+// Support module (SupportDashboard is already imported above)
+const AgentDashboard = lazy(() => import('./pages/support/AgentDashboard'));
+const TicketDesk = lazy(() => import('./pages/support/TicketDesk'));
+const PatientSupport = lazy(() => import('./pages/support/PatientSupport'));
 
 // Pharmacy full module routes
 import { PharmacyRoutes } from './pages/pharmacy/PharmacyRoutes';
@@ -212,6 +262,15 @@ function App() {
           
           <Route path="/login" element={<Navigate to="/patient/login" replace />} />
           <Route path="/:portalSlug/login" element={<PortalLoginPage />} />
+          
+          <Route 
+            path="/teleconsultation/room/:id" 
+            element={
+              <RoleRoute allowedRoles={['ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_SUPER_ADMIN']}>
+                <TeleconsultationRoom />
+              </RoleRoute>
+            } 
+          />
 
           {/* ── Patient Routes ──────────────────────────────────────────── */}
           <Route
@@ -243,9 +302,10 @@ function App() {
             <Route path="dependents" element={<PatientDependents />} />
             <Route path="settings" element={<PatientSettings />} />
             <Route path="consent" element={<PatientConsent />} />
+            <Route path="support" element={<PatientSupport />} />
             <Route path="home-visits" element={<HomeVisits />} />
             <Route path="teleconsultations" element={<Teleconsultations />} />
-            <Route path="assistant" element={<AiAssistant />} />
+            <Route path="ai-assistant" element={<AiAssistant />} />
             <Route path="documents" element={<PatientDocuments />} />
             
             {/* Patient eCommerce Routes */}
@@ -310,7 +370,10 @@ function App() {
             <Route path="patients" element={<NurseAssignedPatients />} />
             <Route path="vitals" element={<VitalSignsEntry />} />
             <Route path="medication" element={<MedicationAdministration />} />
+            <Route path="notes" element={<NursingNotes />} />
+            <Route path="monitoring" element={<PatientMonitoring />} />
             <Route path="wards" element={<WardManagement />} />
+            <Route path="tasks" element={<TaskManagement />} />
             <Route path="workspace/:patientId" element={<NurseWorkspace />} />
             {/* Previously missing nurse routes */}
           </Route>
@@ -333,7 +396,8 @@ function App() {
             <Route path="billing" element={<ReceptionBilling />} />
             <Route path="insurance" element={<InsuranceVerificationPage />} />
             <Route path="documents" element={<DocumentScanning />} />
-            <Route path="kiosk" element={<CheckInKiosk />} />
+            <Route path="checkin" element={<CheckInKiosk />} />
+            <Route path="search" element={<PatientSearch />} />
             {/* Previously missing reception routes */}
             <Route path="book" element={<DoctorList />} />
             <Route path="book/:doctorId" element={<BookAppointment />} />
@@ -356,8 +420,8 @@ function App() {
           <Route
             path="/lab"
             element={
-              <RoleRoute allowedRoles={['ROLE_LAB_TECH', 'ROLE_SUPER_ADMIN']} portalSlug="lab">
-                <DashboardLayout portalSlug="lab" allowedRoles={['ROLE_LAB_TECH', 'ROLE_SUPER_ADMIN']} />
+              <RoleRoute allowedRoles={['ROLE_LAB_TECH', 'ROLE_PATHOLOGIST', 'ROLE_SUPER_ADMIN']} portalSlug="lab">
+                <DashboardLayout portalSlug="lab" allowedRoles={['ROLE_LAB_TECH', 'ROLE_PATHOLOGIST', 'ROLE_SUPER_ADMIN']} />
               </RoleRoute>
             }
           >
@@ -366,6 +430,7 @@ function App() {
             <Route path="worklist" element={<LabWorklist />} />
             <Route path="catalog" element={<LabCatalogManagement />} />
             <Route path="verification" element={<ReportVerification />} />
+            <Route path="notifications" element={<LabNotifications />} />
             {/* Previously missing lab routes */}
             <Route path="lab-request" element={<LabRequest />} />
           </Route>
@@ -383,8 +448,12 @@ function App() {
           >
             <Route index element={<Navigate to="/radiologist/dashboard" replace />} />
             <Route path="dashboard" element={<RadiologistDashboard />} />
+            <Route path="requests" element={<RadiologyRequests />} />
+            <Route path="upload" element={<RadiologyUpload />} />
             <Route path="viewer" element={<DicomViewer />} />
+            <Route path="reporting" element={<Navigate to="/radiologist/requests" replace />} />
             <Route path="reporting/:requestId" element={<RadiologyReporting />} />
+            <Route path="archive" element={<RadiologyArchive />} />
           </Route>
 
           {/* ── Accountant → Finance redirect ───────────────────────────── */}
@@ -405,6 +474,33 @@ function App() {
             <Route path="invoices" element={<InvoicesList />} />
             <Route path="pnl" element={<PnLStatement />} />
             {/* Previously missing finance routes */}
+            <Route path="payments" element={<FinancePayments />} />
+            <Route path="insurance-claims" element={<InsuranceClaimsList />} />
+            <Route path="refunds" element={<FinanceRefunds />} />
+            <Route path="daily-cash" element={<FinanceDailyCash />} />
+            <Route path="revenue" element={<PnLStatement />} />
+            <Route path="reports" element={<PnLStatement />} />
+          </Route>
+
+          {/* ── Inventory Routes ────────────────────────────────────────── */}
+          <Route
+            path="/inventory"
+            element={
+              <RoleRoute allowedRoles={['ROLE_INVENTORY_MANAGER', 'ROLE_SUPER_ADMIN']} portalSlug="inventory">
+                <DashboardLayout portalSlug="inventory" allowedRoles={['ROLE_INVENTORY_MANAGER', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/inventory/dashboard" replace />} />
+            <Route path="dashboard" element={<InventoryDashboard />} />
+            <Route path="warehouses" element={<WarehousesList />} />
+            <Route path="purchase-orders" element={<InventoryPurchaseOrders />} />
+            <Route path="suppliers" element={<InventorySuppliers />} />
+            <Route path="transfers" element={<StockTransfers />} />
+            <Route path="batches" element={<InventoryBatches />} />
+            <Route path="expiry" element={<InventoryExpiry />} />
+            <Route path="branches" element={<InventoryBranches />} />
+            <Route path="reports" element={<InventoryReports />} />
           </Route>
 
           {/* ── Marketing / CRM Routes ──────────────────────────────────── */}
@@ -423,6 +519,8 @@ function App() {
             <Route path="loyalty" element={<MarketingLoyalty />} />
             <Route path="nps" element={<MarketingNps />} />
             <Route path="consent" element={<MarketingConsent />} />
+            <Route path="analytics" element={<MarketingAnalytics />} />
+            <Route path="communications" element={<MarketingCommunications />} />
           </Route>
 
           {/* ── HR Module Routes ────────────────────────────────────────── */}
@@ -469,6 +567,107 @@ function App() {
             }
           >
             {PharmacyRoutes}
+          </Route>
+          {/* ── Inpatient Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/inpatient"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} portalSlug="inpatient">
+                <DashboardLayout portalSlug="inpatient" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/inpatient/dashboard" replace />} />
+            <Route path="dashboard" element={<InpatientDashboard />} />
+            <Route path="beds" element={<BedStatusBoard />} />
+            <Route path="nursing-station" element={<NursingStationDashboard />} />
+            <Route path="admission" element={<AdmissionWorkflow />} />
+          </Route>
+
+          {/* ── Emergency Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/emergency"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTION']} portalSlug="emergency">
+                <DashboardLayout portalSlug="emergency" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTION']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/emergency/queue" replace />} />
+            <Route path="queue" element={<EmergencyQueue />} />
+          </Route>
+
+          {/* ── Surgery Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/surgery"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} portalSlug="surgery">
+                <DashboardLayout portalSlug="surgery" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/surgery/schedule" replace />} />
+            <Route path="schedule" element={<OtSchedulingCalendar />} />
+          </Route>
+
+          {/* ── Branch Admin Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/branch-admin"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_BRANCH_ADMIN']} portalSlug="branch-admin">
+                <DashboardLayout portalSlug="branch-admin" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_BRANCH_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/branch-admin/analytics" replace />} />
+            <Route path="analytics" element={<BranchPerformance />} />
+            <Route path="staff" element={<BranchLocalHR />} />
+            <Route path="facilities" element={<BranchFacility />} />
+          </Route>
+
+          {/* ── Back Office Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/backoffice"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} portalSlug="backoffice">
+                <DashboardLayout portalSlug="backoffice" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/backoffice/support" replace />} />
+            <Route path="support" element={<SupportTicketing />} />
+            <Route path="ecommerce" element={<EcommerceAdmin />} />
+            <Route path="vendors" element={<VendorManagement />} />
+          </Route>
+
+          {/* ── Support Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/support"
+            element={
+              <RoleRoute allowedRoles={['ROLE_SUPPORT', 'ROLE_CUSTOMER_SUPPORT', 'ROLE_SUPER_ADMIN']} portalSlug="support">
+                <DashboardLayout portalSlug="support" allowedRoles={['ROLE_SUPPORT', 'ROLE_CUSTOMER_SUPPORT', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/support/dashboard" replace />} />
+            <Route path="dashboard" element={<SupportDashboard />} />
+            <Route path="agent" element={<AgentDashboard />} />
+            <Route path="tickets" element={<TicketDesk />} />
+          </Route>
+
+          {/* ── Admin Module Routes ──────────────────────────────────── */}
+          <Route
+            path="/admin"
+            element={
+              <RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} portalSlug="admin">
+                <DashboardLayout portalSlug="admin" allowedRoles={['ROLE_ADMIN', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="branches" element={<BranchManagement />} />
+            <Route path="users" element={<UserManagement />} />
           </Route>
 
           {/* ── Fallbacks ───────────────────────────────────────────────── */}

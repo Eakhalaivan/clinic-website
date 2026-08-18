@@ -17,4 +17,9 @@ public class TelemedicineController {
     public ResponseEntity<TeleconsultSession> createRoom(@RequestParam Long appointmentId, @RequestParam Long tenantId) {
         return ResponseEntity.ok(videoProviderService.createRoom(appointmentId, tenantId));
     }
+
+    @GetMapping("/rooms/appointment/{appointmentId}")
+    public ResponseEntity<TeleconsultSession> getSessionByAppointment(@PathVariable Long appointmentId) {
+        return ResponseEntity.ok(videoProviderService.getSessionByAppointment(appointmentId));
+    }
 }

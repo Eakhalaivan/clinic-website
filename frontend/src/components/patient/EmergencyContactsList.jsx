@@ -13,14 +13,14 @@ const EmergencyContactsList = () => {
   const { data: contacts, isLoading } = useQuery({
     queryKey: ['emergency-contacts'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/v1/patient/settings/emergency-contacts');
+      const res = await axiosPrivate.get('/v1/patient/settings/emergency-contacts');
       return res.data;
     }
   });
 
   const addMutation = useMutation({
     mutationFn: async (data) => {
-      await axiosPrivate.post('/api/v1/patient/settings/emergency-contacts', data);
+      await axiosPrivate.post('/v1/patient/settings/emergency-contacts', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['emergency-contacts']);

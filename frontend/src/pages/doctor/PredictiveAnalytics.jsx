@@ -6,7 +6,7 @@ const PredictiveAnalytics = () => {
   const { data: risks, isLoading: loadingRisks } = useQuery({
     queryKey: ['patientRisks'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/analytics/predictive/patient-risk');
+      const res = await axiosPrivate.get('/analytics/predictive/patient-risk');
       return res.data;
     }
   });
@@ -14,7 +14,7 @@ const PredictiveAnalytics = () => {
   const { data: noShows, isLoading: loadingNoShows } = useQuery({
     queryKey: ['noShowPredictions'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/analytics/predictive/no-show');
+      const res = await axiosPrivate.get('/analytics/predictive/no-show');
       return res.data;
     }
   });
@@ -22,7 +22,7 @@ const PredictiveAnalytics = () => {
   const { data: demand, isLoading: loadingDemand } = useQuery({
     queryKey: ['resourceDemand'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/analytics/predictive/resource-demand');
+      const res = await axiosPrivate.get('/analytics/predictive/resource-demand');
       return res.data;
     }
   });

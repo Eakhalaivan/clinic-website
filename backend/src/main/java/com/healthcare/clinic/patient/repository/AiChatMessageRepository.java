@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface AiChatMessageRepository extends JpaRepository<AiChatMessage, Long> {
-    List<AiChatMessage> findBySessionIdOrderByCreatedAtAsc(Long sessionId);
+    List<AiChatMessage> findBySessionIdOrderBySentAtAsc(Long sessionId);
 }

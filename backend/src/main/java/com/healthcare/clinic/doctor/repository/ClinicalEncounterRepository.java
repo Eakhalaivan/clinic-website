@@ -11,4 +11,5 @@ public interface ClinicalEncounterRepository extends JpaRepository<ClinicalEncou
     List<ClinicalEncounter> findByPatientIdOrderByCreatedAtDesc(Long patientId);
     List<ClinicalEncounter> findByDoctorIdAndStatusNot(Long doctorId, String status);
     List<ClinicalEncounter> findByDoctorIdOrderByCreatedAtDesc(Long doctorId);
+    java.util.Optional<ClinicalEncounter> findByAppointmentId(Long appointmentId);
 }

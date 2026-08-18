@@ -26,10 +26,14 @@ public class EcCartController {
 
     @PostMapping("/items")
     public ResponseEntity<EcCart> addItem(
-            @RequestParam Long cartId,
-            @RequestParam Long productId,
-            @RequestParam Integer quantity) {
-        return ResponseEntity.ok(cartService.addItemToCart(cartId, productId, quantity));
+            @AuthenticationPrincipal User user,
+            @RequestHeader(value = "X-Session-Key", required = false) String sessionKey,
+            @RequestBody java.util.Map<String, Object> request) {
+        Long patientId = user != null ? user.getId() : null;
+        EcCart cart = cartService.getOrCreateCart(patientId, sessionKey);
+        Long productId = Long.valueOf(request.get("productId").toString());
+        Integer quantity = Integer.valueOf(request.get("quantity").toString());
+        return ResponseEntity.ok(cartService.addItemToCart(cart.getId(), productId, quantity));
     }
 
     @PostMapping("/merge")

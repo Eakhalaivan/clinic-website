@@ -17,6 +17,20 @@ public class CashierController {
 
     private final CashierService cashierService;
 
+    @GetMapping("/sessions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    public ResponseEntity<java.util.List<CashierSession>> getSessions() {
+        return ResponseEntity.ok(cashierService.getAllSessions());
+    }
+
+    @GetMapping("/session/current")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RECEPTIONIST')")
+    public ResponseEntity<CashierSession> getCurrentSession(@RequestParam Long cashierId) {
+        return cashierService.getCurrentSession(cashierId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
     @PostMapping("/session/open")
     @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'RECEPTIONIST')")
     public ResponseEntity<CashierSession> openSession(@RequestBody Map<String, Object> request) {

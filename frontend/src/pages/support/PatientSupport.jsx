@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { LifeBuoy, Search, Plus, MessageCircle, FileText, ChevronRight } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader';
 
 export default function PatientSupport() {
     const queryClient = useQueryClient();
@@ -13,7 +12,7 @@ export default function PatientSupport() {
     const { data: tickets = [] } = useQuery({
         queryKey: ['patientTickets'],
         queryFn: async () => {
-            const res = await axiosPrivate.get('/api/v1/patient/support/tickets');
+            const res = await axiosPrivate.get('/v1/patient/support/tickets');
             return res.data;
         }
     });
@@ -22,7 +21,7 @@ export default function PatientSupport() {
         queryKey: ['kbSearch', searchQuery],
         queryFn: async () => {
             if (!searchQuery) return [];
-            const res = await axiosPrivate.get(`/api/v1/patient/support/kb/search?q=${searchQuery}`);
+            const res = await axiosPrivate.get(`/v1/patient/support/kb/search?q=${searchQuery}`);
             return res.data;
         },
         enabled: searchQuery.length > 2
@@ -30,7 +29,7 @@ export default function PatientSupport() {
 
     const createMutation = useMutation({
         mutationFn: async (data) => {
-            const res = await axiosPrivate.post('/api/v1/patient/support/tickets', data);
+            const res = await axiosPrivate.post('/v1/patient/support/tickets', data);
             return res.data;
         },
         onSuccess: () => {
@@ -42,7 +41,7 @@ export default function PatientSupport() {
 
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-8">
-            <PageHeader title="Help & Support" subtitle="Find answers or contact our team" />
+            <div className="mb-6"><h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">Help & Support</h1><p className="text-sm text-[var(--color-text-muted)] m-0 mt-1">Find answers or contact our team</p></div>
             
             {/* Knowledge Base Search */}
             <div className="bg-indigo-600 rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">

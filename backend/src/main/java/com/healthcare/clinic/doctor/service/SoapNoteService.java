@@ -26,7 +26,7 @@ public class SoapNoteService {
     @Transactional
     public SoapNote saveSoapNote(User user, Long encounterId, SoapNote note) {
         ClinicalEncounter encounter = encounterService.getEncounter(user, encounterId);
-        if (encounter.getStatus().equals("Finalized") || encounter.getStatus().equals("Signed") || encounter.getStatus().equals("Completed")) {
+        if (encounter.getStatus().equals("Finalized") || encounter.getStatus().equals("Signed") || encounter.getStatus().equals("Completed") || encounter.getStatus().equals("CLOSED")) {
             throw new RuntimeException("Cannot edit SOAP note for a finalized encounter");
         }
 

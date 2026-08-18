@@ -35,6 +35,23 @@ public class MarketingController {
     private final CouponService couponService;
     private final GiftCardService giftCardService;
     private final MarketingDashboardService dashboardService;
+    private final CommunicationHistoryService communicationHistoryService;
+
+    // ─── Communications ───────────────────────────────────────────────────────
+
+    @PostMapping("/communications/send")
+    @PreAuthorize("hasAnyRole('MARKETING','SUPER_ADMIN')")
+    public ResponseEntity<CommunicationHistory> sendCommunication(@RequestBody CommunicationHistory communication) {
+        return ResponseEntity.ok(communicationHistoryService.sendCommunication(communication));
+    }
+
+    @GetMapping("/communications/history")
+    @PreAuthorize("hasAnyRole('MARKETING','SUPER_ADMIN','RECEPTION')")
+    public ResponseEntity<Page<CommunicationHistory>> getCommunicationHistory(
+            @RequestParam Long patientId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(communicationHistoryService.getPatientCommunicationHistory(patientId, pageable));
+    }
 
     // ─── Dashboard ────────────────────────────────────────────────────────────
 
@@ -392,6 +409,15 @@ public class MarketingController {
             @RequestParam(required = false) String comments,
             @RequestParam(required = false) String category) {
         return ResponseEntity.ok(npsService.submitResponse(id, npsScore, rating, comments, category));
+    }
+    
+    @PostMapping("/nps/surveys/{id}/resolve")
+    @PreAuthorize("hasAnyRole('MARKETING','SUPER_ADMIN','BRANCH_ADMIN')")
+    public ResponseEntity<NpsResponse> resolveEscalation(
+            @PathVariable Long id,
+            @RequestParam Long resolvedBy,
+            @RequestParam String resolutionNotes) {
+        return ResponseEntity.ok(npsService.resolveEscalation(id, resolvedBy, resolutionNotes));
     }
 
     @GetMapping("/nps/metrics")

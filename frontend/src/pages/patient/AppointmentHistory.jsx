@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { CalendarDays, XCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const AppointmentHistory = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [cancelId, setCancelId] = useState(null);
 
   const { data: appointments = [], isLoading } = useQuery({
     queryKey: ['patientAppointments', user?.id],
@@ -24,28 +27,30 @@ const AppointmentHistory = () => {
       toast.success('Appointment cancelled successfully');
       queryClient.invalidateQueries(['patientAppointments', user?.id]);
       queryClient.invalidateQueries(['patient-360']);
+      setCancelId(null);
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to cancel appointment');
+      setCancelId(null);
     }
   });
 
   const handleCancel = (id) => {
-    if (window.confirm('Are you sure you want to cancel this appointment?')) {
-      cancelMutation.mutate(id);
-    }
+    cancelMutation.mutate(id);
   };
+
+  const isActive = (status) => ['SCHEDULED', 'BOOKED', 'CONFIRMED'].includes(status);
 
   const statusColor = (status) => {
     if (status === 'COMPLETED') return { bg: 'var(--color-success-bg)', color: 'var(--color-success)' };
-    if (status === 'SCHEDULED') return { bg: '#e0f2fe', color: '#0369a1' };
+    if (isActive(status)) return { bg: '#EFF4FF', color: '#2B4AFE' };
     return { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' };
   };
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto">
       <h1 className="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-        <CalendarDays size={24} color="#0369a1" aria-hidden="true" /> Appointment History
+        <CalendarDays size={24} color="#2B4AFE" aria-hidden="true" /> Appointment History
       </h1>
 
       <div style={{ background: 'var(--color-surface)', borderRadius: '12px', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
@@ -68,9 +73,9 @@ const AppointmentHistory = () => {
                 <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                   {a.specialty || 'General'} · {a.type || 'Consultation'}
                 </p>
-                <p className="text-xs mt-1 font-semibold" style={{ color: '#0369a1' }}>
-                  {a.date || new Date(a.startTime).toLocaleDateString()} at{' '}
-                  {a.time || new Date(a.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <p className="text-xs mt-1 font-semibold" style={{ color: '#2B4AFE' }}>
+                  {a.date || (a.startTime ? new Date(a.startTime).toLocaleDateString() : '—')} at{' '}
+                  {a.time || (a.startTime ? new Date(a.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—')}
                 </p>
               </div>
               <div className="flex flex-col sm:items-end gap-2">
@@ -80,19 +85,25 @@ const AppointmentHistory = () => {
                 >
                   {a.status}
                 </span>
-                {a.status === 'SCHEDULED' && (
+                {isActive(a.status) && (
                   <div className="flex gap-2 mt-2">
+                    {cancelId === a.id ? (
+                      <div className="flex gap-2">
+                        <button onClick={() => handleCancel(a.id)} className="text-xs font-bold text-red-600 underline">Confirm</button>
+                        <button onClick={() => setCancelId(null)} className="text-xs font-bold text-gray-600 underline">Cancel</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setCancelId(a.id)}
+                        disabled={cancelMutation.isPending}
+                        className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition-colors disabled:opacity-50"
+                      >
+                        <XCircle size={14} /> Cancel
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleCancel(a.id)}
-                      disabled={cancelMutation.isPending}
-                      className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition-colors disabled:opacity-50"
-                    >
-                      <XCircle size={14} /> Cancel
-                    </button>
-                    {/* Reschedule could redirect to BookAppointment with pre-selected doctor */}
-                    <button
-                      onClick={() => window.location.href = `/patient/book-appointment/${a.doctorId}`}
-                      className="flex items-center gap-1 text-xs font-bold text-[#0369a1] bg-[#e0f2fe] hover:bg-[#bae6fd] px-2 py-1 rounded transition-colors"
+                      onClick={() => navigate(`/patient/book/${a.doctorUserId}?rescheduleId=${a.id}`)}
+                      className="flex items-center gap-1 text-xs font-bold text-[#2B4AFE] bg-[#EFF4FF] hover:bg-[#bae6fd] px-2 py-1 rounded transition-colors"
                     >
                       <RefreshCw size={14} /> Reschedule
                     </button>

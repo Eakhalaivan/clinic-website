@@ -30,5 +30,9 @@ public class OutboxPrescriptionPayload {
         private String instructions;
         private String strength;
         private String timing;
+        private Long medicineId;
+        private Integer prescribedQuantity;
+        private Integer dispensedQuantity;
+        private Integer remainingQuantity;
     }
 }

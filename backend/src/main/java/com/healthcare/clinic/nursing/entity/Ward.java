@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 
-@Entity
+@Entity(name="NursingWard")
 @Table(name = "wards")
 @Data
 @NoArgsConstructor

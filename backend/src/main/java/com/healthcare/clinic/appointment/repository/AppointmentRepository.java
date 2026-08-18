@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -16,6 +17,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByDoctorId(Long doctorId);
     List<Appointment> findByPatient_UserId(Long userId);
     List<Appointment> findByDoctor_UserId(Long userId);
+    List<Appointment> findAllByStatus(com.healthcare.clinic.appointment.entity.AppointmentStatus status);
+    java.util.Optional<Appointment> findByIdempotencyKey(String idempotencyKey);
 
     @Query("SELECT new com.healthcare.clinic.appointment.dto.AppointmentResponseDto(" +
            "a.id, a.status, a.reasonForVisit, a.notes, a.branchId, a.createdAt, " +
@@ -73,4 +76,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.userId = :patientUserId AND a.doctor.id = :doctorId AND a.status != 'CANCELLED' AND a.slot.startTime >= :startOfDay AND a.slot.startTime < :endOfDay")
     long countByPatientAndDoctorAndDate(@Param("patientUserId") Long patientUserId, @Param("doctorId") Long doctorId, @Param("startOfDay") ZonedDateTime startOfDay, @Param("endOfDay") ZonedDateTime endOfDay);
+    
+    long countBySlotStartTimeBetween(java.time.ZonedDateTime start, java.time.ZonedDateTime end);
+    long countByStatus(com.healthcare.clinic.appointment.entity.AppointmentStatus status);
 }

@@ -27,3 +27,11 @@ stripe:
   secret-key: dummy
   webhook-secret: dummy
   publishable-key: dummy
+
+gemini:
+  api:
+    url: dummy
+    key: dummy
+
+app:
+  frontend-url: http://localhost:5173

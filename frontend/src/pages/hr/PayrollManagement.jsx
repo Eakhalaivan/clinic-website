@@ -18,7 +18,7 @@ const PayrollManagement = () => {
   const { data: payrolls, isLoading } = useQuery({
     queryKey: ['payrolls'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/hr/payroll');
+      const res = await axiosPrivate.get('/hr/payroll');
       return res.data;
     }
   });
@@ -26,7 +26,7 @@ const PayrollManagement = () => {
   const { data: staffList } = useQuery({
     queryKey: ['staffList'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/users');
+      const res = await axiosPrivate.get('/users');
       // For a real app we'd filter for staff roles only
       return res.data;
     }
@@ -34,7 +34,7 @@ const PayrollManagement = () => {
 
   const generateMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axiosPrivate.post('/api/hr/payroll/generate', data);
+      const res = await axiosPrivate.post('/hr/payroll/generate', data);
       return res.data;
     },
     onSuccess: () => {
@@ -56,7 +56,7 @@ const PayrollManagement = () => {
 
   const processMutation = useMutation({
     mutationFn: async (payrollId) => {
-      const res = await axiosPrivate.put(`/api/hr/payroll/${payrollId}/process`);
+      const res = await axiosPrivate.put(`/hr/payroll/${payrollId}/process`);
       return res.data;
     },
     onSuccess: () => {

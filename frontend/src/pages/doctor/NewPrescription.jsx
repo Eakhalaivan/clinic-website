@@ -6,6 +6,7 @@ import { axiosPrivate } from '../../api/axios';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import WipBanner from '../../components/ui/WipBanner';
 import OrderSetPicker from './OrderSetPicker';
+import PrescriptionDocument from '../../components/doctor/PrescriptionDocument';
 import { 
   Plus, Trash2, ChevronLeft, Search, BriefcaseMedical, 
   FileText, AlertTriangle, Activity, Clock, Save, Printer, 
@@ -208,7 +209,7 @@ const NewPrescription = () => {
     if (profile?.medicalHistorySummary && !medicalHistory) {
       setMedicalHistory(profile.medicalHistorySummary);
     }
-  }, [profile]);
+  }, [profile, medicalHistory]);
 
   const openEditModal = () => {
     let parsedAllergies = '';

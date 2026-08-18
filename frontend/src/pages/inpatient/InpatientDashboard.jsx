@@ -12,7 +12,7 @@ const InpatientDashboard = () => {
   const { data: beds, isLoading: bedsLoading } = useQuery({
     queryKey: ['beds'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/inpatient/beds');
+      const res = await axiosPrivate.get('/inpatient/beds');
       return res.data;
     }
   });
@@ -20,14 +20,21 @@ const InpatientDashboard = () => {
   const { data: admissions, isLoading: admissionsLoading } = useQuery({
     queryKey: ['activeAdmissions'],
     queryFn: async () => {
-      const res = await axiosPrivate.get('/api/inpatient/admissions/active');
+      const res = await axiosPrivate.get('/inpatient/admissions?status=ACTIVE');
       return res.data;
     }
   });
 
   const admitMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axiosPrivate.post('/api/inpatient/admit', data);
+      // Backend expects AdmissionRequest: patientId, doctorId, bedId, admissionType, reason
+      const payload = {
+        ...data,
+        doctorId: 1, // default doctor for demo
+        admissionType: 'ROUTINE',
+        reason: data.notes
+      };
+      const res = await axiosPrivate.post('/inpatient/admissions', payload);
       return res.data;
     },
     onSuccess: () => {
@@ -41,7 +48,9 @@ const InpatientDashboard = () => {
 
   const dischargeMutation = useMutation({
     mutationFn: async (admissionId) => {
-      const res = await axiosPrivate.post(`/api/inpatient/discharge/${admissionId}`);
+      // Backend expects DischargeRequest: dischargingDoctorId, summaryData
+      const payload = { dischargingDoctorId: 1, summaryData: "Discharged from UI" };
+      const res = await axiosPrivate.post(`/inpatient/admissions/${admissionId}/discharge`, payload);
       return res.data;
     },
     onSuccess: () => {
@@ -52,7 +61,9 @@ const InpatientDashboard = () => {
 
   const updateBedStatusMutation = useMutation({
     mutationFn: async ({ bedId, status }) => {
-      const res = await axiosPrivate.put(`/api/inpatient/beds/${bedId}/status?status=${status}`);
+      // Backend doesn't have a direct status update yet, but simulating it.
+      // Ideally we need an endpoint in BedManagementController
+      const res = await axiosPrivate.patch(`/inpatient/beds/${bedId}/status`, { status });
       return res.data;
     },
     onSuccess: () => {

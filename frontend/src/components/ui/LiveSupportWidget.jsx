@@ -17,7 +17,7 @@ export default function LiveSupportWidget() {
 
         // In a real app, this would use WebSockets. Here we mock a generic REST submission.
         try {
-            await axiosPrivate.post('/api/v1/patient/support/tickets', {
+            await axiosPrivate.post('/v1/patient/support/tickets', {
                 subject: 'Live Chat Support',
                 description: input,
                 channel: 'LIVE_CHAT'

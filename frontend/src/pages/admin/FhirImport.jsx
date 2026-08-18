@@ -9,7 +9,7 @@ const FhirImport = () => {
 
   const importMutation = useMutation({
     mutationFn: async (formData) => {
-      const res = await axiosPrivate.post('/api/integration/fhir/import', formData, {
+      const res = await axiosPrivate.post('/integration/fhir/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return res.data;

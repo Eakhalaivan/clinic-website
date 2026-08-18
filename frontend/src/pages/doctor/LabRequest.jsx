@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
+import { toast } from 'react-hot-toast';
 import { FlaskConical, ChevronLeft, Send, Check } from 'lucide-react';
 
 const LabRequest = () => {
@@ -47,7 +48,7 @@ const LabRequest = () => {
       });
     },
     onSuccess: () => {
-      alert('Lab order placed successfully!');
+      toast.success('Lab order placed successfully!');
       if (patientId) {
         navigate(`/doctor/patients/${patientId}/notes`);
       } else {

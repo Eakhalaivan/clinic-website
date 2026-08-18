@@ -54,4 +54,29 @@ public class PharmacyPrescriptionItem {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "medicine_id")
+    private Long medicineId;
+
+    @Column(name = "prescribed_quantity")
+    @Builder.Default
+    private Integer prescribedQuantity = 1;
+
+    @Column(name = "dispensed_quantity")
+    @Builder.Default
+    private Integer dispensedQuantity = 0;
+
+    @Column(name = "remaining_quantity")
+    @Builder.Default
+    private Integer remainingQuantity = 1;
+
+    @Column(name = "substitution_allowed")
+    @Builder.Default
+    private Boolean substitutionAllowed = false;
+
+    @Column(name = "dispensed_medicine_id")
+    private Long dispensedMedicineId;
+
+    @Column(name = "dispensed_medicine_name")
+    private String dispensedMedicineName;
 }

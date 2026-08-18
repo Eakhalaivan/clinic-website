@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    Optional<User> findByPhoneNumber(String phoneNumber);
 
     @Query("SELECT u FROM User u WHERE " +
            "LOWER(u.firstName) LIKE LOWER(CONCAT('%',:q,'%')) OR " +
@@ -21,6 +22,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "LOWER(u.email)     LIKE LOWER(CONCAT('%',:q,'%'))")
     Page<User> searchByNameOrEmail(@Param("q") String q, Pageable pageable);
 
+    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
+    Optional<User> findByEmailWithRoles(@Param("email") String email);
+
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND u.enabled = true")
     java.util.List<User> findUsersByRoleName(@Param("roleName") String roleName);
+    
+    long countByEnabledTrue();
+    long countByEnabledFalse();
 }
