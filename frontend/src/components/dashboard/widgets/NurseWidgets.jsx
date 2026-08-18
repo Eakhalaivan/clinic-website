@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../../api/axios';
-import { HeartPulse, Users, Save, Activity, FileText } from 'lucide-react';
+import { Activity, Inbox, UserSearch } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Card from '../../ui/Card';
 import Button from '../../ui/Button';
 import FormField from '../../ui/FormField';
 import Badge from '../../ui/Badge';
-import EmptyState from '../../ui/EmptyState';
 import Skeleton from '../../ui/Skeleton';
 import PatientProfileCard from '../../PatientProfileCard';
+
+// Helper component for the custom empty states in the Nurse Dashboard
+const CustomEmptyState = ({ icon: IconComponent, title, description }) => (
+  <div className="flex flex-col items-center justify-center h-full text-center p-8">
+    <div className="w-[84px] h-[84px] rounded-[24px] bg-[#f2f5fd] flex items-center justify-center mb-6">
+      <IconComponent className="w-10 h-10 text-[#2552d0]" strokeWidth={2} />
+    </div>
+    <h3 className="font-bold text-[18px] text-slate-900 mb-3">{title}</h3>
+    <p className="text-[14px] text-slate-500 max-w-[280px] leading-relaxed m-0">
+      {description}
+    </p>
+  </div>
+);
 
 export const NurseAssignedPatientsWidget = ({ assignmentsList, isAssignmentsLoading, selectedPatientId, setSelectedPatientId }) => {
   const [showTokenForm, setShowTokenForm] = useState(false);
@@ -35,14 +46,23 @@ export const NurseAssignedPatientsWidget = ({ assignmentsList, isAssignmentsLoad
   });
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <Card.Header className="flex justify-between items-center">
-        <h2 className="font-display font-bold text-lg text-[var(--color-navy-900)] m-0 flex items-center gap-2">
-          <Users className="w-5 h-5 text-[var(--color-navy-800)]" /> Assigned Patients
+    <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-full flex flex-col overflow-hidden">
+      <div className="px-6 py-5 flex justify-between items-center shrink-0">
+        <h2 className="font-bold text-[16px] text-slate-900 flex items-center gap-3 m-0">
+          <div className="flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          Assigned Patients
         </h2>
-        <Button variant="outline" size="sm" onClick={() => setShowTokenForm(!showTokenForm)}>+ OP Token</Button>
-      </Card.Header>
-      <Card.Body className="p-2 flex-1 overflow-y-auto">
+        <button 
+          onClick={() => setShowTokenForm(!showTokenForm)}
+          className="border border-indigo-200 text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors"
+        >
+          + OP Token
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
         {showTokenForm && (
           <div className="p-3 mb-2 bg-[var(--color-surface-alt)] rounded-md border border-[var(--color-border)] space-y-3">
             <p className="text-xs font-semibold text-[var(--color-text)] m-0">Register Walk-in / OP Token</p>
@@ -63,31 +83,33 @@ export const NurseAssignedPatientsWidget = ({ assignmentsList, isAssignmentsLoad
             </div>
           </div>
         )}
+
         {isAssignmentsLoading ? (
           <Skeleton count={4} variant="line" className="h-10 mb-2" />
         ) : assignmentsList?.length === 0 ? (
-          <EmptyState title="No Patients Assigned" description="There are currently no OP patients assigned to your nursing queue." />
+          <CustomEmptyState 
+            icon={Inbox} 
+            title="No Patients Assigned" 
+            description="There are currently no OP patients assigned to your nursing queue." 
+          />
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {assignmentsList?.map((assignment) => {
               const isSelected = selectedPatientId === assignment.patientId;
               return (
-                <div key={assignment.id} onClick={() => setSelectedPatientId(assignment.patientId)} className={`p-3 rounded-md border transition-all cursor-pointer flex items-center justify-between gap-2 ${isSelected ? 'border-[var(--color-navy-600)] bg-[var(--color-navy-800)]/10 shadow-sm' : 'border-transparent hover:bg-[var(--color-surface-alt)]'}`}>
+                <div key={assignment.id} onClick={() => setSelectedPatientId(assignment.patientId)} className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${isSelected ? 'border-indigo-600 bg-indigo-50/50 shadow-sm' : 'border-slate-200 hover:bg-slate-50'}`}>
                   <div>
-                    <p className="font-semibold text-sm text-[var(--color-navy-900)] m-0">{assignment.patientName}</p>
-                    <p className="text-xs text-[var(--color-text-muted)] m-0 mb-1">Dr. {assignment.attendingDoctorName}</p>
-                    <div className="flex gap-1 flex-wrap mt-1">
-                      {assignment.insuranceStatus && <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-blue-100 text-blue-800 border border-blue-200">Ins: {assignment.insuranceStatus}</span>}
-                    </div>
+                    <p className="font-bold text-slate-900 m-0 text-sm">{assignment.patientName}</p>
+                    <p className="text-xs text-slate-500 m-0 mt-1">Dr. {assignment.attendingDoctorName}</p>
                   </div>
-                  <Badge variant={isSelected ? 'info' : 'neutral'} size="sm">{isSelected ? 'Active' : 'Select'}</Badge>
+                  <Badge variant={isSelected ? 'primary' : 'neutral'} size="sm">{isSelected ? 'Active' : 'Select'}</Badge>
                 </div>
               );
             })}
           </div>
         )}
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -111,58 +133,79 @@ export const VitalSignsFormWidget = ({ selectedPatientId, selectedPatient }) => 
 
   if (!selectedPatientId || !selectedPatient) {
     return (
-      <Card className="min-h-[300px] flex items-center justify-center h-full">
-        <EmptyState icon={Users} title="No Patient Selected" description="Select an assigned patient from the list on the left to view records and log triage vitals." />
-      </Card>
+      <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-full flex flex-col justify-center">
+        <CustomEmptyState 
+          icon={UserSearch} 
+          title="No Patient Selected" 
+          description="Select an assigned patient from the list on the left to view records and log triage vitals." 
+        />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6 h-[600px] overflow-y-auto">
+    <div className="h-full flex flex-col overflow-y-auto space-y-6">
       <PatientProfileCard patient={{ firstName: selectedPatient.patientName.split(' ')[0], lastName: selectedPatient.patientName.split(' ')[1] || '', age: selectedPatient.age, id: selectedPatient.patientId }} />
-      <Card>
-        <Card.Header><h2 className="font-display font-bold text-lg text-[var(--color-navy-900)] m-0 flex items-center gap-2"><Activity className="w-5 h-5 text-[var(--color-navy-800)]" /> Record Vital Signs</h2></Card.Header>
-        <Card.Body>
-          <form onSubmit={e => { e.preventDefault(); recordVitals.mutate(vitalSign); }} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Temperature (°C)" required id="temp"><input id="temp" type="number" step="0.1" className="input-field" value={vitalSign.temperature} onChange={e => setVitalSign({...vitalSign, temperature: e.target.value})} placeholder="e.g. 37.2" required /></FormField>
-              <FormField label="Blood Pressure (mmHg)" required id="bp"><input id="bp" type="text" className="input-field" value={vitalSign.bloodPressure} onChange={e => setVitalSign({...vitalSign, bloodPressure: e.target.value})} placeholder="e.g. 120/80" required /></FormField>
-              <FormField label="Heart Rate (bpm)" required id="hr"><input id="hr" type="number" className="input-field" value={vitalSign.heartRate} onChange={e => setVitalSign({...vitalSign, heartRate: e.target.value})} placeholder="e.g. 72" required /></FormField>
-              <FormField label="Respiratory Rate (bpm)" required id="rr"><input id="rr" type="number" className="input-field" value={vitalSign.respiratoryRate} onChange={e => setVitalSign({...vitalSign, respiratoryRate: e.target.value})} placeholder="e.g. 16" required /></FormField>
-              <FormField label="Oxygen Saturation SpO2 (%)" required id="spo2"><input id="spo2" type="number" step="0.1" className="input-field" value={vitalSign.oxygenSaturation} onChange={e => setVitalSign({...vitalSign, oxygenSaturation: e.target.value})} placeholder="e.g. 98" required /></FormField>
-            </div>
-            <FormField label="Clinical Nursing Notes" id="notes"><textarea id="notes" className="input-field" rows={3} value={vitalSign.notes} onChange={e => setVitalSign({...vitalSign, notes: e.target.value})} placeholder="Observe patient symptoms, medication tolerance, or triage notes..." /></FormField>
-            <div className="pt-2 flex justify-end"><Button type="submit" variant="primary" icon={Save} isLoading={recordVitals.isPending}>Save Vitals</Button></div>
-          </form>
-        </Card.Body>
-      </Card>
+      <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex-1 p-6">
+        <h2 className="font-bold text-[16px] text-slate-900 flex items-center gap-3 m-0 mb-6">
+          <Activity className="w-5 h-5 text-indigo-600" /> Record Vital Signs
+        </h2>
+        <form onSubmit={e => { e.preventDefault(); recordVitals.mutate(vitalSign); }} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField label="Temperature (°C)" required id="temp"><input id="temp" type="number" step="0.1" className="input-field" value={vitalSign.temperature} onChange={e => setVitalSign({...vitalSign, temperature: e.target.value})} placeholder="e.g. 37.2" required /></FormField>
+            <FormField label="Blood Pressure (mmHg)" required id="bp"><input id="bp" type="text" className="input-field" value={vitalSign.bloodPressure} onChange={e => setVitalSign({...vitalSign, bloodPressure: e.target.value})} placeholder="e.g. 120/80" required /></FormField>
+            <FormField label="Heart Rate (bpm)" required id="hr"><input id="hr" type="number" className="input-field" value={vitalSign.heartRate} onChange={e => setVitalSign({...vitalSign, heartRate: e.target.value})} placeholder="e.g. 72" required /></FormField>
+            <FormField label="Respiratory Rate (bpm)" required id="rr"><input id="rr" type="number" className="input-field" value={vitalSign.respiratoryRate} onChange={e => setVitalSign({...vitalSign, respiratoryRate: e.target.value})} placeholder="e.g. 16" required /></FormField>
+            <FormField label="Oxygen Saturation SpO2 (%)" required id="spo2"><input id="spo2" type="number" step="0.1" className="input-field" value={vitalSign.oxygenSaturation} onChange={e => setVitalSign({...vitalSign, oxygenSaturation: e.target.value})} placeholder="e.g. 98" required /></FormField>
+          </div>
+          <FormField label="Clinical Nursing Notes" id="notes"><textarea id="notes" className="input-field" rows={3} value={vitalSign.notes} onChange={e => setVitalSign({...vitalSign, notes: e.target.value})} placeholder="Observe patient symptoms, medication tolerance, or triage notes..." /></FormField>
+          <div className="pt-4 flex justify-end">
+            <button type="submit" disabled={recordVitals.isPending} className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+              {recordVitals.isPending ? 'Saving...' : 'Save Vitals'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
 export const NurseRecentActivityWidget = ({ recentActivity, isActivityLoading }) => (
-  <Card className="h-[600px] flex flex-col">
-    <Card.Header><h2 className="font-display font-bold text-lg text-[var(--color-navy-900)] m-0 flex items-center gap-2"><Activity className="w-5 h-5 text-[var(--color-navy-800)]" /> Recent Activity</h2></Card.Header>
-    <Card.Body className="p-5 flex-1 overflow-y-auto">
+  <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-full flex flex-col overflow-hidden">
+    <div className="px-6 py-5 flex items-center shrink-0">
+      <h2 className="font-bold text-[16px] text-slate-900 flex items-center gap-3 m-0">
+        <Activity className="w-5 h-5 text-slate-900" /> Recent Activity
+      </h2>
+    </div>
+    
+    <div className="flex-1 overflow-y-auto px-6 pb-6">
       {isActivityLoading ? (
         <Skeleton count={5} variant="line" className="h-12 mb-3" />
       ) : recentActivity?.length === 0 ? (
-        <EmptyState icon={Activity} title="No Recent Activity" description="Quiet shift so far. No events to show." />
+        <CustomEmptyState 
+          icon={Activity} 
+          title="No Recent Activity" 
+          description="Quiet shift so far. No events to show." 
+        />
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-5 mt-4">
           {recentActivity?.map((act, i) => (
-            <div key={i} className="flex gap-3 relative">
-              {i !== recentActivity.length - 1 && <div className="absolute left-[13px] top-8 w-px h-10 bg-[var(--color-border)]"></div>}
-              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 ring-4 ring-[var(--color-surface)]" style={{ backgroundColor: act.bg || '#f3f4f6', color: act.color || '#3b82f6' }}><Activity size={12} /></div>
-              <div className="flex-1 min-w-0 pt-0.5">
-                <p className="text-xs font-bold text-[var(--color-text)] truncate">{act.title}</p>
-                <p className="text-[10px] text-[var(--color-text-muted)]">{act.sub}</p>
+            <div key={i} className="flex gap-4 relative">
+              {i !== recentActivity.length - 1 && <div className="absolute left-[13px] top-8 w-[2px] h-10 bg-slate-100"></div>}
+              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 ring-4 ring-white" style={{ backgroundColor: act.bg || '#f3f4f6', color: act.color || '#3b82f6' }}>
+                <Activity size={12} strokeWidth={3} />
               </div>
-              <div className="text-[10px] text-[var(--color-text-muted)] font-medium pt-0.5">{act.time ? new Date(act.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className="text-[13px] font-bold text-slate-900 truncate m-0">{act.title}</p>
+                <p className="text-[11px] text-slate-500 m-0 mt-0.5">{act.sub}</p>
+              </div>
+              <div className="text-[11px] text-slate-400 font-medium pt-0.5">
+                {act.time ? new Date(act.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+              </div>
             </div>
           ))}
         </div>
       )}
-    </Card.Body>
-  </Card>
+    </div>
+  </div>
 );

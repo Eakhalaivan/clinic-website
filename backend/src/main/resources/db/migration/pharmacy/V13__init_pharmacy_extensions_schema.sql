@@ -9,7 +9,7 @@ CREATE TABLE medicine_batches (
     quantity INT NOT NULL DEFAULT 0,
     created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE(medicine_id, batch_number),
-    CONSTRAINT fk_med_batches_medicine FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON DELETE CASCADE
+    CONSTRAINT fk_med_batches_medicine FOREIGN KEY (medicine_id) REFERENCES pharmacy_medicines(id) ON DELETE CASCADE
 );
 
 CREATE TABLE prescriptions_dispensed (
@@ -28,6 +28,6 @@ CREATE TABLE prescription_dispensed_items (
     quantity_dispensed INT NOT NULL,
     price_charged DECIMAL(10,2) NOT NULL,
     CONSTRAINT fk_disp_items_dispensed FOREIGN KEY (dispensed_id) REFERENCES prescriptions_dispensed(id) ON DELETE CASCADE,
-    CONSTRAINT fk_disp_items_medicine FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON DELETE CASCADE,
+    CONSTRAINT fk_disp_items_medicine FOREIGN KEY (medicine_id) REFERENCES pharmacy_medicines(id) ON DELETE CASCADE,
     CONSTRAINT fk_disp_items_batch FOREIGN KEY (batch_id) REFERENCES medicine_batches(id) ON DELETE SET NULL
 );

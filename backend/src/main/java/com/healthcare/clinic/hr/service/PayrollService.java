@@ -67,8 +67,8 @@ public class PayrollService {
         if (structure.getComponents() != null) {
             for (SalaryComponent comp : structure.getComponents()) {
                 BigDecimal amount = comp.getAmountType().equals("FIXED") ? 
-                        comp.getValue() : 
-                        basic.multiply(comp.getValue()).divide(BigDecimal.valueOf(100));
+                        comp.getAmount() : 
+                        basic.multiply(comp.getAmount()).divide(BigDecimal.valueOf(100));
 
                 if (comp.getType().equals("ALLOWANCE")) {
                     totalAllowances = totalAllowances.add(amount);

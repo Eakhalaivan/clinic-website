@@ -77,13 +77,14 @@ export default function BillingDashboard() {
   const fmt = (val) => val != null ? Number(val).toLocaleString('en-IN') : '0';
 
   const quickActions = [
-    { label: 'New Sale', icon: FileText, action: () => navigate('/sales'), color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Credit Bills', icon: CreditCard, action: () => navigate('/credit-bills'), color: 'text-orange-500', bg: 'bg-orange-50' },
-    { label: 'Process Return', icon: RotateCcw, action: () => navigate('/returns'), color: 'text-rose-500', bg: 'bg-rose-50' },
+    { label: 'New Sale', icon: FileText, action: () => navigate('/pharmacy/direct-pharmacy-sales'), color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Credit Bills', icon: CreditCard, action: () => navigate('/pharmacy/medicine-credit-bills'), color: 'text-orange-500', bg: 'bg-orange-50' },
+    { label: 'Process Return', icon: RotateCcw, action: () => navigate('/pharmacy/medicine-returns'), color: 'text-rose-500', bg: 'bg-rose-50' },
   ];
 
   return (
     <DashboardShell quickActions={quickActions}>
+      <div className="flex-1 overflow-y-auto pr-2 pb-6 min-h-0 flex flex-col">
       <div className="flex flex-col gap-1 mb-8 mt-2">
         <h2 className="text-[28px] font-extrabold text-slate-900 m-0 tracking-tight">
           {systemData?.greeting || 'Welcome'}, here's your Billing Dashboard
@@ -120,8 +121,8 @@ export default function BillingDashboard() {
         />
       </div>
 
-      <DashboardGrid
-        left={
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[400px]">
+        <div className="lg:col-span-5 flex flex-col">
           <div className="bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[15px] font-bold text-gray-900">Sales Trend (Last 7 Days)</h3>
@@ -151,8 +152,8 @@ export default function BillingDashboard() {
               <span className="text-[12px] font-semibold text-slate-700">Revenue (₹)</span>
             </div>
           </div>
-        }
-        center={
+        </div>
+        <div className="lg:col-span-7 flex flex-col">
           <div className="bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] flex flex-col h-full overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
               <h3 className="text-[15px] font-bold text-gray-900">Recent Transactions</h3>
@@ -214,12 +215,13 @@ export default function BillingDashboard() {
               </div>
             </div>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       <AppModal isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} maxWidth="sm:max-w-4xl" padding={false}>
         <PharmacyInvoice bill={selectedInvoice} onClose={() => setIsInvoiceModalOpen(false)} />
       </AppModal>
+      </div>
     </DashboardShell>
   );
 }

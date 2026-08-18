@@ -3,60 +3,56 @@
 -- and adds all new Marketing/CRM tables.
 
 -- ─── Extend existing campaigns table ────────────────────────────────────────
-ALTER TABLE campaigns
-    ADD COLUMN IF NOT EXISTS objective       VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS target_segment_id BIGINT,
-    ADD COLUMN IF NOT EXISTS channels        JSONB        NOT NULL DEFAULT '["EMAIL"]',
-    ADD COLUMN IF NOT EXISTS content_template_id BIGINT,
-    ADD COLUMN IF NOT EXISTS budget          DECIMAL(12,2),
-    ADD COLUMN IF NOT EXISTS owner_id        BIGINT,
-    ADD COLUMN IF NOT EXISTS branch_id       BIGINT,
-    ADD COLUMN IF NOT EXISTS start_date      TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS end_date        TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS frequency_cap_per_user INT NOT NULL DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS approved_by     BIGINT,
-    ADD COLUMN IF NOT EXISTS approved_at     TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS scheduled_at    TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS success_metrics JSONB,
-    ADD COLUMN IF NOT EXISTS archived_at     TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    ADD COLUMN IF NOT EXISTS campaign_type   VARCHAR(50) NOT NULL DEFAULT 'GENERAL';
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS objective       VARCHAR(100);
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS target_segment_id BIGINT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS channels        JSONB        NOT NULL DEFAULT '["EMAIL"]';
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS content_template_id BIGINT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS budget          DECIMAL(12,2);
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS owner_id        BIGINT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS branch_id       BIGINT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS start_date      TIMESTAMP WITH TIME ZONE;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS end_date        TIMESTAMP WITH TIME ZONE;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS frequency_cap_per_user INT NOT NULL DEFAULT 1;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS approved_by     BIGINT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS approved_at     TIMESTAMP WITH TIME ZONE;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS scheduled_at    TIMESTAMP WITH TIME ZONE;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS success_metrics JSONB;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS archived_at     TIMESTAMP WITH TIME ZONE;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW();
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS campaign_type   VARCHAR(50) NOT NULL DEFAULT 'GENERAL';
 
 -- ─── Extend existing coupons table ──────────────────────────────────────────
-ALTER TABLE coupons
-    ADD COLUMN IF NOT EXISTS campaign_id         BIGINT,
-    ADD COLUMN IF NOT EXISTS eligible_service_ids JSONB,
-    ADD COLUMN IF NOT EXISTS branch_ids          JSONB,
-    ADD COLUMN IF NOT EXISTS segment_id          BIGINT,
-    ADD COLUMN IF NOT EXISTS per_patient_limit   INT NOT NULL DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS is_stackable        BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS approved_by         BIGINT,
-    ADD COLUMN IF NOT EXISTS approved_at         TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS purpose             VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    ADD COLUMN IF NOT EXISTS created_by          BIGINT;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS campaign_id         BIGINT;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS eligible_service_ids JSONB;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS branch_ids          JSONB;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS segment_id          BIGINT;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS per_patient_limit   INT NOT NULL DEFAULT 1;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS is_stackable        BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS approved_by         BIGINT;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS approved_at         TIMESTAMP WITH TIME ZONE;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS purpose             VARCHAR(100);
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW();
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS created_by          BIGINT;
 
 -- ─── Extend existing patient_loyalty table ───────────────────────────────────
-ALTER TABLE patient_loyalty
-    ADD COLUMN IF NOT EXISTS lifetime_earned    INT NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS lifetime_redeemed  INT NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS last_earned_at     TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS last_redeemed_at   TIMESTAMP WITH TIME ZONE;
+ALTER TABLE patient_loyalty ADD COLUMN IF NOT EXISTS lifetime_earned    INT NOT NULL DEFAULT 0;
+ALTER TABLE patient_loyalty ADD COLUMN IF NOT EXISTS lifetime_redeemed  INT NOT NULL DEFAULT 0;
+ALTER TABLE patient_loyalty ADD COLUMN IF NOT EXISTS last_earned_at     TIMESTAMP WITH TIME ZONE;
+ALTER TABLE patient_loyalty ADD COLUMN IF NOT EXISTS last_redeemed_at   TIMESTAMP WITH TIME ZONE;
 
 -- ─── Extend existing referrals table ────────────────────────────────────────
-ALTER TABLE referrals
-    ADD COLUMN IF NOT EXISTS program_id              BIGINT,
-    ADD COLUMN IF NOT EXISTS referral_code           VARCHAR(30) UNIQUE,
-    ADD COLUMN IF NOT EXISTS referral_link           VARCHAR(500),
-    ADD COLUMN IF NOT EXISTS lead_id                 BIGINT,
-    ADD COLUMN IF NOT EXISTS converted_patient_id    BIGINT,
-    ADD COLUMN IF NOT EXISTS qualifying_reference_id BIGINT,
-    ADD COLUMN IF NOT EXISTS fraud_review_status     VARCHAR(30) NOT NULL DEFAULT 'NOT_REQUIRED',
-    ADD COLUMN IF NOT EXISTS reward_issued_at        TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS reward_type             VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS reward_value            DECIMAL(10,2),
-    ADD COLUMN IF NOT EXISTS expires_at              TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS updated_at              TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW();
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS program_id              BIGINT;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_code           VARCHAR(30) UNIQUE;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_link           VARCHAR(500);
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS lead_id                 BIGINT;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS converted_patient_id    BIGINT;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS qualifying_reference_id BIGINT;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS fraud_review_status     VARCHAR(30) NOT NULL DEFAULT 'NOT_REQUIRED';
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS reward_issued_at        TIMESTAMP WITH TIME ZONE;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS reward_type             VARCHAR(30);
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS reward_value            DECIMAL(10,2);
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS expires_at              TIMESTAMP WITH TIME ZONE;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS updated_at              TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW();
 
 -- ─── Campaign Segments ────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS campaign_segments (

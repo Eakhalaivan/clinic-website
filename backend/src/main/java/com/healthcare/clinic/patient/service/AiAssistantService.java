@@ -1,11 +1,11 @@
 package com.healthcare.clinic.patient.service;
 
 import com.healthcare.clinic.identity.entity.User;
-import com.healthcare.clinic.patient.entity.AiChatMessage;
-import com.healthcare.clinic.patient.entity.AiChatSession;
+import com.healthcare.clinic.ai.entity.AiChatMessage;
+import com.healthcare.clinic.ai.entity.AiChatSession;
 import com.healthcare.clinic.patient.entity.PatientProfile;
-import com.healthcare.clinic.patient.repository.AiChatMessageRepository;
-import com.healthcare.clinic.patient.repository.AiChatSessionRepository;
+import com.healthcare.clinic.ai.repository.AiChatMessageRepository;
+import com.healthcare.clinic.ai.repository.AiChatSessionRepository;
 import com.healthcare.clinic.patient.repository.PatientProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,18 +29,20 @@ public class AiAssistantService {
     @Transactional
     public AiChatSession getOrCreateActiveSession(User user) {
         PatientProfile profile = getPatientProfile(user);
-        return sessionRepository.findFirstByPatientIdAndStatusOrderByCreatedAtDesc(profile.getId(), "Active")
+        return sessionRepository.findByUserId(profile.getId())
+                .stream().findFirst()
                 .orElseGet(() -> {
-                    AiChatSession newSession = new AiChatSession();
-                    newSession.setPatientId(profile.getId());
-                    newSession.setStatus("Active");
+                    AiChatSession newSession = AiChatSession.builder()
+                            .userId(profile.getId())
+                            .userRole("PATIENT")
+                            .title("Health Assistant")
+                            .build();
                     return sessionRepository.save(newSession);
                 });
     }
 
     public List<AiChatMessage> getSessionMessages(User user, Long sessionId) {
-        // Simple authorization check could be added here
-        return messageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        return messageRepository.findBySessionIdOrderBySentAtAsc(sessionId);
     }
 
     @Transactional
@@ -49,20 +51,22 @@ public class AiAssistantService {
                 .orElseThrow(() -> new RuntimeException("Session not found"));
 
         // Save User Message
-        AiChatMessage userMessage = new AiChatMessage();
-        userMessage.setSessionId(session.getId());
-        userMessage.setSender("USER");
-        userMessage.setContent(content);
+        AiChatMessage userMessage = AiChatMessage.builder()
+                .session(session)
+                .sender("USER")
+                .content(content)
+                .build();
         messageRepository.save(userMessage);
 
         // Generate Mock AI Response
         String aiResponseText = generateMockAiResponse(content);
 
         // Save AI Message
-        AiChatMessage aiMessage = new AiChatMessage();
-        aiMessage.setSessionId(session.getId());
-        aiMessage.setSender("AI");
-        aiMessage.setContent(aiResponseText);
+        AiChatMessage aiMessage = AiChatMessage.builder()
+                .session(session)
+                .sender("AI")
+                .content(aiResponseText)
+                .build();
         return messageRepository.save(aiMessage);
     }
 

@@ -9,7 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "doctor_working_hours")
@@ -52,9 +52,9 @@ public class DoctorWorkingHours {
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
-    private ZonedDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private ZonedDateTime updatedAt;
+    private Instant updatedAt;
 }

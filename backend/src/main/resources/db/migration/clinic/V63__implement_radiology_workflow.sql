@@ -1,10 +1,9 @@
 -- Phase 6: Radiology and PACS Workflow enhancements
 
 -- 1. Extend imaging_requests
-ALTER TABLE imaging_requests
-ADD COLUMN encounter_id BIGINT REFERENCES medical_records(id) ON DELETE SET NULL,
-ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL,
-ADD COLUMN invoice_id BIGINT REFERENCES invoices(id) ON DELETE SET NULL;
+ALTER TABLE imaging_requests ADD COLUMN encounter_id BIGINT REFERENCES medical_records(id) ON DELETE SET NULL;
+ALTER TABLE imaging_requests ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
+ALTER TABLE imaging_requests ADD COLUMN invoice_id BIGINT REFERENCES invoices(id) ON DELETE SET NULL;
 
 -- Migrate existing statuses to the new strict state machine
 -- Existing statuses: REQUESTED, SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
@@ -13,12 +12,11 @@ UPDATE imaging_requests SET status = 'REPORTING' WHERE status = 'IN_PROGRESS';
 UPDATE imaging_requests SET status = 'RELEASED' WHERE status = 'COMPLETED';
 
 -- 2. Extend radiology_reports
-ALTER TABLE radiology_reports
-ADD COLUMN verified_at TIMESTAMP WITH TIME ZONE,
-ADD COLUMN verified_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
-ADD COLUMN is_addendum BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN parent_report_id BIGINT REFERENCES radiology_reports(id) ON DELETE CASCADE,
-ADD COLUMN structured_data JSONB;
+ALTER TABLE radiology_reports ADD COLUMN verified_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE radiology_reports ADD COLUMN verified_by BIGINT REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE radiology_reports ADD COLUMN is_addendum BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE radiology_reports ADD COLUMN parent_report_id BIGINT REFERENCES radiology_reports(id) ON DELETE CASCADE;
+ALTER TABLE radiology_reports ADD COLUMN structured_data JSONB;
 
 -- 3. Create dicom_studies table
 CREATE TABLE dicom_studies (

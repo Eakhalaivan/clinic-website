@@ -59,15 +59,29 @@ public class SseController {
     }
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@RequestParam("ticket") String ticket) {
-        SseTicketService.TicketDetails details = sseTicketService.consumeTicket(ticket);
-        if (details == null) {
-            throw new org.springframework.security.access.AccessDeniedException("Invalid or expired SSE ticket");
+    public SseEmitter subscribe(@RequestParam(value = "ticket", required = false) String ticket,
+                                @AuthenticationPrincipal UserPrincipal user) {
+        Long userId = null;
+        boolean isAdmin = false;
+
+        if (ticket != null) {
+            SseTicketService.TicketDetails details = sseTicketService.consumeTicket(ticket);
+            if (details == null) {
+                throw new org.springframework.security.access.AccessDeniedException("Invalid or expired SSE ticket");
+            }
+            userId = details.userId();
+            isAdmin = details.isAdminOrReceptionist();
+        } else if (user != null) {
+            userId = user.getUserId();
+            isAdmin = user.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_RECEPTIONIST"));
+        } else {
+            throw new org.springframework.security.access.AccessDeniedException("Missing ticket or authentication");
         }
 
         SseEmitter emitter = new SseEmitter(60 * 60 * 1000L); // 1 hour timeout
         
-        ClientConnection connection = new ClientConnection(emitter, details.userId(), details.isAdminOrReceptionist());
+        ClientConnection connection = new ClientConnection(emitter, userId, isAdmin);
         connections.add(connection);
 
         emitter.onCompletion(() -> connections.remove(connection));

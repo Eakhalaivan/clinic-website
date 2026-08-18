@@ -1,17 +1,15 @@
 -- Phase 5: Laboratory Information System Workflow enhancements
 
 -- 1. Extend lab_test_catalog
-ALTER TABLE lab_test_catalog
-ADD COLUMN category VARCHAR(100),
-ADD COLUMN specimen_type VARCHAR(100),
-ADD COLUMN turnaround_target_hours INTEGER,
-ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
+ALTER TABLE lab_test_catalog ADD COLUMN category VARCHAR(100);
+ALTER TABLE lab_test_catalog ADD COLUMN specimen_type VARCHAR(100);
+ALTER TABLE lab_test_catalog ADD COLUMN turnaround_target_hours INTEGER;
+ALTER TABLE lab_test_catalog ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
 
 -- 2. Extend lab_test_requests
-ALTER TABLE lab_test_requests
-ADD COLUMN encounter_id BIGINT REFERENCES medical_records(id) ON DELETE SET NULL,
-ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL,
-ADD COLUMN invoice_id BIGINT REFERENCES invoices(id) ON DELETE SET NULL;
+ALTER TABLE lab_test_requests ADD COLUMN encounter_id BIGINT REFERENCES medical_records(id) ON DELETE SET NULL;
+ALTER TABLE lab_test_requests ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
+ALTER TABLE lab_test_requests ADD COLUMN invoice_id BIGINT REFERENCES invoices(id) ON DELETE SET NULL;
 
 -- Migrate existing statuses to the new strict state machine
 UPDATE lab_test_requests SET status = 'DRAFT' WHERE status = 'REQUESTED' AND (sample_collected_at IS NULL);
@@ -19,10 +17,9 @@ UPDATE lab_test_requests SET status = 'COLLECTED' WHERE status = 'SAMPLE_COLLECT
 UPDATE lab_test_requests SET status = 'IN_PROGRESS' WHERE status = 'PROCESSING';
 
 -- 3. Extend lab_sample_collections
-ALTER TABLE lab_sample_collections
-ADD COLUMN storage_state VARCHAR(50),
-ADD COLUMN chain_of_custody JSONB,
-ADD COLUMN rejection_reason VARCHAR(100);
+ALTER TABLE lab_sample_collections ADD COLUMN storage_state VARCHAR(50);
+ALTER TABLE lab_sample_collections ADD COLUMN chain_of_custody JSONB;
+ALTER TABLE lab_sample_collections ADD COLUMN rejection_reason VARCHAR(100);
 
 -- 4. Create lab_test_panels
 CREATE TABLE lab_test_panels (

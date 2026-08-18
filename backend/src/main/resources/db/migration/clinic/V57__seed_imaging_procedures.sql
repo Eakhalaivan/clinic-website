@@ -6,5 +6,4 @@ VALUES
   ('RAD-MRI-001', 'MRI Brain (Without Contrast)', 'MRI', 'Brain', 500.00, true),
   ('RAD-CT-001', 'CT Scan Abdomen', 'CT', 'Abdomen', 300.00, true),
   ('RAD-US-001', 'Ultrasound Pelvis', 'ULTRASOUND', 'Pelvis', 150.00, true),
-  ('RAD-PET-001', 'PET Scan Whole Body', 'PET', 'Whole Body', 1200.00, true)
-ON CONFLICT (code) DO NOTHING;
+  ('RAD-PET-001', 'PET Scan Whole Body', 'PET', 'Whole Body', 1200.00, true);

@@ -40,7 +40,7 @@ public class LeaveBalance {
     @Builder.Default
     private BigDecimal taken = BigDecimal.ZERO;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "leave_year", nullable = false)
     private Integer year;
 
     @CreationTimestamp

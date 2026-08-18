@@ -31,5 +31,5 @@ public class SalaryComponent {
     private String amountType; // FIXED, PERCENTAGE
 
     @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal value;
+    private BigDecimal amount;
 }

@@ -27,7 +27,7 @@ export const WIDGETS = {
 export const dashboardConfig = {
   ROLE_DOCTOR: {
     quickActions: [
-      { label: 'New Appointment', icon: CalendarIcon, color: 'text-[#5244F2]', bg: 'bg-[#5244F2]/10', actionPath: '?panel=calendar' },
+      { label: 'New Appointment', icon: CalendarIcon, color: 'text-[#5244F2]', bg: 'bg-[#5244F2]/10', actionPath: '?panel=new-appointment' },
       { label: 'Add Patient', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10', actionPath: '/doctor/patients' },
       { label: 'New Prescription', icon: Pill, color: 'text-orange-500', bg: 'bg-orange-500/10', actionPath: '/doctor/prescription-templates' },
       { label: 'Lab Request', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10', actionPath: '/doctor/patients' },

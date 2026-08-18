@@ -80,6 +80,9 @@ public class PatientProfile {
     @Column(nullable = false)
     private Long branchId;
 
+    @Column(name = "tenant_id")
+    private Long tenantId;
+
     @Column(name = "op_number", length = 50, unique = true)
     private String opNumber;
 

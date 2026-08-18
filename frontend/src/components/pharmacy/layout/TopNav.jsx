@@ -4,6 +4,8 @@ import CommandPalette from '../../ui/CommandPalette';
 import NotificationDropdown from './NotificationDropdown.jsx';
 import MessageDropdown from './MessageDropdown.jsx';
 import ProfileDropdown from './ProfileDropdown.jsx';
+import QuickActionDropdown from './QuickActionDropdown.jsx';
+
 export default function TopNav({ toggleSidebar, isSidebarOpen }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -47,6 +49,7 @@ export default function TopNav({ toggleSidebar, isSidebarOpen }) {
         </div>
         
         <div className="flex items-center gap-5 shrink-0">
+          <QuickActionDropdown />
           <div className="flex items-center gap-4">
             <NotificationDropdown />
             <MessageDropdown />

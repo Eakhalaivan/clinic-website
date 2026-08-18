@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
+@RestController("hrDocumentController")
 @RequestMapping("/api/hr/documents")
 @RequiredArgsConstructor
 public class DocumentController {

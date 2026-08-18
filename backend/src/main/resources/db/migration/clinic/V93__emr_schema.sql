@@ -108,7 +108,7 @@ CREATE TABLE clinical_observations (
     patient_id BIGINT NOT NULL REFERENCES patient_profiles(id),
     observation_code VARCHAR(100),
     observation_name VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL,
+    "value" VARCHAR(255) NOT NULL,
     unit VARCHAR(50),
     observed_at TIMESTAMP WITH TIME ZONE NOT NULL,
     observed_by_user_id BIGINT NOT NULL,
@@ -129,6 +129,7 @@ CREATE TABLE procedure_records (
 );
 
 -- 11. Clinical Referrals
+DROP TABLE IF EXISTS clinical_referrals CASCADE;
 CREATE TABLE clinical_referrals (
     id BIGSERIAL PRIMARY KEY,
     patient_id BIGINT NOT NULL REFERENCES patient_profiles(id),
