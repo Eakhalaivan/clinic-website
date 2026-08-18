@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Filter;
 import lombok.*;
 
-@Entity(name="SuperadminIntegrationConfig")
+@Entity
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Table(name = "integration_configs")
 @Data
@@ -16,10 +16,10 @@ public class IntegrationConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="provider_name", nullable = false)
+    @Column(nullable = false)
     private String providerName;
 
-    @Column(name="integration_type", nullable = false)
+    @Column(nullable = false)
     private String integrationType; // SMS, PAYMENT, LAB
 
     @Column(name = "tenant_id")

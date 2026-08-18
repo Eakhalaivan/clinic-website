@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, AlertTriangle, Stethoscope } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, AlertTriangle, Stethoscope, ArrowLeft } from 'lucide-react';
 import { axiosPublic } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 
 const DoctorList = () => {
   const { token, roles } = useAuthStore();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
 
@@ -61,10 +62,19 @@ const DoctorList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative">
         
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate(-1)} 
+          className="absolute top-0 left-0 flex items-center text-gray-500 hover:text-indigo-600 transition-colors font-medium -mt-8 sm:mt-0"
+        >
+          <ArrowLeft className="w-5 h-5 mr-1" />
+          Back
+        </button>
+
         {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-16 mt-8 sm:mt-0">
           <span className="text-indigo-600 font-semibold tracking-wider uppercase text-sm mb-4 block">Our Specialists</span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
             Meet Our Physicians

@@ -8,6 +8,12 @@ import com.healthcare.clinic.doctor.entity.DoctorProfile;
 import com.healthcare.clinic.doctor.repository.DoctorProfileRepository;
 import com.healthcare.clinic.doctor.entity.DoctorWorkingHours;
 import com.healthcare.clinic.doctor.repository.DoctorWorkingHoursRepository;
+import com.healthcare.clinic.patient.entity.PatientProfile;
+import com.healthcare.clinic.patient.repository.PatientProfileRepository;
+import com.healthcare.clinic.tenant.entity.Tenant;
+import com.healthcare.clinic.tenant.repository.TenantRepository;
+import com.healthcare.clinic.branch.entity.Branch;
+import com.healthcare.clinic.branch.repository.BranchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +38,16 @@ public class DataSeeder implements CommandLineRunner {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorWorkingHoursRepository doctorWorkingHoursRepository;
 
+    @Value("${SEED_ADMIN_PASSWORD:CHANGE_ME_ADMIN}")
+    private String seedAdminPassword;
+
+    @Value("${SEED_DOCTOR_PASSWORD:CHANGE_ME_DOCTOR}")
+    private String seedDoctorPassword;
+
     @Override
     public void run(String... args) throws Exception {
+        validateSeedPassword("SEED_ADMIN_PASSWORD", seedAdminPassword);
+        validateSeedPassword("SEED_DOCTOR_PASSWORD", seedDoctorPassword);
 
         String[] allRoleNames = {
             "ROLE_ADMIN", "ROLE_SUPER_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_BRANCH_ADMIN",
@@ -91,6 +105,8 @@ public class DataSeeder implements CommandLineRunner {
                         .slotDurationMinutes(20)
                         .isActive(true)
                         .branchId(savedProfile.getBranchId())
+                        .createdAt(java.time.Instant.now())
+                        .updatedAt(java.time.Instant.now())
                         .build();
                 doctorWorkingHoursRepository.save(hours);
             }
@@ -118,16 +134,23 @@ public class DataSeeder implements CommandLineRunner {
         user.setLockedUntil(null);
         user.setEnabled(true);
 
-        Set<Role> roles = user.getRoles() != null ? new HashSet<>(user.getRoles()) : new HashSet<>();
-        if (roleNames != null) {
-            for (String roleName : roleNames) {
-                roleRepository.findByName(roleName).ifPresent(roles::add);
-            }
+        Set<Role> roles = new HashSet<>();
+        for (String roleName : roleNames) {
+            roleRepository.findByName(roleName).ifPresent(roles::add);
         }
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
         log.info("DataSeeder: synced {} credentials and roles.", email);
         return savedUser;
+    }
+
+    private void validateSeedPassword(String envVarName, String value) {
+        if (value == null || value.trim().isEmpty() || value.startsWith("CHANGE_ME")) {
+            throw new IllegalStateException(
+                "Refusing to start: " + envVarName + " is not configured. " +
+                "Set a strong password in your .env file before running the application."
+            );
+        }
     }
 
     private String getLoginPortalForRole(String roleName) {

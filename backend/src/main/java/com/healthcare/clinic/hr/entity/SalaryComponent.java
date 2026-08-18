@@ -30,6 +30,6 @@ public class SalaryComponent {
     @Column(name = "amount_type", nullable = false, length = 30)
     private String amountType; // FIXED, PERCENTAGE
 
-    @Column(name = "component_value", nullable = false, precision = 12, scale = 2)
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal value;
 }

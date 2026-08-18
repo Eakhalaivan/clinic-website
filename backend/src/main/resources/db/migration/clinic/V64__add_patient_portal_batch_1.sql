@@ -57,6 +57,7 @@ CREATE TABLE consent_versions (
 );
 
 -- Patient Consents
+DROP TABLE IF EXISTS patient_consents;
 CREATE TABLE patient_consents (
     id BIGSERIAL PRIMARY KEY,
     patient_id BIGINT NOT NULL,

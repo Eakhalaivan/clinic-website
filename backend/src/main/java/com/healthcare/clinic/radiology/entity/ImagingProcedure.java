@@ -37,14 +37,14 @@ public class ImagingProcedure {
     @Builder.Default
     private Boolean isActive = true;
 
-    @Column(name = "requires_contrast", nullable = false)
+    @Column(name = "requires_contrast")
     @Builder.Default
     private Boolean requiresContrast = false;
 
     @Column(name = "preparation_instructions", columnDefinition = "TEXT")
     private String preparationInstructions;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(name = "duration_minutes")
     @Builder.Default
     private Integer durationMinutes = 30;
 

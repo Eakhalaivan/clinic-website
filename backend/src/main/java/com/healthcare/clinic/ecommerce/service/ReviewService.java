@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+@Service("ecommerceReviewService")
 @RequiredArgsConstructor
 public class ReviewService {
 

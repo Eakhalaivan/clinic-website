@@ -9,6 +9,7 @@ import {
   Home, HeartPulse, Package, Upload, Laptop
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import './PatientDashboard.css';
 
 /* ════════════════════════════════════════════════════════════════════════════
    DESIGN TOKENS  (matches reference: white + #F3F6FF BG + blue #2563EB)

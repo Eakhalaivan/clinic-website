@@ -12,7 +12,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 
 @EnableCaching
-@SpringBootApplication(excludeName = {
+@SpringBootApplication(
+    nameGenerator = org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator.class,
+    excludeName = {
     "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
     "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration",
     "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration",

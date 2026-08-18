@@ -522,7 +522,7 @@ export default function BookAppointment() {
 
                         {/* Calendar Card (Only visible/active if doctor is selected and we are on step 1 or 2) */}
                         {(currentStep === 1 || currentStep === 2) && (
-                            <div className={`bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-5 transition-opacity ${!selectedDoctorId ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-5 transition-opacity">
                                 <h3 className="font-extrabold text-gray-900 mb-4 text-[14px]">Select Date</h3>
                                 
                                 <div className="mb-3">
@@ -542,7 +542,9 @@ export default function BookAppointment() {
                                         {daysInMonth.map(day => {
                                             const isPast = day < new Date(new Date().setHours(0,0,0,0));
                                             const isSelectedDay = selectedDate && isSameDay(day, selectedDate);
-                                            const isWorkingDay = workingHours.some(wh => wh.dayOfWeek === day.getDay() && wh.isActive);
+                                            const isWorkingDay = selectedDoctorId 
+                                                ? workingHours.some(wh => wh.dayOfWeek === day.getDay() && wh.isActive)
+                                                : true;
                                             const isDisabled = isPast || !isWorkingDay;
                                             
                                             return (

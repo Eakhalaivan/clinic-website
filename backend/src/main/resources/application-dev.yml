@@ -1,4 +1,8 @@
 spring:
+  flyway:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     clinic:
       jdbc-url: jdbc:h2:mem:clinicdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
@@ -20,11 +24,11 @@ jwt:
   access-token-expiration-ms: 86400000
 
 stripe:
-  secret-key: dummy_stripe_key
-  webhook-secret: dummy_webhook_secret
-  publishable-key: dummy_publishable_key
+  secret-key: sk_test_dev_placeholder_not_real
+  webhook-secret: whsec_dev_placeholder_not_real
+  publishable-key: pk_test_dev_placeholder_not_real
 
 twilio:
-  account-sid: dummy_twilio_sid
-  auth-token: dummy_twilio_token
-  from-number: dummy_twilio_number
+  account-sid: ACdev0000000000000000000000000000
+  auth-token: dev_placeholder_auth_token
+  from-number: "+10000000000"

@@ -10,5 +10,6 @@ import java.util.List;
 public interface HomeVisitRequestRepository extends JpaRepository<HomeVisitRequest, Long> {
     List<HomeVisitRequest> findByPatientId(Long patientId);
     List<HomeVisitRequest> findByPatientIdOrderByRequestDateDesc(Long patientId);
+    List<HomeVisitRequest> findByPatientIdOrderByCreatedAtDesc(Long patientId);
     List<HomeVisitRequest> findByStatusOrderByRequestDateDesc(String status);
 }

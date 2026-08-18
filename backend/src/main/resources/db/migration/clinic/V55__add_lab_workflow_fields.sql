@@ -1,8 +1,7 @@
 -- Phase 1: Explicit "Accept" step
-ALTER TABLE lab_test_requests
-ADD COLUMN accepted_at TIMESTAMP,
-ADD COLUMN accepted_by_id BIGINT,
-ADD CONSTRAINT fk_lab_requests_accepted_by FOREIGN KEY (accepted_by_id) REFERENCES users(id);
+ALTER TABLE lab_test_requests ADD COLUMN accepted_at TIMESTAMP;
+ALTER TABLE lab_test_requests ADD COLUMN accepted_by_id BIGINT;
+ALTER TABLE lab_test_requests ADD CONSTRAINT fk_lab_requests_accepted_by FOREIGN KEY (accepted_by_id) REFERENCES users(id);
 
 -- Phase 2: Barcode/QR sample tracking
 ALTER TABLE lab_test_requests

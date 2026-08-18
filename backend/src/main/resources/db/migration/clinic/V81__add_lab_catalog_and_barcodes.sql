@@ -1,12 +1,11 @@
 -- V81__add_lab_catalog_and_barcodes.sql
 -- Enhance lab_test_catalog with more configuration
-ALTER TABLE lab_test_catalog
-ADD COLUMN department VARCHAR(100),
-ADD COLUMN container_type VARCHAR(100),
-ADD COLUMN collection_instructions TEXT,
-ADD COLUMN method VARCHAR(100),
-ADD COLUMN insurance_eligible BOOLEAN DEFAULT true,
-ADD COLUMN preparation_instructions TEXT;
+ALTER TABLE lab_test_catalog ADD COLUMN department VARCHAR(100);
+ALTER TABLE lab_test_catalog ADD COLUMN container_type VARCHAR(100);
+ALTER TABLE lab_test_catalog ADD COLUMN collection_instructions TEXT;
+ALTER TABLE lab_test_catalog ADD COLUMN method VARCHAR(100);
+ALTER TABLE lab_test_catalog ADD COLUMN insurance_eligible BOOLEAN DEFAULT true;
+ALTER TABLE lab_test_catalog ADD COLUMN preparation_instructions TEXT;
 
 -- Create lab_barcodes table to manage specimen barcodes properly
 CREATE TABLE lab_barcodes (

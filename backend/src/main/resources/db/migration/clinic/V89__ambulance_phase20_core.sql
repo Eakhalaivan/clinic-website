@@ -34,21 +34,19 @@ CREATE TABLE hospital_destinations (
 );
 
 -- 4. Update Ambulances Table
-ALTER TABLE ambulances
-    ADD COLUMN driver_id BIGINT REFERENCES ambulance_drivers(id) ON DELETE SET NULL,
-    ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL,
-    ADD COLUMN type VARCHAR(50) DEFAULT 'BLS',
-    ADD COLUMN equipment_level VARCHAR(50),
-    ADD COLUMN registration_number VARCHAR(100);
+ALTER TABLE ambulances ADD COLUMN driver_id BIGINT REFERENCES ambulance_drivers(id) ON DELETE SET NULL;
+ALTER TABLE ambulances ADD COLUMN branch_id BIGINT REFERENCES branches(id) ON DELETE SET NULL;
+ALTER TABLE ambulances ADD COLUMN type VARCHAR(50) DEFAULT 'BLS';
+ALTER TABLE ambulances ADD COLUMN equipment_level VARCHAR(50);
+ALTER TABLE ambulances ADD COLUMN registration_number VARCHAR(100);
 
 -- 5. Update Emergency Requests Table
-ALTER TABLE emergency_requests
-    ADD COLUMN caller_name VARCHAR(100),
-    ADD COLUMN caller_phone VARCHAR(30),
-    ADD COLUMN caller_relation VARCHAR(50),
-    ADD COLUMN incident_description TEXT,
-    ADD COLUMN clinical_red_flags TEXT,
-    ADD COLUMN hospital_destination_id BIGINT REFERENCES hospital_destinations(id) ON DELETE SET NULL;
+ALTER TABLE emergency_requests ADD COLUMN caller_name VARCHAR(100);
+ALTER TABLE emergency_requests ADD COLUMN caller_phone VARCHAR(30);
+ALTER TABLE emergency_requests ADD COLUMN caller_relation VARCHAR(50);
+ALTER TABLE emergency_requests ADD COLUMN incident_description TEXT;
+ALTER TABLE emergency_requests ADD COLUMN clinical_red_flags TEXT;
+ALTER TABLE emergency_requests ADD COLUMN hospital_destination_id BIGINT REFERENCES hospital_destinations(id) ON DELETE SET NULL;
 
 -- 6. Ambulance Assignments (Active Trips)
 CREATE TABLE ambulance_assignments (
@@ -97,7 +95,7 @@ CREATE TABLE ambulance_trip_billings (
     id BIGSERIAL PRIMARY KEY,
     trip_id BIGINT NOT NULL REFERENCES ambulance_trip_histories(id) ON DELETE CASCADE,
     patient_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
-    invoice_id BIGINT REFERENCES billing_invoices(id) ON DELETE SET NULL,
+    invoice_id BIGINT REFERENCES invoices(id) ON DELETE SET NULL,
     dispatch_fee DECIMAL(10, 2),
     distance_fee DECIMAL(10, 2),
     equipment_fee DECIMAL(10, 2),

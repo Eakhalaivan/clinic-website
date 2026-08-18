@@ -1,7 +1,7 @@
 package com.healthcare.clinic.superadmin.controller;
 
-import com.healthcare.clinic.superadmin.entity.FeatureFlag;
-import com.healthcare.clinic.superadmin.service.FeatureFlagService;
+import com.healthcare.clinic.tenant.entity.FeatureFlag;
+import com.healthcare.clinic.tenant.service.FeatureFlagService;
 import com.healthcare.clinic.superadmin.service.IntegrationService;
 import com.healthcare.clinic.superadmin.service.SessionManagementService;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class SuperAdminPortalController {
 
     @GetMapping("/feature-flags")
     public ResponseEntity<List<FeatureFlag>> getFeatureFlags() {
-        return ResponseEntity.ok(featureFlagService.getAllFlags());
+        return ResponseEntity.ok(featureFlagService.findAll());
     }
 
     @PostMapping("/feature-flags")
     public ResponseEntity<FeatureFlag> createFeatureFlag(@RequestBody FeatureFlag flag) {
-        return ResponseEntity.ok(featureFlagService.createOrUpdateFlag(flag));
+        return ResponseEntity.ok(featureFlagService.save(flag));
     }
     
     @GetMapping("/sessions")

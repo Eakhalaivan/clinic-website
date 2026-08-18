@@ -6,11 +6,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface LabTestRequestRepository extends JpaRepository<LabTestRequest, Long>, JpaSpecificationExecutor<LabTestRequest> {
     @EntityGraph(attributePaths = {"patient", "doctor", "testCatalog"})
     List<LabTestRequest> findAll();
@@ -34,7 +32,7 @@ public interface LabTestRequestRepository extends JpaRepository<LabTestRequest, 
     @Query("SELECT SUM(r.testCatalog.price) FROM LabTestRequest r WHERE r.status IN ('VERIFIED', 'RELEASED')")
     java.math.BigDecimal calculateTotalRevenue();
 
-    @Query(value = "SELECT c.test_name, AVG(EXTRACT(EPOCH FROM (r.released_at - r.requested_at))) " +
+    @Query(value = "SELECT c.test_name, AVG(DATE_PART('epoch', r.released_at) - DATE_PART('epoch', r.requested_at)) " +
            "FROM lab_test_requests r JOIN lab_test_catalog c ON r.test_catalog_id = c.id " +
            "WHERE r.status = 'RELEASED' AND r.released_at IS NOT NULL " +
            "GROUP BY c.test_name", nativeQuery = true)

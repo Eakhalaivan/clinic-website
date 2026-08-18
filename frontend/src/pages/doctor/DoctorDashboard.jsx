@@ -18,6 +18,7 @@ import DoctorCalendar from './DoctorCalendar';
 import FollowUps from './FollowUps';
 import PatientList from './PatientList';
 import PatientDetail from './PatientDetail';
+import NewAppointmentPanel from './NewAppointmentPanel';
 
 // Color palette for calendar events
 const EVENT_COLORS = [
@@ -608,6 +609,16 @@ const DoctorDashboard = () => {
           stackIndex={0}
         >
           <PatientDetail patientIdOverride={patientId} />
+        </ModulePanel>
+      )}
+
+      {currentPanel === 'new-appointment' && (
+        <ModulePanel 
+          isOpen={true} onClose={closePanel} 
+          title="New Appointment" icon={CalendarIcon} 
+          variant="panel" colorHex="#4F46E5" stackIndex={0}
+        >
+          <NewAppointmentPanel onClose={closePanel} />
         </ModulePanel>
       )}
     </div>

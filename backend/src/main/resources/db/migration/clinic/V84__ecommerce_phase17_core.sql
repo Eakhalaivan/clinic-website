@@ -45,33 +45,32 @@ CREATE TABLE ec_brands (
 -- ──────────────────────────────────────────────────────────────
 -- 3. EXTEND EXISTING ecommerce_products TABLE
 -- ──────────────────────────────────────────────────────────────
-ALTER TABLE ecommerce_products
-    ADD COLUMN IF NOT EXISTS barcode              VARCHAR(100) UNIQUE,
-    ADD COLUMN IF NOT EXISTS generic_name         VARCHAR(300),
-    ADD COLUMN IF NOT EXISTS brand_id             BIGINT REFERENCES ec_brands(id),
-    ADD COLUMN IF NOT EXISTS category_id          BIGINT REFERENCES ec_categories(id),
-    ADD COLUMN IF NOT EXISTS mrp                  DECIMAL(10,2),
-    ADD COLUMN IF NOT EXISTS tax_class            VARCHAR(50) NOT NULL DEFAULT 'MEDICINE_12',
-    ADD COLUMN IF NOT EXISTS hsn_code             VARCHAR(20),
-    ADD COLUMN IF NOT EXISTS pack_size            VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS dosage_strength      VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS prescription_required BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS age_restriction      INT,
-    ADD COLUMN IF NOT EXISTS cold_chain_required  BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS regulatory_status    VARCHAR(50) NOT NULL DEFAULT 'APPROVED',
-    ADD COLUMN IF NOT EXISTS product_status       VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
-    ADD COLUMN IF NOT EXISTS return_eligible      BOOLEAN NOT NULL DEFAULT true,
-    ADD COLUMN IF NOT EXISTS images               TEXT,          -- JSON array of image URLs
-    ADD COLUMN IF NOT EXISTS specifications       TEXT,          -- JSON key-value pairs
-    ADD COLUMN IF NOT EXISTS ingredients          TEXT,
-    ADD COLUMN IF NOT EXISTS warnings             TEXT,
-    ADD COLUMN IF NOT EXISTS warranty_months      INT,
-    ADD COLUMN IF NOT EXISTS weight_grams         INT,
-    ADD COLUMN IF NOT EXISTS branch_id            BIGINT,
-    ADD COLUMN IF NOT EXISTS updated_at           TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS activated_at         TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS created_by           BIGINT,
-    ADD COLUMN IF NOT EXISTS updated_by           BIGINT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS barcode              VARCHAR(100) UNIQUE;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS generic_name         VARCHAR(300);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS brand_id             BIGINT REFERENCES ec_brands(id);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS category_id          BIGINT REFERENCES ec_categories(id);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS mrp                  DECIMAL(10,2);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS tax_class            VARCHAR(50) NOT NULL DEFAULT 'MEDICINE_12';
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS hsn_code             VARCHAR(20);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS pack_size            VARCHAR(100);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS dosage_strength      VARCHAR(100);
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS prescription_required BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS age_restriction      INT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS cold_chain_required  BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS regulatory_status    VARCHAR(50) NOT NULL DEFAULT 'APPROVED';
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS product_status       VARCHAR(30) NOT NULL DEFAULT 'ACTIVE';
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS return_eligible      BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS images               TEXT;          -- JSON array of image URLs
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS specifications       TEXT;          -- JSON key-value pairs
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS ingredients          TEXT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS warnings             TEXT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS warranty_months      INT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS weight_grams         INT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS branch_id            BIGINT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS updated_at           TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS activated_at         TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS created_by           BIGINT;
+ALTER TABLE ecommerce_products ADD COLUMN IF NOT EXISTS updated_by           BIGINT;
 
 CREATE INDEX IF NOT EXISTS idx_ec_products_category  ON ecommerce_products(category_id);
 CREATE INDEX IF NOT EXISTS idx_ec_products_brand     ON ecommerce_products(brand_id);
@@ -237,31 +236,30 @@ CREATE INDEX idx_ec_delivery_zones_pincode ON ec_delivery_zones(pincode);
 -- ──────────────────────────────────────────────────────────────
 -- 12. EXTEND ecommerce_orders TABLE
 -- ──────────────────────────────────────────────────────────────
-ALTER TABLE ecommerce_orders
-    ADD COLUMN IF NOT EXISTS order_number        VARCHAR(30) UNIQUE,
-    ADD COLUMN IF NOT EXISTS patient_id          BIGINT REFERENCES users(id),
-    ADD COLUMN IF NOT EXISTS cart_id             BIGINT REFERENCES ec_carts(id),
-    ADD COLUMN IF NOT EXISTS address_id          BIGINT REFERENCES ec_delivery_addresses(id),
-    ADD COLUMN IF NOT EXISTS coupon_id           BIGINT,
-    ADD COLUMN IF NOT EXISTS subtotal            DECIMAL(10,2),
-    ADD COLUMN IF NOT EXISTS tax_amount          DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS shipping_amount     DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS discount_amount     DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS loyalty_points_used INT NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS idempotency_key     VARCHAR(128) UNIQUE,
-    ADD COLUMN IF NOT EXISTS prescription_review_required BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS branch_id           BIGINT,
-    ADD COLUMN IF NOT EXISTS invoice_id          BIGINT,
-    ADD COLUMN IF NOT EXISTS payment_status      VARCHAR(30) NOT NULL DEFAULT 'PENDING',
-    ADD COLUMN IF NOT EXISTS fulfillment_status  VARCHAR(30) NOT NULL DEFAULT 'PENDING',
-    ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(500),
-    ADD COLUMN IF NOT EXISTS notes               VARCHAR(500),
-    ADD COLUMN IF NOT EXISTS confirmed_at        TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS packed_at           TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS dispatched_at       TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS delivered_at        TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS returned_at         TIMESTAMP WITH TIME ZONE,
-    ADD COLUMN IF NOT EXISTS updated_at          TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS order_number        VARCHAR(30) UNIQUE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS patient_id          BIGINT REFERENCES users(id);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS cart_id             BIGINT REFERENCES ec_carts(id);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS address_id          BIGINT REFERENCES ec_delivery_addresses(id);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS coupon_id           BIGINT;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS subtotal            DECIMAL(10,2);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS tax_amount          DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS shipping_amount     DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS discount_amount     DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS loyalty_points_used INT NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS idempotency_key     VARCHAR(128) UNIQUE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS prescription_review_required BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS branch_id           BIGINT;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS invoice_id          BIGINT;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS payment_status      VARCHAR(30) NOT NULL DEFAULT 'PENDING';
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS fulfillment_status  VARCHAR(30) NOT NULL DEFAULT 'PENDING';
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(500);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS notes               VARCHAR(500);
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS confirmed_at        TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS packed_at           TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS dispatched_at       TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS delivered_at        TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS returned_at         TIMESTAMP WITH TIME ZONE;
+ALTER TABLE ecommerce_orders ADD COLUMN IF NOT EXISTS updated_at          TIMESTAMP WITH TIME ZONE;
 
 CREATE INDEX IF NOT EXISTS idx_ec_orders_patient    ON ecommerce_orders(patient_id);
 CREATE INDEX IF NOT EXISTS idx_ec_orders_number     ON ecommerce_orders(order_number);
@@ -558,18 +556,17 @@ CREATE INDEX idx_ec_recommendations_product ON ec_product_recommendations(produc
 -- ──────────────────────────────────────────────────────────────
 -- 27. EXTEND ecommerce_order_items TABLE
 -- ──────────────────────────────────────────────────────────────
-ALTER TABLE ecommerce_order_items
-    ADD COLUMN IF NOT EXISTS tax_class          VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS tax_amount         DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS cgst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS sgst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS igst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS discount_amount    DECIMAL(10,2) NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS sku_snapshot       VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS product_name_snapshot VARCHAR(300),
-    ADD COLUMN IF NOT EXISTS batch_id           BIGINT REFERENCES ec_stock_batches(id),
-    ADD COLUMN IF NOT EXISTS prescription_required BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS prescription_id    BIGINT;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS tax_class          VARCHAR(50);
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS tax_amount         DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS cgst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS sgst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS igst_amount        DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS discount_amount    DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS sku_snapshot       VARCHAR(100);
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS product_name_snapshot VARCHAR(300);
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS batch_id           BIGINT REFERENCES ec_stock_batches(id);
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS prescription_required BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE ecommerce_order_items ADD COLUMN IF NOT EXISTS prescription_id    BIGINT;
 
 -- ──────────────────────────────────────────────────────────────
 -- 28. SEED DEFAULT DELIVERY ZONES (sample)

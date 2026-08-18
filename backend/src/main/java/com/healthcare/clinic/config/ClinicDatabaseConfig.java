@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.sql.DataSource;
 import java.util.HashMap;
 
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -89,22 +91,15 @@ public class ClinicDatabaseConfig {
                 "com.healthcare.clinic.reception",
                 "com.healthcare.clinic.security",
                 "com.healthcare.clinic.subscription",
-                "com.healthcare.clinic.superadmin",
-                "com.healthcare.clinic.support",
-                "com.healthcare.clinic.surgery",
-                "com.healthcare.clinic.telemedicine",
-                "com.healthcare.clinic.tenant",
-                "com.healthcare.clinic.vendor"
+                "com.healthcare.clinic.ai",
+                "com.healthcare.clinic.fhir"
         );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        String dialect = env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQLDialect");
-        String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto", "validate");
-        if (dialect.contains("H2")) {
-            ddlAuto = "update";
-        }
+        String dialect = env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
+        String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto", "create-drop");
         properties.put("hibernate.dialect", dialect);
         properties.put("hibernate.hbm2ddl.auto", ddlAuto);
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");

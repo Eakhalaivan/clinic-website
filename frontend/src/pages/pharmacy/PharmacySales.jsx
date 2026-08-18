@@ -585,7 +585,7 @@ export default function PharmacySales() {
               onChange={(e) => setBarcodeInput(e.target.value)}
               onKeyDown={handleBarcodeScan}
               autoFocus
-              className="flex-1 bg-transparent border-b-2 border-white/30 text-white placeholder:text-white/60 py-2 outline-none text-lg font-bold"
+              className="flex-1 bg-transparent border-0 border-b-2 border-white/30 text-white placeholder:text-white/60 py-2 focus:ring-0 focus:outline-none text-lg font-bold"
             />
           </div>
 

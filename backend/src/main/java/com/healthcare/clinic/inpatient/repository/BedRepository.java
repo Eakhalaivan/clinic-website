@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Repository("inpatientBedRepository")
 public interface BedRepository extends JpaRepository<Bed, Long> {
     
     @Query("SELECT b FROM InpatientBed b JOIN FETCH b.room r JOIN FETCH r.ward w WHERE w.branchId = :branchId")
@@ -22,7 +22,6 @@ public interface BedRepository extends JpaRepository<Bed, Long> {
     List<Bed> findByStatusAndBranchId(@Param("status") String status, @Param("branchId") Long branchId);
 
     @Lock(LockModeType.OPTIMISTIC)
-    @EntityGraph(attributePaths = {"room", "room.ward"})
-    @Query("SELECT b FROM InpatientBed b WHERE b.id = :id")
+    @Query("SELECT b FROM Bed b WHERE b.id = :id")
     Optional<Bed> findByIdWithLock(@Param("id") Long id);
 }

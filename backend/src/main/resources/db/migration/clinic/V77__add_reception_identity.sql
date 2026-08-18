@@ -1,11 +1,10 @@
 -- V77__add_reception_identity.sql
 
 -- Add OP number and duplicate tracking to patient_profiles
-ALTER TABLE patient_profiles
-ADD COLUMN op_number VARCHAR(50) UNIQUE,
-ADD COLUMN is_duplicate_of BIGINT REFERENCES patient_profiles(id),
-ADD COLUMN merge_reason VARCHAR(255),
-ADD COLUMN preferred_communication VARCHAR(20) DEFAULT 'EMAIL';
+ALTER TABLE patient_profiles ADD COLUMN op_number VARCHAR(50) UNIQUE;
+ALTER TABLE patient_profiles ADD COLUMN is_duplicate_of BIGINT REFERENCES patient_profiles(id);
+ALTER TABLE patient_profiles ADD COLUMN merge_reason VARCHAR(255);
+ALTER TABLE patient_profiles ADD COLUMN preferred_communication VARCHAR(20) DEFAULT 'EMAIL';
 
 -- Patient Identity Verification table
 CREATE TABLE patient_identity_verifications (

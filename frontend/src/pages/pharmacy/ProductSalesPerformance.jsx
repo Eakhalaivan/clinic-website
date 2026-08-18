@@ -249,13 +249,13 @@ export default function ProductSalesPerformance() {
               </button>
             </div>
             <div className="flex-1 flex items-center justify-center">
-              <div className="w-1/2 h-[220px] relative">
+              <div className="w-[130px] h-[130px] shrink-0 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={categoryData}
-                      innerRadius={65}
-                      outerRadius={95}
+                      innerRadius="60%"
+                      outerRadius="80%"
                       paddingAngle={2}
                       dataKey="value"
                       stroke="none"
@@ -268,21 +268,21 @@ export default function ProductSalesPerformance() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-                  <span className="text-[10px] font-bold text-slate-400">Total</span>
-                  <span className="text-sm font-black text-slate-800">₹ 12,48,950</span>
+                  <span className="text-[9px] font-bold text-slate-400 leading-none mb-0.5">Total</span>
+                  <span className="text-xs font-black text-slate-800 leading-none">₹ 12.4L</span>
                 </div>
               </div>
-              <div className="w-1/2 pl-6">
-                <ul className="space-y-3.5">
+              <div className="flex-1 pl-4">
+                <ul className="space-y-3">
                   {categoryData.map((item, index) => (
-                    <li key={index} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                        <span className="font-medium text-slate-600 truncate max-w-[90px]">{item.name}</span>
+                    <li key={index} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-2">
+                         <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="font-medium text-slate-600 truncate">{item.name}</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400 text-[10px] w-12 text-right">₹ {Math.round(item.value/1000)}k</span>
-                        <span className="font-bold text-slate-800 w-10 text-right">({((item.value/1248950)*100).toFixed(1)}%)</span>
+                      <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                        <span className="text-slate-400 text-[10px] w-9 text-right">₹ {Math.round(item.value/1000)}k</span>
+                        <span className="font-bold text-slate-800 w-9 text-right">({((item.value/1248950)*100).toFixed(1)}%)</span>
                       </div>
                     </li>
                   ))}
@@ -329,13 +329,13 @@ export default function ProductSalesPerformance() {
           <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex flex-col">
             <h3 className="text-sm font-bold text-slate-800 mb-4">ABC Value Distribution</h3>
             <div className="flex-1 flex items-center justify-center relative">
-              <div className="w-[180px] h-[180px] relative">
+              <div className="w-[160px] h-[160px] shrink-0 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={abcData}
-                      innerRadius={65}
-                      outerRadius={85}
+                      innerRadius="60%"
+                      outerRadius="80%"
                       paddingAngle={2}
                       dataKey="value"
                       stroke="none"
