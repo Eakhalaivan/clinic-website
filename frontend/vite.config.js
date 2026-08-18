@@ -39,23 +39,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
-            return 'react-vendor';
-          }
-          if (id.includes('node_modules/lucide-react/') || id.includes('node_modules/@headlessui/react/') || id.includes('node_modules/framer-motion/')) {
-            return 'ui-vendor';
-          }
-          if (id.includes('node_modules/recharts/')) {
-            return 'chart-vendor';
-          }
-          if (id.includes('node_modules/@tanstack/react-query/')) {
-            return 'query-vendor';
-          }
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
-        }
+        // Let Vite/Rollup handle chunking to prevent execution order / context undefined errors
       }
     }
   },
