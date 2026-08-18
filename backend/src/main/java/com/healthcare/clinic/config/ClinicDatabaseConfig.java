@@ -91,6 +91,10 @@ public class ClinicDatabaseConfig {
                 "com.healthcare.clinic.reception",
                 "com.healthcare.clinic.security",
                 "com.healthcare.clinic.subscription",
+                "com.healthcare.clinic.surgery",
+                "com.healthcare.clinic.telemedicine",
+                "com.healthcare.clinic.tenant",
+                "com.healthcare.clinic.vendor",
                 "com.healthcare.clinic.ai",
                 "com.healthcare.clinic.fhir"
         );
