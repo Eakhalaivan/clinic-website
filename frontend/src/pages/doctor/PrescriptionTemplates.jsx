@@ -86,42 +86,7 @@ const PrescriptionTemplates = () => {
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <Toaster position="top-right" />
       
-      {/* Top Navbar */}
-      <div className="bg-white px-6 py-4 border-b border-slate-200 flex justify-between items-center sticky top-0 z-20 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-        >
-          <ChevronLeft className="w-4 h-4" /> Back
-        </button>
 
-        <div className="flex-1 max-w-xl px-6 hidden md:block">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              placeholder="Search templates..." 
-              className="w-full pl-11 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm font-medium transition-colors shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="relative cursor-pointer hover:bg-slate-50 p-2 rounded-full transition-colors">
-            <Bell className="w-5 h-5 text-slate-600" />
-            <div className="absolute top-1.5 right-2 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold ring-2 ring-white">
-              5
-            </div>
-          </div>
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-200">
-            <img loading="lazy" src="https://i.pravatar.cc/150?img=11" alt="Dr. John Doe" className="w-9 h-9 rounded-full object-cover border border-slate-200" />
-            <div className="hidden sm:block text-left">
-              <div className="text-sm font-extrabold text-slate-900 leading-tight">Dr. John Doe</div>
-              <div className="text-[11px] text-slate-500 font-medium">Cardiologist</div>
-            </div>
-            <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block ml-1" />
-          </div>
-        </div>
-      </div>
 
       {/* Main Content Area */}
       <div className="p-8 max-w-[1400px] mx-auto w-full flex-1">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../utils/pharmacy/api';
 import { 
@@ -111,7 +112,7 @@ export default function PharmacyDashboard() {
             </div>
             <div>
               <p className="text-[11px] font-semibold text-slate-500 mb-1">Total Stock Value</p>
-              <h3 className="text-xl font-bold text-slate-900">$24,560.80</h3>
+              <h3 className="text-xl font-bold text-slate-900">₹24,560.80</h3>
             </div>
           </div>
           <p className="text-xs font-medium text-emerald-600 flex items-center gap-1">
@@ -126,7 +127,7 @@ export default function PharmacyDashboard() {
             </div>
             <div>
               <p className="text-[11px] font-semibold text-slate-500 mb-1">Total Sales (Today)</p>
-              <h3 className="text-xl font-bold text-slate-900">$1,245.30</h3>
+              <h3 className="text-xl font-bold text-slate-900">₹1,245.30</h3>
             </div>
           </div>
           <p className="text-xs font-medium text-emerald-600 flex items-center gap-1">
@@ -327,42 +328,42 @@ export default function PharmacyDashboard() {
         <div className="xl:col-span-3 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
           <h3 className="font-bold text-slate-900 text-base mb-6">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200 group">
+            <Link to="/pharmacy/medicine-master" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <PlusCircle className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-indigo-900 text-center">Add Medicine</span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition-colors border border-transparent hover:border-sky-200 group">
+            </Link>
+            <Link to="/pharmacy/purchase-orders" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition-colors border border-transparent hover:border-sky-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <ShoppingCart className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-sky-900 text-center">Purchase Order</span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors border border-transparent hover:border-emerald-200 group">
+            </Link>
+            <Link to="/pharmacy/medicine-stock" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors border border-transparent hover:border-emerald-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <ArrowRightLeft className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-emerald-900 text-center">Stock Transfer</span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors border border-transparent hover:border-orange-200 group">
+            </Link>
+            <Link to="/pharmacy/direct-pharmacy-sales" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors border border-transparent hover:border-orange-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <FileOutput className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-orange-900 text-center">Sales Invoice</span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition-colors border border-transparent hover:border-rose-200 group">
+            </Link>
+            <Link to="/pharmacy/grnentry" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition-colors border border-transparent hover:border-rose-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <ArrowDownToLine className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-rose-900 text-center">GRN Entry</span>
-            </button>
-            <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors border border-transparent hover:border-purple-200 group">
+            </Link>
+            <Link to="/pharmacy/medicine-stock" className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors border border-transparent hover:border-purple-200 group">
               <div className="w-10 h-10 rounded-full bg-white text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                 <Settings2 className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-bold text-purple-900 text-center">Stock Adjust</span>
-            </button>
+            </Link>
           </div>
         </div>
 

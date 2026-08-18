@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   main:
     allow-bean-definition-overriding: true
   datasource:
@@ -15,7 +17,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
 jwt:
   secret: default_dev_secret_key_that_is_long_enough_for_hs256_algorithm_12345

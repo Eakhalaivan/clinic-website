@@ -12,6 +12,9 @@ import DashboardGrid from '../components/dashboard/DashboardGrid';
 import ThemeToggle from '../components/ui/ThemeToggle';
 import ErrorBoundary from '../components/ui/ErrorBoundary';
 import CommandPalette from '../components/ui/CommandPalette';
+import NotificationBell from '../components/NotificationBell';
+import MessageDropdown from '../components/MessageDropdown';
+import ActivityDropdown from '../components/ActivityDropdown';
 
 const DashboardLayout = ({ portalSlug, allowedRoles }) => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
@@ -173,40 +176,10 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
 
             <div className="flex items-center gap-4 text-slate-500">
               
-              <div className="relative" onMouseLeave={() => setIsNotificationsOpen(false)}>
-                <div className="cursor-pointer relative" onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
-                  <Bell size={22} className="text-slate-600 hover:text-slate-800 transition" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
+              <NotificationBell />
 
-                {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                      <span className="font-bold text-slate-800 text-sm">Notifications</span>
-                      <span className="text-xs text-indigo-600 font-semibold cursor-pointer hover:underline" onClick={() => window.location.pathname = '/patient/timeline'}>View All</span>
-                    </div>
-                    <div className="max-h-72 overflow-y-auto">
-                      {unreadCount === 0 ? (
-                         <div className="p-4 text-center text-sm text-slate-500">No new notifications.</div>
-                      ) : (
-                         <div className="p-4 text-center text-sm text-slate-500">You have {unreadCount} unread notifications. Check your timeline.</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative cursor-pointer" onClick={() => window.location.hash = '?panel=messages'}>
-                <MessageSquare size={22} className="text-slate-600 hover:text-slate-800 transition" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">
-                  6
-                </span>
-              </div>
-              <Activity size={22} className="text-slate-600 hover:text-slate-800 transition cursor-pointer" />
+              <MessageDropdown />
+              <ActivityDropdown />
             </div>
 
             <div className="flex items-center gap-3 pl-6 border-l border-slate-200">

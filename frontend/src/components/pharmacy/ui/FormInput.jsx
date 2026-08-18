@@ -1,5 +1,6 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Eye, EyeOff } from 'lucide-react';
 
 const FormInput = forwardRef(({ 
   label, 
@@ -10,11 +11,16 @@ const FormInput = forwardRef(({
   containerClassName = '',
   ...props 
 }, ref) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPassword = type === 'password';
+  const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+
   const baseClasses = `w-full px-4 py-2.5 rounded-xl border outline-none focus:ring-2 bg-white font-bold transition-all disabled:bg-slate-50 disabled:text-slate-400 ${
     error 
       ? 'border-red-300 focus:ring-red-500/20 focus:border-red-400' 
       : 'border-slate-200 focus:ring-primary/20 focus:border-primary'
-  } ${className}`;
+  } ${isPassword ? 'pr-12' : ''} ${className}`;
 
   return (
     <div className={`space-y-1.5 ${containerClassName}`}>
@@ -35,7 +41,21 @@ const FormInput = forwardRef(({
       ) : type === 'textarea' ? (
         <textarea ref={ref} className={baseClasses} {...props} />
       ) : (
-        <input ref={ref} type={type} className={baseClasses} {...props} />
+        <div className="relative">
+          <input ref={ref} type={inputType} className={baseClasses} {...props} />
+          {isPassword && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowPassword(!showPassword);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
       )}
       {error && <span className="text-[10px] text-red-500 font-bold px-1">{error}</span>}
     </div>

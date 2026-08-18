@@ -8,32 +8,15 @@ spring:
   application:
     name: clinic-app
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: false
   datasource:
-    clinic:
-      jdbc-url: ${DB_URL}
-      username: ${DB_USER}
-      password: ${DB_PASSWORD}
-      driver-class-name: org.postgresql.Driver
-      hikari:
-        connection-timeout: 10000
-        maximum-pool-size: 5
-        minimum-idle: 2
-        initialization-fail-timeout: 1
-    pharmacy:
-      jdbc-url: ${PHARMACY_DB_URL}
-      username: ${PHARMACY_DB_USER}
-      password: ${PHARMACY_DB_PASSWORD}
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      hikari:
-        connection-timeout: 10000
-        maximum-pool-size: 5
-        minimum-idle: 2
-        initialization-fail-timeout: 1
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:587}

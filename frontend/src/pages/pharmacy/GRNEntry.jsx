@@ -136,7 +136,14 @@ export default function GRNEntry({ onBack }) {
     <div className="space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
-
+        {onBack && (
+          <button 
+            onClick={onBack} 
+            className="p-2 hover:bg-slate-200 bg-slate-100 rounded-xl text-slate-600 transition-colors mr-1"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
         <div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Goods Receipt Note (GRN)</h2>
           <p className="text-sm text-slate-500 font-medium">Record delivery against a Purchase Order</p>

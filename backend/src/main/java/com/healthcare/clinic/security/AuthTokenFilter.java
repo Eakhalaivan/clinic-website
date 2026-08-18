@@ -62,6 +62,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return headerAuth.substring(7);
         }
 
+        String tokenParam = request.getParameter("token");
+        if (StringUtils.hasText(tokenParam) && request.getRequestURI().contains("/api/sse/")) {
+            return tokenParam;
+        }
+
         return null;
     }
 }

@@ -36,7 +36,6 @@ public class PharmacyDatabaseConfig {
     }
 
     @Bean(name = "pharmacyEntityManagerFactory")
-    @org.springframework.context.annotation.DependsOn("pharmacyFlyway")
     public LocalContainerEntityManagerFactoryBean pharmacyEntityManagerFactory(
             @Qualifier("pharmacyDataSource") DataSource dataSource,
             org.springframework.core.env.Environment env) {

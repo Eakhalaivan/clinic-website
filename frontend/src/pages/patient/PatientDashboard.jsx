@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { 
   Calendar, Pill, Users, FileText, Heart, Shield, ChevronRight, 
-  ChevronLeft, Check, Plus, MessageCircle, FlaskConical, Bell
+  ChevronLeft, Check, Plus, MessageCircle, FlaskConical, Bot
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './PatientDashboard.css';
@@ -211,11 +211,11 @@ const PatientDashboard = () => {
 
             {/* Quick Links Grid */}
             <div className="grid grid-cols-3 gap-3">
-              <button onClick={() => navigate('/patient/appointments')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
+              <button onClick={() => navigate('/patient/book')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
                 <Calendar className="w-6 h-6 text-indigo-600" />
                 <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Book<br/>Appointment</span>
               </button>
-              <button onClick={() => navigate('/patient/doctors')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
+              <button onClick={() => navigate('/doctors')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
                 <Users className="w-6 h-6 text-indigo-600" />
                 <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Find a<br/>Doctor</span>
               </button>
@@ -227,13 +227,13 @@ const PatientDashboard = () => {
                 <FlaskConical className="w-6 h-6 text-indigo-600" />
                 <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Lab<br/>Reports</span>
               </button>
-              <button onClick={() => navigate('/patient/vitals')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
+              <button onClick={() => navigate('/patient/timeline')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
                 <Heart className="w-6 h-6 text-indigo-600" />
                 <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Vitals<br/>Log</span>
               </button>
-              <button onClick={() => navigate('/patient/reminders')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
-                <Bell className="w-6 h-6 text-indigo-600" />
-                <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Reminders<br/>&nbsp;</span>
+              <button onClick={() => navigate('/patient/assistant')} className="bg-white border border-slate-100 rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow">
+                <Bot className="w-6 h-6 text-indigo-600" />
+                <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">AI<br/>Assistant</span>
               </button>
             </div>
 
@@ -268,10 +268,6 @@ const PatientDashboard = () => {
 
         </div>
 
-        {/* Floating Action Button for Chat */}
-        <button className="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-[0_8px_30px_rgb(79,70,229,0.4)] flex items-center justify-center transition-transform hover:scale-105 z-50">
-          <MessageCircle className="w-6 h-6" />
-        </button>
       </main>
     </div>
   );

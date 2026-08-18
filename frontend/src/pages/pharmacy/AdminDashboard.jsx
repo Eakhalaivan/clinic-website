@@ -26,10 +26,10 @@ const ROLE_CONFIG = {
     chartType: 'area',
     chartLabel: '7-Day Sales Revenue',
     quickActions: [
-      { label: 'New Sale', icon: Plus, path: '/sales' },
-      { label: 'Scan Barcode', icon: ScanLine, path: '/barcode-scanner' },
-      { label: 'Add Stock', icon: PackagePlus, path: '/stocks' },
-      { label: 'Create PO', icon: ShoppingCart, path: '/purchase-orders' },
+      { label: 'New Sale', icon: Plus, path: '/pharmacy/direct-pharmacy-sales' },
+      { label: 'Scan Barcode', icon: ScanLine, path: '/pharmacy/barcode-scanner' },
+      { label: 'Add Stock', icon: PackagePlus, path: '/pharmacy/medicine-stock' },
+      { label: 'Create PO', icon: ShoppingCart, path: '/pharmacy/purchase-orders' },
       { label: 'Print Day Report', icon: Printer, action: 'printDayReport' },
     ],
   },
@@ -41,9 +41,9 @@ const ROLE_CONFIG = {
     chartType: 'line',
     chartLabel: "Today's Hourly Sales",
     quickActions: [
-      { label: 'New Sale', icon: Plus, path: '/sales' },
-      { label: 'Scan Barcode', icon: ScanLine, path: '/barcode-scanner' },
-      { label: 'Process Return', icon: RotateCcw, path: '/returns' },
+      { label: 'New Sale', icon: Plus, path: '/pharmacy/direct-pharmacy-sales' },
+      { label: 'Scan Barcode', icon: ScanLine, path: '/pharmacy/barcode-scanner' },
+      { label: 'Process Return', icon: RotateCcw, path: '/pharmacy/medicine-returns' },
       { label: 'Print Receipt', icon: Printer, action: 'printReceipt' },
     ],
   },
@@ -55,11 +55,11 @@ const ROLE_CONFIG = {
     chartType: 'bar',
     chartLabel: 'Payment Mode Breakdown',
     quickActions: [
-      { label: 'New Bill', icon: Plus, path: '/sales' },
-      { label: 'View Advances', icon: IndianRupee, path: '/advances' },
-      { label: 'Process Clearance', icon: CheckSquare, path: '/clearance' },
+      { label: 'New Bill', icon: Plus, path: '/pharmacy/direct-pharmacy-sales' },
+      { label: 'View Advances', icon: IndianRupee, path: '/pharmacy/pharmacy-advances' },
+      { label: 'Process Clearance', icon: CheckSquare, path: '/pharmacy/pharmacy-clearance' },
       { label: 'Print Bill', icon: Printer, action: 'printBill' },
-      { label: 'View Consolidated', icon: FileText, path: '/consolidated-bills' },
+      { label: 'View Consolidated', icon: FileText, path: '/pharmacy/consolidated-bills' },
       { label: 'Day Close', icon: Calendar, action: 'dayClose' },
     ],
   },
@@ -71,12 +71,12 @@ const ROLE_CONFIG = {
     chartType: 'dualBar',
     chartLabel: 'Stock Inflow vs Outflow (7 Days)',
     quickActions: [
-      { label: 'Create PO', icon: ShoppingCart, path: '/purchase-orders' },
-      { label: 'Record GRN', icon: Truck, path: '/grn' },
-      { label: 'Adjust Stock', icon: PackagePlus, path: '/stocks' },
-      { label: 'Supplier Return', icon: RotateCcw, path: '/returns' },
-      { label: 'View Low Stock', icon: AlertTriangle, path: '/low-stock-alerts' },
-      { label: 'View Expiry', icon: Calendar, path: '/expiry-tracker' },
+      { label: 'Create PO', icon: ShoppingCart, path: '/pharmacy/purchase-orders' },
+      { label: 'Record GRN', icon: Truck, path: '/pharmacy/grnentry' },
+      { label: 'Adjust Stock', icon: PackagePlus, path: '/pharmacy/medicine-stock' },
+      { label: 'Supplier Return', icon: RotateCcw, path: '/pharmacy/medicine-returns' },
+      { label: 'View Low Stock', icon: AlertTriangle, path: '/pharmacy/low-stock-alerts' },
+      { label: 'View Expiry', icon: Calendar, path: '/pharmacy/expiry-tracker' },
     ],
   },
   SUPERVISOR: {
@@ -87,12 +87,12 @@ const ROLE_CONFIG = {
     chartType: 'bar',
     chartLabel: 'Department Sales Breakdown',
     quickActions: [
-      { label: 'Approve Returns', icon: CheckSquare, path: '/returns' },
-      { label: 'View Staff Activity', icon: Users, path: '/users' },
-      { label: 'Run Report', icon: FileText, path: '/reports' },
+      { label: 'Approve Returns', icon: CheckSquare, path: '/pharmacy/medicine-returns' },
+      { label: 'View Staff Activity', icon: Users, path: '/pharmacy/user-management' },
+      { label: 'Run Report', icon: FileText, path: '/pharmacy/reports' },
       { label: 'View Alerts', icon: AlertTriangle, action: 'scrollToAlerts' },
-      { label: 'Manage Users', icon: Users, path: '/users' },
-      { label: 'Analytics', icon: TrendingUp, path: '/analytics' },
+      { label: 'Manage Users', icon: Users, path: '/pharmacy/user-management' },
+      { label: 'Analytics', icon: TrendingUp, path: '/pharmacy/analytics/analytics-dashboard' },
     ],
   },
   RECEPTIONIST: {
@@ -102,7 +102,7 @@ const ROLE_CONFIG = {
     chartType: 'line',
     chartLabel: 'Patient Flow',
     quickActions: [
-      { label: 'Patients', icon: Users, path: '/patients' }
+      { label: 'Patients', icon: Users, path: '/pharmacy/patients' }
     ]
   },
   MEDICAL_STAFF: {
@@ -129,7 +129,7 @@ const ROLE_CONFIG = {
     chartType: 'bar',
     chartLabel: 'Activity Overview',
     quickActions: [
-      { label: 'View Reports', icon: FileText, path: '/reports' },
+      { label: 'View Reports', icon: FileText, path: '/pharmacy/reports' },
     ]
   },
   LAB_TECHNICIAN: {
@@ -363,8 +363,14 @@ export default function AdminDashboard() {
   });
 
   const handleAction = (actionName) => {
-    // Future: dispatch action-specific logic (e.g. print day report)
-    void actionName;
+    if (actionName === 'printDayReport' || actionName === 'printReceipt' || actionName === 'printBill') {
+      window.print();
+    } else if (actionName === 'scrollToAlerts') {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    } else if (actionName === 'dayClose') {
+      // Stub for Day Close logic
+      console.log('Day Close initiated');
+    }
   };
 
   const mappedQuickActions = config.quickActions.map(action => ({
@@ -379,6 +385,7 @@ export default function AdminDashboard() {
     <DashboardShell
       quickActions={mappedQuickActions}
     >
+      <div className="flex-1 overflow-y-auto pr-2 pb-6 min-h-0 flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 mt-2">
         <div>
@@ -497,6 +504,7 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
+      </div>
     </DashboardShell>
   );
 }
