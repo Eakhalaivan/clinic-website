@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate, Link, Outlet } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import { AnimatePresence } from 'framer-motion';
-import PageTransition from '../components/ui/PageTransition';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
+import { motion } from 'framer-motion';
+import { Menu } from 'lucide-react';
+import NotificationBell from '../components/notifications/NotificationBell';
+
 import './AuthLayout.css';
 
 const AuthLayout = ({ allowedRoles }) => {
@@ -114,11 +117,7 @@ const AuthLayout = ({ allowedRoles }) => {
                     </div>
                 </header>
                 <div className="portal-content relative">
-                    <AnimatePresence mode="wait" initial={false}>
-                        <PageTransition key={location.pathname} className="absolute inset-0">
-                            <Outlet />
-                        </PageTransition>
-                    </AnimatePresence>
+                        <Outlet />
                 </div>
             </main>
         </div>

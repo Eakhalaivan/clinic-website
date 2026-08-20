@@ -5,7 +5,7 @@ import { CATEGORIES } from './reportCatalog';
 import { doExportCSV } from './reportExportUtils';
 import { toast } from 'react-hot-toast';
 import { fmtDateTime, fmtDateTimeEnd, monthStart, today } from './reportCatalog';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 /**
@@ -34,7 +34,7 @@ export default function ReportCard({ report, isFav, onToggleFav, onOpen, onSched
   };
 
   return (
-    <PageTransition>
+    
     <div className={`bg-white rounded-2xl border p-6 flex flex-col h-full hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all cursor-default ${
       report.isNarcotic ? 'border-blue-200' : 'border-slate-100'
     }`}>
@@ -101,7 +101,7 @@ export default function ReportCard({ report, isFav, onToggleFav, onOpen, onSched
         </button>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }
 

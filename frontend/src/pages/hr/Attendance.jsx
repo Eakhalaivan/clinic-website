@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../../components/ui/motion';
 import toast from 'react-hot-toast';
 import Badge from '../../components/ui/Badge';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const Attendance = () => {
@@ -25,7 +25,7 @@ const Attendance = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-8 max-w-4xl mx-auto">
       <motion.div
         variants={fadeIn}
@@ -80,7 +80,7 @@ const Attendance = () => {
         </table>
       </motion.div>
     </div>
-    </PageTransition>
+    
   );
 };
 

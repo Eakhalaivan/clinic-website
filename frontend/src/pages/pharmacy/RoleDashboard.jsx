@@ -1,6 +1,6 @@
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import { getRoleColor } from '../../config/pharmacy/roles.config';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function RoleDashboard({ title, description }) {
@@ -8,7 +8,7 @@ export default function RoleDashboard({ title, description }) {
   const colorClass = getRoleColor(activeRole);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
@@ -29,6 +29,6 @@ export default function RoleDashboard({ title, description }) {
         </p>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

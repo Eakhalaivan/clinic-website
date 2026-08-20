@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../../components/ui/motion';
 import toast from 'react-hot-toast';
 import { Settings, Building2, BarChart3, Users, UserPlus, Users2, ShieldCheck, Building, Download, ClipboardList, Database, CheckSquare, CheckCircle2, DollarSign, CalendarCheck } from 'lucide-react';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AdminDashboard = () => {
@@ -109,7 +109,6 @@ const AdminDashboard = () => {
           {quickActions.map((btn, i) => {
             const Icon = btn.icon;
             return (
-    <PageTransition>
               <motion.button
                 key={i}
                 onClick={btn.action}
@@ -170,7 +169,6 @@ const AdminDashboard = () => {
       </div>
       </div>
     </DashboardShell>
-    </PageTransition>
   );
 };
 

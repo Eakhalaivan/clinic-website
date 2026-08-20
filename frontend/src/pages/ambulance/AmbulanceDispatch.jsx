@@ -5,7 +5,7 @@ import { axiosPrivate } from '../../api/axios';
 import { Ambulance } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AmbulanceDispatch = () => {
@@ -62,7 +62,7 @@ const AmbulanceDispatch = () => {
   const availableAmbulances = fleet.filter(a => a.status === 'AVAILABLE');
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -215,7 +215,7 @@ const AmbulanceDispatch = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

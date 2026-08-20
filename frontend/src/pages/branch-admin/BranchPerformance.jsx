@@ -1,11 +1,11 @@
 import { fadeIn } from '../../components/ui/motion';
 import { motion, AnimatePresence } from 'framer-motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const BranchPerformance = () => {
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -80,7 +80,7 @@ const BranchPerformance = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

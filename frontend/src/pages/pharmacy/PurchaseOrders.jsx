@@ -10,10 +10,10 @@ import { useAuth } from '../../context/pharmacy/AuthContext';
 import { ROLES } from '../../config/pharmacy/roles.config';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import Badge from '../../components/ui/Badge';
-import ModuleFilterBar from '../../components/ui/ModuleFilterBar';
-import TableSkeleton from '../../components/ui/TableSkeleton';
-import ErrorBanner from '../../components/ui/ErrorBanner';
-import PageTransition from '../../components/ui/PageTransition';
+import ModuleFilterBar from '../../components/pharmacy/ui/ModuleFilterBar';
+import TableSkeleton from '../../components/pharmacy/ui/TableSkeleton';
+import ErrorBanner from '../../components/pharmacy/ui/ErrorBanner';
+
 
 
 export default function PurchaseOrders() {
@@ -212,7 +212,7 @@ export default function PurchaseOrders() {
   }
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Purchase Orders</h2>
@@ -449,6 +449,6 @@ export default function PurchaseOrders() {
         isDestructive={true}
       />
     </div>
-    </PageTransition>
+    
   );
 }

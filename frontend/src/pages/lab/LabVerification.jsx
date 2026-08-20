@@ -5,7 +5,7 @@ import { CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const LabVerification = () => {
@@ -46,7 +46,7 @@ const LabVerification = () => {
   });
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -150,7 +150,7 @@ const LabVerification = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

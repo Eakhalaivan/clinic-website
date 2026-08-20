@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import dayjs from 'dayjs';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const FinancialReports = () => {
@@ -26,7 +26,7 @@ const FinancialReports = () => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto font-sans text-slate-800">
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -116,7 +116,7 @@ const FinancialReports = () => {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 };
 

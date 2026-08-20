@@ -58,6 +58,8 @@ export const staggerChildren = {
   }
 };
 
+export const staggerContainer = staggerChildren;
+
 export const pageTransition = {
   hidden: { opacity: 0, y: 10 },
   visible: { 

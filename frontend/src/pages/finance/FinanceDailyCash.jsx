@@ -11,7 +11,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const FinanceDailyCash = () => {
@@ -98,7 +98,7 @@ const FinanceDailyCash = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -242,7 +242,7 @@ const FinanceDailyCash = () => {
         </form>
       </Modal>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

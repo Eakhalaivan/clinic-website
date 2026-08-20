@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { axiosPrivate } from '../../api/axios';
 import { useQuery } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MarketingConsent() {
@@ -97,7 +97,7 @@ export default function MarketingConsent() {
                 const consent = latestByChannel[ch];
                 const isOptedIn = consent?.consentState === 'OPTED_IN';
                 return (
-    <PageTransition>
+    
                   <div key={ch} className={`rounded-lg border p-3 text-center ${isOptedIn ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
                     <p className="text-xs font-semibold text-gray-600 mb-1">{ch}</p>
                     <p className={`text-sm font-bold ${isOptedIn ? 'text-green-700' : 'text-gray-400'}`}>
@@ -175,6 +175,6 @@ export default function MarketingConsent() {
         </>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

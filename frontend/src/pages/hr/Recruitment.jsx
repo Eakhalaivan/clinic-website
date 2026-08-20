@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const Recruitment = () => {
@@ -20,7 +20,7 @@ const Recruitment = () => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto font-sans text-slate-800">
 
       
@@ -109,7 +109,7 @@ const Recruitment = () => {
       )}
 
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DoctorLabReports = () => {
@@ -71,7 +71,7 @@ const DoctorLabReports = () => {
   const tabs = ['All Reports', 'Blood Tests', 'Imaging', 'Pathology', 'Microbiology', 'Other Tests'];
 
   return (
-    <PageTransition>
+    
     <div className="p-6 md:p-8 bg-white min-h-full font-sans">
       <div className="max-w-[1500px] mx-auto">
         
@@ -297,7 +297,7 @@ const DoctorLabReports = () => {
 
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

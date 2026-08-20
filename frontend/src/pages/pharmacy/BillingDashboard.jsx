@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSystem } from '../../context/pharmacy/SystemContext';
 import { useConfig } from '../../context/pharmacy/ConfigContext';
 import api from '../../utils/pharmacy/api';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DashboardSkeleton = () => (
@@ -75,7 +75,7 @@ export default function BillingDashboard() {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell quickActions={quickActions}>
       <div className="flex-1 overflow-y-auto pr-2 pb-6 min-h-0 flex flex-col">
       <div className="flex flex-col gap-1 mb-8 mt-2">
@@ -216,6 +216,6 @@ export default function BillingDashboard() {
       </AppModal>
       </div>
     </DashboardShell>
-    </PageTransition>
+    
   );
 }

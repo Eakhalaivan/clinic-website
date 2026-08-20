@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { axiosPrivate } from '../../api/axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MarketingNps() {
@@ -60,7 +60,7 @@ export default function MarketingNps() {
   const surveysContent = surveys?.content || [];
 
   return (
-    <PageTransition>
+    
     <div className="p-6 space-y-6">
       <h1 className="text-xl font-bold text-gray-900">NPS & Patient Feedback</h1>
 
@@ -183,6 +183,6 @@ export default function MarketingNps() {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

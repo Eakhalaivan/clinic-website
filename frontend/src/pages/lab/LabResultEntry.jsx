@@ -5,7 +5,7 @@ import { CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const LabResultEntry = () => {
@@ -60,7 +60,7 @@ const LabResultEntry = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -215,7 +215,7 @@ const LabResultEntry = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

@@ -3,7 +3,7 @@ import logger from '../../../utils/logger';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { exportToCSV } from '../../../utils/pharmacy/reportExport';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 export default function ABCAnalysis() {
@@ -58,7 +58,7 @@ export default function ABCAnalysis() {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-center items-center h-80">
@@ -168,6 +168,6 @@ export default function ABCAnalysis() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

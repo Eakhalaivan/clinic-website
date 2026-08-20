@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ResetPassword() {
@@ -206,7 +206,7 @@ export default function ResetPassword() {
 
 function RequirementBadge({ fulfilled, label }) {
   return (
-    <PageTransition>
+    
     <div className="flex items-center gap-2">
       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${fulfilled ? 'bg-[#ede9fe] text-[#7c3aed]' : 'bg-slate-100 text-slate-300'}`}>
         <Check className="w-2.5 h-2.5 stroke-[3]" />
@@ -215,6 +215,6 @@ function RequirementBadge({ fulfilled, label }) {
         {label}
       </span>
     </div>
-    </PageTransition>
+    
   );
 }

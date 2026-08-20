@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
 import { useSearchParams } from 'react-router-dom';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const RadiologyArchive = () => {
@@ -92,7 +92,7 @@ const RadiologyArchive = () => {
   const isLoading = isLoadingRequest || isLoadingReport;
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -171,7 +171,7 @@ const RadiologyArchive = () => {
         </Card>
       )}
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

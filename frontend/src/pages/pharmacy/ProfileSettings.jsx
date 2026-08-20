@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ProfileSettings() {
@@ -77,7 +77,7 @@ export default function ProfileSettings() {
   if (!user) return null;
 
   return (
-    <PageTransition>
+    
     <div className="max-w-5xl mx-auto space-y-6 pb-10 p-2 md:p-6 lg:p-8 font-sans">
       
       {/* Breadcrumb & Header */}
@@ -287,6 +287,6 @@ export default function ProfileSettings() {
 
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

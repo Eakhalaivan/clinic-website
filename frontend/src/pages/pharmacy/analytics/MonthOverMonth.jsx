@@ -3,7 +3,7 @@ import logger from '../../../utils/logger';
 import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { exportToCSV } from "../../../utils/pharmacy/reportExport";
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 export default function MonthOverMonth() {
@@ -71,7 +71,7 @@ export default function MonthOverMonth() {
   const displayTop10B = monthB.top10Medicines?.length > 0 ? monthB.top10Medicines : defaultTop10B;
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between">
@@ -151,6 +151,6 @@ export default function MonthOverMonth() {
       </div>
 
     </div>
-    </PageTransition>
+    
   );
 }

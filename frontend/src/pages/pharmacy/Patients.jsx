@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import Badge from '../../components/ui/Badge';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function Patients() {
@@ -211,7 +211,7 @@ export default function Patients() {
   ], [roles]);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 font-display">Patient Directory</h2>
@@ -356,6 +356,6 @@ export default function Patients() {
         isLoading={deletePatientMutation.isPending}
       />
     </div>
-    </PageTransition>
+    
   );
 }

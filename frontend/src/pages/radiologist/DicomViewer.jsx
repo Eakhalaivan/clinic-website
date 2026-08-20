@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 // No mock slices allowed in production
@@ -73,7 +73,7 @@ const DicomViewer = () => {
   const currentImage = null; // No image data in production until integrated
 
   return (
-    <PageTransition>
+    
     <div className="flex flex-col h-[calc(100vh-64px)] bg-[#030712] text-slate-300 font-sans -m-6">
       
       {/* ── Top App Bar ── */}
@@ -223,7 +223,7 @@ const DicomViewer = () => {
 
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

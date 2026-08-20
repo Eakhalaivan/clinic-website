@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 import { CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const TaskManagement = () => {
@@ -34,7 +34,7 @@ const TaskManagement = () => {
   const completedTasks = records.filter(r => r.status === 'GIVEN' || r.status === 'COMPLETED').sort((a, b) => new Date(b.administeredAt || b.scheduledTime) - new Date(a.administeredAt || a.scheduledTime));
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -146,7 +146,7 @@ const TaskManagement = () => {
         </Card>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

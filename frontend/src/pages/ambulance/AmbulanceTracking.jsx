@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AmbulanceTracking = () => {
@@ -16,7 +16,7 @@ const AmbulanceTracking = () => {
   });
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -136,7 +136,7 @@ const AmbulanceTracking = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

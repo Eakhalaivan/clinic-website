@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { Pill, Activity } from 'lucide-react';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const PharmacistDashboard = () => {
@@ -36,7 +36,7 @@ const PharmacistDashboard = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell
       tabs={['Dashboard', 'My Dispensed', 'Inventory']}
       activeTab="Dashboard"
@@ -73,7 +73,7 @@ const PharmacistDashboard = () => {
         }
       />
     </DashboardShell>
-    </PageTransition>
+    
   );
 };
 

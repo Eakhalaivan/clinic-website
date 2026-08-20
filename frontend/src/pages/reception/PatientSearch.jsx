@@ -5,7 +5,7 @@ import { axiosPrivate } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { fadeIn } from '../../components/ui/motion';
 import { useDebounce } from 'use-debounce';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const PatientSearch = () => {
@@ -24,7 +24,7 @@ const PatientSearch = () => {
   });
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -111,7 +111,7 @@ const PatientSearch = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

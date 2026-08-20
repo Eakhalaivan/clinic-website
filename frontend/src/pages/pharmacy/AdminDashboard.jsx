@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import api from '../../utils/pharmacy/api';
 import {
-import PageTransition from '../../components/ui/PageTransition';
+
 
   Package, IndianRupee, FileText, AlertTriangle, Calendar, Users,
   Plus, ScanLine, PackagePlus, ShoppingCart, ClipboardList, Printer, TrendingUp, Activity, ShieldAlert,
@@ -376,7 +376,7 @@ export default function AdminDashboard() {
   }));
 
   return (
-    <PageTransition>
+    
     <DashboardShell
       quickActions={mappedQuickActions}
     >
@@ -501,6 +501,6 @@ export default function AdminDashboard() {
       )}
       </div>
     </DashboardShell>
-    </PageTransition>
+    
   );
 }

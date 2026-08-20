@@ -6,7 +6,7 @@ import { Save } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const RadiologyUpload = () => {
@@ -89,7 +89,7 @@ const RadiologyUpload = () => {
   }
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -191,7 +191,7 @@ const RadiologyUpload = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

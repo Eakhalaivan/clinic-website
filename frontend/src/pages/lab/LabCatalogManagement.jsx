@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const LabCatalogManagement = () => {
@@ -222,7 +222,7 @@ const CatalogFormModal = ({ test, onClose }) => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
@@ -305,7 +305,7 @@ const CatalogFormModal = ({ test, onClose }) => {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

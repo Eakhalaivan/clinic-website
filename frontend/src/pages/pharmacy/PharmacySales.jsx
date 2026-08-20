@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function PharmacySales() {
@@ -224,7 +224,7 @@ export default function PharmacySales() {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-1">
@@ -746,6 +746,6 @@ export default function PharmacySales() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

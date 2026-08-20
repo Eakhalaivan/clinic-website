@@ -10,7 +10,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import FormField from '../../components/ui/FormField';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const NursingNotes = () => {
@@ -69,7 +69,7 @@ const NursingNotes = () => {
   const selectedPatient = assignments.find(a => a.patientId === selectedPatientId);
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -208,7 +208,7 @@ const NursingNotes = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

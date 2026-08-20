@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const CrewView = () => {
@@ -89,7 +89,7 @@ const CrewView = () => {
   const action = getNextAction(activeDispatch.status);
 
   return (
-    <PageTransition>
+    
     <div className="flex justify-center items-start pt-8 min-h-[600px]">
       <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden w-full max-w-md">
         <div className={`p-4 text-center text-white ${activeDispatch.priority === 'CRITICAL' ? 'bg-red-600' : 'bg-orange-500'}`}>
@@ -197,7 +197,7 @@ const CrewView = () => {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

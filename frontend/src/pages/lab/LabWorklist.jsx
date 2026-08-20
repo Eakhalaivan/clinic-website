@@ -7,7 +7,7 @@ import { FileText, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const ResultEntryModal = ({ request, onClose, onSuccess }) => {
@@ -233,7 +233,7 @@ const LabWorklist = () => {
                 const isOverdue = isPast(new Date(dueTime)) && req.status !== 'RELEASED' && req.status !== 'VERIFIED';
                 
                 return (
-    <PageTransition>
+    
                   <motion.li variants={fadeIn} key={req.id} className="p-4 hover:bg-[var(--color-surface-alt)] transition-colors flex flex-col sm:flex-row justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -287,7 +287,7 @@ const LabWorklist = () => {
         <ResultEntryModal request={selectedRequest} onClose={() => setSelectedRequest(null)} onSuccess={() => setSelectedRequest(null)} />
       )}
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

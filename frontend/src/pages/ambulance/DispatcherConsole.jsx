@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DispatcherConsole = () => {
@@ -25,7 +25,7 @@ const DispatcherConsole = () => {
   );
 
   return (
-    <PageTransition>
+    
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden flex flex-col">
@@ -78,7 +78,7 @@ const DispatcherConsole = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../utils/pharmacy/api';
-import { KPICard, Card, Badge, Button } from '../../components/ui';
+import KPICard from '../../components/ui/KPICard';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../../components/ui/motion';
 import { 
@@ -10,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
-import PageTransition from '../../components/ui/PageTransition';
+
 
   ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, 
   CartesianGrid, PieChart, Pie, Cell
@@ -84,7 +87,7 @@ export default function PharmacyDashboard() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="font-sans h-full flex flex-col overflow-y-auto bg-[var(--color-bg-app)] p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8 shrink-0">
@@ -402,6 +405,6 @@ export default function PharmacyDashboard() {
 
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

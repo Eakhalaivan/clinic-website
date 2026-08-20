@@ -5,7 +5,7 @@ import axios from 'axios';
 
 import toast from 'react-hot-toast';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const KIOSK_STATION = 'KIOSK-1';
@@ -48,7 +48,7 @@ const CheckInKiosk = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="min-h-screen bg-gradient-to-br from-[var(--color-navy-900)] via-[var(--color-navy-800)] to-[var(--color-navy-900)] flex flex-col items-center justify-center p-6">
       {/* Header */}
       <div className="text-center mb-8">
@@ -225,7 +225,7 @@ const CheckInKiosk = () => {
         </motion.div>
       </AnimatePresence>
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { axiosPrivate } from '../../api/axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const TIER_STYLES = {
@@ -50,7 +50,7 @@ export default function MarketingLoyalty() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 space-y-6">
       <h1 className="text-xl font-bold text-gray-900">Loyalty & Points</h1>
 
@@ -151,6 +151,6 @@ export default function MarketingLoyalty() {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

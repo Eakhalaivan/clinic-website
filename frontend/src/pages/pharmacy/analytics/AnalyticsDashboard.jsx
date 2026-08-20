@@ -4,7 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import api from '../../../utils/pharmacy/api';
 import { TrendingUp, IndianRupee, Package, Activity, AlertTriangle } from 'lucide-react';
 import { exportToCSV } from '../../../utils/pharmacy/reportExport';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 export default function AnalyticsDashboard() {
@@ -70,7 +70,7 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -217,6 +217,6 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

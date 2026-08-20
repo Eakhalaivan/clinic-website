@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import doctorService from '../../utils/pharmacy/doctorService';
 import Skeleton from '../../components/ui/Skeleton';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const EMPTY_FORM = {
@@ -145,7 +145,7 @@ export default function Doctors() {
   }, [doctors, searchTerm]);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
@@ -255,6 +255,6 @@ export default function Doctors() {
         isLoading={deleteDoctorMutation.isPending}
       />
     </div>
-    </PageTransition>
+    
   );
 }

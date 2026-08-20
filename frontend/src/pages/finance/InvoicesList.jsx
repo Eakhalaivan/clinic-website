@@ -11,7 +11,7 @@ import Button from '../../components/ui/Button';
 import DataTable from '../../components/ui/DataTable';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 function useDebouncedValue(value, delay = 300) {
@@ -144,7 +144,7 @@ const InvoicesList = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <motion.div initial="hidden" animate="visible" variants={fadeIn} className="max-w-6xl mx-auto space-y-6">
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -238,7 +238,7 @@ const InvoicesList = () => {
       </Modal>
 
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

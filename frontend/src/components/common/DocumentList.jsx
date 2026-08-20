@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
-import ConfirmDialog from './ConfirmDialog';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 const DocumentList = ({ documents, onRefresh, readOnly = false }) => {
   const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, docId: null });

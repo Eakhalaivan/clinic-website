@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { REPORT_CATALOG, CATEGORIES } from './reports/reportCatalog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 /**
@@ -169,7 +169,7 @@ export default function Reports() {
         if (catReports.length === 0) return null;
         const CatIcon = cat.icon;
         return (
-    <PageTransition>
+    
           <div key={cat.id} className="space-y-6 mt-4">
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-3">
@@ -220,6 +220,6 @@ export default function Reports() {
         />
       )}
     </div>
-    </PageTransition>
+    
   );
 }

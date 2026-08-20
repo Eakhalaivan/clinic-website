@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { Activity, Bed, Users, UserCheck } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
@@ -36,7 +36,7 @@ const IPDAnalyticsDashboard = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -111,7 +111,7 @@ const IPDAnalyticsDashboard = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

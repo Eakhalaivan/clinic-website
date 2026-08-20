@@ -10,7 +10,7 @@ import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 // ── Status helpers ──────────────────────────────────────────────
@@ -624,7 +624,7 @@ export default function Suppliers() {
                 {filtered.map((s, i) => {
                   const statusCfg = statusConfig[s.status] || statusConfig.ACTIVE;
                   return (
-    <PageTransition>
+    
                     <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-3 text-xs text-slate-400">{i + 1}</td>
                       <td className="px-4 py-3">
@@ -726,6 +726,6 @@ export default function Suppliers() {
         isLoading={deleteSupplierMutation.isPending}
       />
     </div>
-    </PageTransition>
+    
   );
 }

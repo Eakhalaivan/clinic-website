@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const LabNotifications = () => {
@@ -65,7 +65,7 @@ const LabNotifications = () => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <PageTransition>
+    
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -170,7 +170,7 @@ const LabNotifications = () => {
         )}
       </Card>
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { axiosPrivate } from '../../api/axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const STATUS_COLORS = {
@@ -42,7 +42,7 @@ export default function MarketingLeads() {
   const STATUSES = ['', 'NEW', 'CONTACTED', 'QUALIFIED', 'APPOINTMENT_BOOKED', 'CONVERTED', 'NURTURING', 'LOST'];
 
   return (
-    <PageTransition>
+    
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">Lead Pipeline</h1>
@@ -153,6 +153,6 @@ export default function MarketingLeads() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

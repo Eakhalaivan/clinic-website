@@ -9,7 +9,7 @@ import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { motion } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../../components/ui/motion';
 import Badge from '../../components/ui/Badge';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MedicineStock() {
@@ -395,7 +395,7 @@ export default function MedicineStock() {
                           {sortedBatches.map(b => {
                             const exp = getExpiryStatus(b.expiryDate);
                             return (
-    <PageTransition>
+    
                               <tr key={b.id} className="hover:bg-white transition-colors">
                                 <td className="py-3 font-mono text-slate-700">{b.batchNumber}</td>
                                 <td className="py-3 text-slate-700 flex items-center gap-2">
@@ -696,6 +696,6 @@ export default function MedicineStock() {
       </AppModal>
 
     </div>
-    </PageTransition>
+    
   );
 }

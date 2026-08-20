@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AmbulanceDashboard = () => {
   const [activeTab, setActiveTab] = useState('dispatcher');
 
   return (
-    <PageTransition>
+    
     <div className="p-6 bg-slate-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-slate-900 m-0">Ambulance Command Center</h2>
@@ -51,7 +51,7 @@ const AmbulanceDashboard = () => {
         {activeTab === 'history' && <TripHistory />}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

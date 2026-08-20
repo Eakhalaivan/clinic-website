@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSystem } from '../../context/pharmacy/SystemContext';
 import { useConfig } from '../../context/pharmacy/ConfigContext';
 import api from '../../utils/pharmacy/api';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DashboardSkeleton = () => (
@@ -47,7 +47,7 @@ export default function SupervisorDashboard() {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell quickActions={quickActions}>
       <div className="flex flex-col gap-1 mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0">
@@ -130,6 +130,6 @@ export default function SupervisorDashboard() {
         }
       />
     </DashboardShell>
-    </PageTransition>
+    
   );
 }

@@ -5,7 +5,7 @@ import { axiosPrivate } from '../../api/axios';
 import { Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const RadiologyRequests = () => {
@@ -22,7 +22,7 @@ const RadiologyRequests = () => {
   });
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -120,7 +120,7 @@ const RadiologyRequests = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

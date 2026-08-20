@@ -294,6 +294,62 @@ export default function PortalLoginPage() {
 
           /* ── DYNAMIC FLOW ── */
           ) : (
+            <form onSubmit={handleLogin}>
+              <h2 className="text-[22px] font-bold text-gray-900 mb-0.5">
+                Sign <span style={{ color: BLUE }}>In</span>
+              </h2>
+              <p className="text-[12px] text-gray-500 mb-6">
+                Welcome back! Please sign in to your account.
+              </p>
+
+              <div className="space-y-3">
+                <InputField
+                  icon={Mail}
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Email Address"
+                />
+                <InputField
+                  icon={Lock}
+                  type={showPass ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Password"
+                  rightSlot={
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="text-gray-400 hover:text-gray-600">
+                      {showPass ? <EyeOff size={14}/> : <Eye size={14}/>}
+                    </button>
+                  }
+                />
+              </div>
+
+              {/* Remember me + Forgot */}
+              <div className="flex items-center justify-between mt-3.5 mb-5">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 accent-[#2B4AFE]"
+                  />
+                  <span className="text-[12px] text-gray-600">Remember Me</span>
+                </label>
+                <button type="button" onClick={() => setForgotStep(1)}
+                  className="text-[12px] font-semibold hover:underline" style={{ color: BLUE }}
+                >Forgot Password?</button>
+              </div>
+
+              {/* Submit */}
+              <Button type="submit" isLoading={isLoading}
+                className="w-full mt-4 py-3 rounded-xl text-[13px] font-semibold text-white transition-all shadow-md"
+                style={{ background: BLUE }}
+              >Sign In</Button>
+
+              {/* OAuth — patient only */}
+              {portalSlug === 'patient' && (
                 <>
                   <OrDivider />
                   <div className="grid grid-cols-2 gap-3">

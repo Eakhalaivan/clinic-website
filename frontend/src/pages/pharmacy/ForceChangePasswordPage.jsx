@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import api from '../../utils/pharmacy/api';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ForceChangePasswordPage() {
@@ -38,7 +38,7 @@ export default function ForceChangePasswordPage() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8">
         <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 mx-auto">
@@ -106,6 +106,6 @@ export default function ForceChangePasswordPage() {
         </form>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

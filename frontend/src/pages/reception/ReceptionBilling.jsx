@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import FormField from '../../components/ui/FormField';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const ReceptionBilling = () => {
@@ -91,7 +91,7 @@ const ReceptionBilling = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -310,7 +310,7 @@ const ReceptionBilling = () => {
       )}
       </AnimatePresence>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

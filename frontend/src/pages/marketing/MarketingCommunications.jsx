@@ -6,7 +6,7 @@ import { Send, MessageSquare, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const MarketingCommunications = () => {
@@ -78,7 +78,7 @@ const MarketingCommunications = () => {
   const communications = historyData?.content || [];
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -218,7 +218,7 @@ const MarketingCommunications = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

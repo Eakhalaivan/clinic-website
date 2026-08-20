@@ -4,7 +4,7 @@ import { ShieldAlert } from 'lucide-react';
 import { fadeIn } from '../../components/ui/motion';
 import { axiosPrivate } from '../../api/axios';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const BranchFacility = () => {
@@ -28,7 +28,7 @@ const BranchFacility = () => {
   }, []);
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -146,7 +146,7 @@ const BranchFacility = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

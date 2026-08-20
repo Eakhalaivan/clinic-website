@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/pharmacy/AuthContext';
 import { ROLES } from '../../config/pharmacy/roles.config';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function PurchaseOrderDetail() {
@@ -69,7 +69,7 @@ export default function PurchaseOrderDetail() {
   const variants = { PENDING: 'warning', APPROVED: 'primary', RECEIVED: 'success', CANCELLED: 'danger' };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6 pb-20">
       <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
         <button 
@@ -189,6 +189,6 @@ export default function PurchaseOrderDetail() {
         }
       `}</style>
     </div>
-    </PageTransition>
+    
   );
 }

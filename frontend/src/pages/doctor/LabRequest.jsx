@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const LabRequest = () => {
@@ -59,7 +59,7 @@ const LabRequest = () => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
       <div className="flex items-center gap-3 mb-5">
         <button onClick={() => navigate(-1)} style={{ background: 'var(--color-surface-alt)', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0 }}>
@@ -204,7 +204,7 @@ const LabRequest = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

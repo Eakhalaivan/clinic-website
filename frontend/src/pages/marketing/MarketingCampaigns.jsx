@@ -5,7 +5,7 @@ import { axiosPrivate } from '../../api/axios';
 import { Megaphone, Send, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const MarketingCampaigns = () => {
@@ -79,7 +79,7 @@ const MarketingCampaigns = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -226,7 +226,7 @@ const MarketingCampaigns = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

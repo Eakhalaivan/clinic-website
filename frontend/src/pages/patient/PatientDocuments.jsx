@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
 import { FileText, Shield, Search, Filter } from 'lucide-react';
-import DocumentUploader from '../../components/DocumentUploader';
-import DocumentList from '../../components/DocumentList';
+import DocumentUploader from '../../components/common/DocumentUploader';
+import DocumentList from '../../components/common/DocumentList';
 import { motion } from 'framer-motion';
 import { staggerChildren, fadeUp, listStagger } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 import PageLoadingSkeleton from '../../components/ui/PageLoadingSkeleton';
 
 const PatientDocuments = () => {
@@ -40,7 +40,7 @@ const PatientDocuments = () => {
   }
 
   return (
-    <PageTransition>
+    
       <div className="p-6 max-w-7xl mx-auto space-y-6">
       
       {/* Header */}
@@ -123,7 +123,7 @@ const PatientDocuments = () => {
         </motion.div>
       </motion.div>
     </div>
-    </PageTransition>
+    
   );
 };
 

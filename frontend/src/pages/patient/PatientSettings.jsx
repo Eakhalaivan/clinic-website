@@ -3,7 +3,7 @@ import { axiosPrivate } from '../../api/axios';
 import { Bell, Mail, MessageSquare, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { staggerChildren, listStagger, fadeUp } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 import PageLoadingSkeleton from '../../components/ui/PageLoadingSkeleton';
 
 const CATEGORIES = [
@@ -51,7 +51,7 @@ const PatientSettings = () => {
   if (isLoading) return <PageLoadingSkeleton />;
 
   return (
-    <PageTransition>
+    
       <div className="p-8 max-w-4xl mx-auto">
         <motion.h2 
           initial={{ opacity: 0, y: -20 }}
@@ -109,7 +109,7 @@ const PatientSettings = () => {
           </div>
         </motion.div>
       </div>
-    </PageTransition>
+    
   );
 };
 

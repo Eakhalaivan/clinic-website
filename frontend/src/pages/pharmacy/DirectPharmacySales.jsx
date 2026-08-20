@@ -8,7 +8,7 @@ import { usePOSStore } from '../../store/usePOSStore';
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 export default function DirectPharmacySales() {
   const queryClient = useQueryClient();
@@ -156,7 +156,7 @@ export default function DirectPharmacySales() {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Direct Sales (OTC)</h2>
@@ -422,6 +422,6 @@ export default function DirectPharmacySales() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

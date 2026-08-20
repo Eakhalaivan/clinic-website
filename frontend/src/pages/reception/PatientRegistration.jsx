@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import FormField from '../../components/ui/FormField';
 import Button from '../../components/ui/Button';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const PatientRegistration = () => {
@@ -39,7 +39,7 @@ const PatientRegistration = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -220,7 +220,7 @@ const PatientRegistration = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

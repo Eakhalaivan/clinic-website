@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MedicineReturns() {
@@ -145,7 +145,7 @@ export default function MedicineReturns() {
   const pendingReturnsAmount = returnsList.filter(r => r.status === 'PENDING').reduce((sum, r) => sum + r.totalReturnAmount, 0);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -477,6 +477,6 @@ export default function MedicineReturns() {
         />
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

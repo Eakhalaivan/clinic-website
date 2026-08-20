@@ -4,7 +4,7 @@ import useAuthStore from '../../store/authStore';
 import { ClipboardList, FileText, Stethoscope } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { staggerChildren, fadeUp, listStagger } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 import PageLoadingSkeleton from '../../components/ui/PageLoadingSkeleton';
 import './MedicalRecords.css';
 
@@ -37,7 +37,7 @@ const MedicalRecords = () => {
   }
 
   return (
-    <PageTransition>
+    
       <div className="medical-records-page">
         <motion.header variants={fadeUp} initial="hidden" animate="visible" className="page-header">
           <h2 className="page-title">My Medical Records</h2>
@@ -84,7 +84,7 @@ const MedicalRecords = () => {
           </motion.div>
         )}
       </div>
-    </PageTransition>
+    
   );
 };
 

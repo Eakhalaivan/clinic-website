@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import {
-import PageTransition from '../../components/ui/PageTransition';
+
 
   Server, Database, Mail, Bell
 } from 'lucide-react';
@@ -82,7 +82,7 @@ const SuperAdminConsole = ({ defaultTab = 'health' }) => {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} quickActions={[]}>
       <div className="flex items-center gap-3">
         <div className="p-2.5 bg-[#1e1b4b] rounded-xl">
@@ -166,7 +166,7 @@ const SuperAdminConsole = ({ defaultTab = 'health' }) => {
         }
       />
     </DashboardShell>
-    </PageTransition>
+    
   );
 };
 

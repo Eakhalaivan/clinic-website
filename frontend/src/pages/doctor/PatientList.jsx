@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, Plus, Eye, Edit2, MoreVertical, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 const PatientList = ({ onPatientClick }) => {
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ const PatientList = ({ onPatientClick }) => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-6 bg-white min-h-full font-sans">
       <div className="max-w-[1400px] mx-auto">
         
@@ -361,7 +361,7 @@ const PatientList = ({ onPatientClick }) => {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 };
 

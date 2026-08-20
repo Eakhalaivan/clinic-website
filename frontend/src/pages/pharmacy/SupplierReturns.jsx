@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function SupplierReturns({ onBack }) {
@@ -41,7 +41,7 @@ export default function SupplierReturns({ onBack }) {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -126,6 +126,6 @@ export default function SupplierReturns({ onBack }) {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

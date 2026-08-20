@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { ArrowLeftRight, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 
@@ -122,7 +122,7 @@ const StockTransfers = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
@@ -223,7 +223,7 @@ const StockTransfers = () => {
       </Card>
 
     </div>
-    </PageTransition>
+    
   );
 };
 

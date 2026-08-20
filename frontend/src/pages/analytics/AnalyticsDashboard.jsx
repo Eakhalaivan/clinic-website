@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AnalyticsDashboard = () => {
@@ -22,7 +22,7 @@ const AnalyticsDashboard = () => {
   const avgWaitTime = dailyMetrics.length ? (dailyMetrics.reduce((acc, cur) => acc + (cur.averageWaitTimeMinutes || 0), 0) / dailyMetrics.length).toFixed(1) : 0;
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto font-sans text-slate-800">
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -103,7 +103,7 @@ const AnalyticsDashboard = () => {
       </div>
 
     </div>
-    </PageTransition>
+    
   );
 };
 

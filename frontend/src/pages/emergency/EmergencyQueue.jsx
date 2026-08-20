@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 
 import { staggerChildren } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const EmergencyQueue = () => {
@@ -205,7 +205,7 @@ const EmergencyQueue = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <motion.div initial="hidden" animate="visible" variants={staggerChildren} className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -356,7 +356,7 @@ const EmergencyQueue = () => {
       )}
 
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

@@ -4,7 +4,7 @@ import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function PendingReplacementReturns() {
@@ -101,7 +101,7 @@ export default function PendingReplacementReturns() {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Replacement Return List</h2>
@@ -234,6 +234,6 @@ export default function PendingReplacementReturns() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

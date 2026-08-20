@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { toast } from 'react-hot-toast';
-import Skeleton from '../../../../components/ui/Skeleton';
+import Skeleton from '../../../components/ui/Skeleton';
 import pharmacyService from "../../../utils/pharmacy/pharmacyService";
 import { fmtDate } from './reportCatalog';
-import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import { ToggleRight, ToggleLeft, Trash2, Bell } from 'lucide-react';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 const CHANNEL_BADGE  = { EMAIL: '✉️ Email', WHATSAPP: '💬 WhatsApp', BOTH: '✉️+💬 Both' };
@@ -86,7 +86,7 @@ export default function SchedulesTab() {
   }
 
   return (
-    <PageTransition>
+    
     <div className="space-y-4">
       <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
         <table className="w-full text-xs">
@@ -153,6 +153,6 @@ export default function SchedulesTab() {
         isDestructive={true}
       />
     </div>
-    </PageTransition>
+    
   );
 }

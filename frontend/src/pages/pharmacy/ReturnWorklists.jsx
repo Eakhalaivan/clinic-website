@@ -3,7 +3,7 @@ import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ReturnWorklists() {
@@ -115,7 +115,7 @@ export default function ReturnWorklists() {
   if (loading) return <div className="p-8 text-center text-slate-500 font-bold italic">Loading Return Worklist...</div>;
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center shrink-0">
@@ -250,6 +250,6 @@ export default function ReturnWorklists() {
         )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

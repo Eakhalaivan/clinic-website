@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import toast from 'react-hot-toast';
 import { HeartPulse, AlertTriangle, Save } from 'lucide-react';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const VitalSignsEntry = () => {
@@ -53,7 +53,7 @@ const VitalSignsEntry = () => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       <h1 className="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2 text-[var(--color-navy-900)]">
         <HeartPulse size={24} className="text-teal-700" aria-hidden="true" /> Record Vital Signs
@@ -109,7 +109,7 @@ const VitalSignsEntry = () => {
         </button>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

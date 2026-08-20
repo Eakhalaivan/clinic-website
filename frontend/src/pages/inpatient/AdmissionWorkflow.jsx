@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { User, BedDouble, Stethoscope, FileText, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AdmissionWorkflow = () => {
@@ -91,7 +91,7 @@ const AdmissionWorkflow = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       
       <div className="mb-8">
@@ -329,7 +329,7 @@ const AdmissionWorkflow = () => {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

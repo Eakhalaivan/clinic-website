@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 // Icons
@@ -422,7 +422,7 @@ const MarketingDashboard = () => {
                       BRONZE: 'bg-orange-400',
                     };
                     return (
-    <PageTransition>
+    
                       <div key={tier} className="flex items-center gap-3">
                         <span className={`w-3 h-3 rounded-full ${colors[tier]}`} />
                         <span className="text-sm text-gray-600 w-20">{tier}</span>
@@ -489,7 +489,7 @@ const MarketingDashboard = () => {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

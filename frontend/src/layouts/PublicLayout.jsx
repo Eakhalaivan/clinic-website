@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useLocation, Link, Outlet } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '../components/ui/ErrorBoundary';
-import PageTransition from '../components/ui/PageTransition';
+
 import './PublicLayout.css';
 
 const PublicLayout = () => {
@@ -39,11 +38,7 @@ const PublicLayout = () => {
 
 
       <main className="public-main overflow-x-hidden">
-        <AnimatePresence mode="wait" initial={false}>
-          <PageTransition key={location.pathname}>
-            <Outlet />
-          </PageTransition>
-        </AnimatePresence>
+        <Outlet />
       </main>
       {location.pathname !== '/' && (
         <footer className="public-footer">

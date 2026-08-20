@@ -5,7 +5,7 @@ import { axiosPrivate } from '../../api/axios';
 import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const WalkInCheckIn = () => {
@@ -66,7 +66,7 @@ const WalkInCheckIn = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -209,7 +209,7 @@ const WalkInCheckIn = () => {
         </Card>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

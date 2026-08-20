@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DoctorPrescriptions = () => {
@@ -47,7 +47,7 @@ const DoctorPrescriptions = () => {
   const tabs = ['All Prescriptions', 'Draft', 'Active', 'Completed', 'Discontinued'];
 
   return (
-    <PageTransition>
+    
     <div className="p-6 md:p-8 bg-white min-h-full font-sans">
       <div className="max-w-[1500px] mx-auto">
         
@@ -292,7 +292,7 @@ const DoctorPrescriptions = () => {
 
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

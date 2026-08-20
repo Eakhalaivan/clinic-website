@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { dashboardConfig } from '../../config/dashboardConfig';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const VendorDashboard = () => {
@@ -26,14 +26,14 @@ const VendorDashboard = () => {
   };
 
   return (
-    <PageTransition>
+    
     <ConfigDrivenDashboard 
       config={dashboardConfig.ROLE_VENDOR}
       data={data}
       activeTab={activeTab}
       onTabChange={setActiveTab}
     />
-    </PageTransition>
+    
   );
 };
 

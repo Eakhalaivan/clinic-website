@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const RadiologyReporting = () => {
@@ -103,7 +103,7 @@ const RadiologyReporting = () => {
   const isFinalized = existingReport?.status === 'FINALIZED';
 
   return (
-    <PageTransition>
+    
     <div className="max-w-6xl mx-auto pb-12">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -224,7 +224,7 @@ const RadiologyReporting = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

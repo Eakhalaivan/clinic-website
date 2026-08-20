@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import logger from '../../utils/logger';
 import api from '../../utils/pharmacy/api';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const STATUS_STYLES = {
@@ -51,7 +51,7 @@ export default function InvoiceMatching({ onBack }) {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -142,6 +142,6 @@ export default function InvoiceMatching({ onBack }) {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

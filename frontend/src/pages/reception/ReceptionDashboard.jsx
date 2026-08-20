@@ -8,7 +8,7 @@ import {
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../../components/ui/motion';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const BRANCH_ID = 1;
@@ -70,7 +70,7 @@ const ReceptionDashboard = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="h-full flex flex-col font-sans overflow-y-auto bg-[var(--color-bg-app)]">
       
       {/* Top Action Cards */}
@@ -205,7 +205,7 @@ const ReceptionDashboard = () => {
         </motion.div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

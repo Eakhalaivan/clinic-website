@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MedicineCreditBills() {
@@ -88,7 +88,7 @@ export default function MedicineCreditBills() {
   const overdueBills = creditBillsList.filter(b => b.status !== 'PAID').length; // Simplify overdue logic to not paid for now
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -323,6 +323,6 @@ export default function MedicineCreditBills() {
         )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

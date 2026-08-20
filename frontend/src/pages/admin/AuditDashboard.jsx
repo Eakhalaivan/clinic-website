@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { format } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const AuditDashboard = () => {
@@ -47,7 +47,7 @@ const AuditDashboard = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -191,7 +191,7 @@ const AuditDashboard = () => {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

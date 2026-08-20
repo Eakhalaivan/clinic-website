@@ -1,12 +1,12 @@
 import { UserPlus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const BranchLocalHR = () => {
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -91,7 +91,7 @@ const BranchLocalHR = () => {
         </div>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

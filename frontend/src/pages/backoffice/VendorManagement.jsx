@@ -4,7 +4,7 @@ import { Plus, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fadeIn } from '../../components/ui/motion';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const VendorManagement = () => {
@@ -58,7 +58,7 @@ const VendorManagement = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -67,7 +67,7 @@ const VendorManagement = () => {
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link to="/inventory/dashboard" className="inline-flex items-center text-xs font-semibold text-[var(--color-navy-600)] hover:underline mb-2 gap-1">
+          <Link to="/backoffice" className="inline-flex items-center text-xs font-semibold text-[var(--color-navy-600)] hover:underline mb-2 gap-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold font-display text-[var(--color-navy-900)] m-0 flex items-center gap-2">
@@ -175,7 +175,7 @@ const VendorManagement = () => {
         </Card.Body>
       </Card>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

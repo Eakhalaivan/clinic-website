@@ -38,6 +38,10 @@ const PatientDependents = lazy(() => import('./pages/patient/PatientDependents')
 const PatientSettings = lazy(() => import('./pages/patient/PatientSettings'));
 const PatientConsent = lazy(() => import('./pages/patient/PatientConsent'));
 const HomeVisits = lazy(() => import('./pages/patient/HomeVisits'));
+const MembershipPlans = lazy(() => import('./pages/patient/MembershipPlans'));
+const PatientReminders = lazy(() => import('./pages/patient/PatientReminders'));
+const SurveyResponse = lazy(() => import('./pages/patient/SurveyResponse'));
+const NotificationsPage = lazy(() => import('./pages/shared/NotificationsPage'));
 const Teleconsultations = lazy(() => import('./pages/patient/Teleconsultations'));
 const AiAssistant = lazy(() => import('./pages/patient/AiAssistant'));
 const PatientDocuments = lazy(() => import('./pages/patient/PatientDocuments'));
@@ -101,7 +105,6 @@ const ReportVerification = lazy(() => import('./pages/lab/ReportVerification'));
 const LabCatalogManagement = lazy(() => import('./pages/lab/LabCatalogManagement'));
 const LabNotifications = lazy(() => import('./pages/lab/LabNotifications'));
 // Lab Reports for patients/doctors (can reuse or specific)
-const AccountantDashboard = lazy(() => import('./pages/accountant/AccountantDashboard'));
 const RadiologistDashboard = lazy(() => import('./pages/radiologist/RadiologistDashboard'));
 
 // Back-office dashboard pages
@@ -189,6 +192,11 @@ const Recruitment = lazy(() => import('./pages/hr/Recruitment'));
 // Analytics Module routes
 const AnalyticsDashboard = lazy(() => import('./pages/analytics/AnalyticsDashboard'));
 const FinancialReports = lazy(() => import('./pages/analytics/FinancialReports'));
+const ClinicalAnalyticsDashboard = lazy(() => import('./pages/analytics/ClinicalAnalyticsDashboard'));
+const FinanceAnalyticsDashboard = lazy(() => import('./pages/analytics/FinanceAnalyticsDashboard'));
+const IPDAnalyticsDashboard = lazy(() => import('./pages/analytics/IPDAnalyticsDashboard'));
+const LabAnalyticsDashboard = lazy(() => import('./pages/analytics/LabAnalyticsDashboard'));
+const OPDAnalyticsDashboard = lazy(() => import('./pages/analytics/OPDAnalyticsDashboard'));
 
 // No placeholders allowed in production
 
@@ -225,9 +233,6 @@ const DashboardRoute = ({ path, portalSlug, allowedRoles, defaultRedirect, child
     {children}
   </Route>
 );
-
-// Shorthand: renders a PlaceholderPage with the given title
-const PH = (title, subtitle) => <PlaceholderPage title={title} subtitle={subtitle} />;
 
 function App() {
   useEffect(() => {
@@ -330,6 +335,10 @@ function App() {
             <Route path="consent" element={<PatientConsent />} />
             <Route path="support" element={<PatientSupport />} />
             <Route path="home-visits" element={<HomeVisits />} />
+            <Route path="membership" element={<MembershipPlans />} />
+            <Route path="reminders" element={<PatientReminders />} />
+            <Route path="survey" element={<SurveyResponse />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="teleconsultations" element={<Teleconsultations />} />
             <Route path="ai-assistant" element={<AiAssistant />} />
             <Route path="documents" element={<PatientDocuments />} />
@@ -579,6 +588,11 @@ function App() {
             <Route index element={<Navigate to="/analytics/dashboard" replace />} />
             <Route path="dashboard" element={<AnalyticsDashboard />} />
             <Route path="financial" element={<FinancialReports />} />
+            <Route path="clinical" element={<ClinicalAnalyticsDashboard />} />
+            <Route path="finance-reports" element={<FinanceAnalyticsDashboard />} />
+            <Route path="ipd" element={<IPDAnalyticsDashboard />} />
+            <Route path="lab" element={<LabAnalyticsDashboard />} />
+            <Route path="opd" element={<OPDAnalyticsDashboard />} />
           </Route>
 
           {/* ── Pharmacy Full Module ─────────────────────────────────────── */}
@@ -697,6 +711,58 @@ function App() {
           </Route>
 
           {/* ── Fallbacks ───────────────────────────────────────────────── */}
+          {/* ── Super Admin ────────────────────────────────────────────── */}
+          <Route
+            path="/super-admin"
+            element={
+              <RoleRoute allowedRoles={['ROLE_SUPER_ADMIN']} portalSlug="super-admin">
+                <DashboardLayout portalSlug="super-admin" allowedRoles={['ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/super-admin/dashboard" replace />} />
+            <Route path="dashboard" element={<SuperAdminConsole />} />
+          </Route>
+
+          {/* ── Ambulance ──────────────────────────────────────────────── */}
+          <Route
+            path="/ambulance"
+            element={
+              <RoleRoute allowedRoles={['ROLE_AMBULANCE', 'ROLE_SUPER_ADMIN']} portalSlug="ambulance">
+                <DashboardLayout portalSlug="ambulance" allowedRoles={['ROLE_AMBULANCE', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/ambulance/dashboard" replace />} />
+            <Route path="dashboard" element={<AmbulanceDashboard />} />
+          </Route>
+
+          {/* ── Vendor ─────────────────────────────────────────────────── */}
+          <Route
+            path="/vendor"
+            element={
+              <RoleRoute allowedRoles={['ROLE_VENDOR', 'ROLE_SUPER_ADMIN']} portalSlug="vendor">
+                <DashboardLayout portalSlug="vendor" allowedRoles={['ROLE_VENDOR', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/vendor/dashboard" replace />} />
+            <Route path="dashboard" element={<VendorDashboard />} />
+          </Route>
+
+          {/* ── Insurance Staff ────────────────────────────────────────── */}
+          <Route
+            path="/insurance"
+            element={
+              <RoleRoute allowedRoles={['ROLE_INSURANCE', 'ROLE_SUPER_ADMIN']} portalSlug="insurance">
+                <DashboardLayout portalSlug="insurance" allowedRoles={['ROLE_INSURANCE', 'ROLE_SUPER_ADMIN']} />
+              </RoleRoute>
+            }
+          >
+            <Route index element={<Navigate to="/insurance/dashboard" replace />} />
+            <Route path="dashboard" element={<InsuranceDashboard />} />
+          </Route>
+
           <Route path="/unauthorized" element={
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: 16, fontFamily: 'Inter, sans-serif' }}>
               <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--color-danger)', margin: 0 }}>403</h1>

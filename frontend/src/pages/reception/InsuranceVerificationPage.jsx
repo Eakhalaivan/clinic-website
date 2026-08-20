@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const InsuranceVerificationPage = () => {
@@ -66,7 +66,7 @@ const InsuranceVerificationPage = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div
       initial="hidden"
       animate="visible"
@@ -248,7 +248,7 @@ const InsuranceVerificationPage = () => {
         </>
       )}
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

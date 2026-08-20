@@ -7,7 +7,7 @@ import pharmacyService from '../../utils/pharmacy/pharmacyService';
 
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MedicineCreditReturns() {
@@ -140,7 +140,7 @@ export default function MedicineCreditReturns() {
   });
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Medicine Credit Returns</h2>
@@ -294,6 +294,6 @@ export default function MedicineCreditReturns() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

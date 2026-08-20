@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { format } from 'date-fns';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const fetchPnL = async (startDate, endDate, branchId) => {
@@ -32,7 +32,7 @@ const PnLStatement = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -118,7 +118,7 @@ const PnLStatement = () => {
         ) : null}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../../components/ui/motion';
 import { 
-import PageTransition from '../../components/ui/PageTransition';
-
   Plus, FlaskConical, CheckSquare, Printer, History, AlertCircle, Microscope, FileText 
 } from 'lucide-react';
 
@@ -84,7 +82,6 @@ const LabDashboard = () => {
         {tabs.map((tab) => {
           const isActive = activeTab === tab;
           return (
-    <PageTransition>
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -135,7 +132,6 @@ const LabDashboard = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
   );
 };
 

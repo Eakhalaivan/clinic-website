@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const WarehousesList = () => {
@@ -50,7 +50,7 @@ const WarehousesList = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <>
     <div className="p-4 sm:p-6" style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
@@ -158,7 +158,7 @@ const WarehousesList = () => {
         </Dialog>
       </Transition>
     </>
-    </PageTransition>
+    
   );
 };
 

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const TripHistory = () => {
@@ -17,7 +17,7 @@ const TripHistory = () => {
   const history = requests.filter(r => r.status === 'COMPLETED' || r.status === 'CANCELLED');
 
   return (
-    <PageTransition>
+    
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="p-5 border-b border-slate-100 bg-slate-50">
         <h5 className="font-bold text-lg mb-0 text-slate-800">Completed Trips & History</h5>
@@ -63,7 +63,7 @@ const TripHistory = () => {
         </table>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

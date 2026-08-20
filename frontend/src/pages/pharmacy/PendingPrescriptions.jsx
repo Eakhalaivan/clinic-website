@@ -4,7 +4,7 @@ import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { axiosPrivate } from '../../api/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function PendingPrescriptions() {
@@ -136,7 +136,7 @@ export default function PendingPrescriptions() {
     : filteredPrescriptions.slice((currentPage - 1) * Number(pageSize), currentPage * Number(pageSize));
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pending Prescriptions</h2>
@@ -292,6 +292,6 @@ export default function PendingPrescriptions() {
         )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

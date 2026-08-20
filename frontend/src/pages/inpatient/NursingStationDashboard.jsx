@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { Users } from 'lucide-react';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const NursingStationDashboard = () => {
@@ -90,7 +90,7 @@ const NursingStationDashboard = () => {
   }
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div>
@@ -290,7 +290,7 @@ const NursingStationDashboard = () => {
       )}
 
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const StaffDocuments = () => {
@@ -74,7 +74,7 @@ const StaffDocuments = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Staff Document Management</h1>
 
@@ -201,7 +201,7 @@ const StaffDocuments = () => {
         isLoading={deleteMutation.isPending}
       />
     </div>
-    </PageTransition>
+    
   );
 };
 

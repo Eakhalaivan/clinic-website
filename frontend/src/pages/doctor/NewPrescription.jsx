@@ -9,7 +9,7 @@ import { AlertTriangle, Clock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Ointment', 'Drops', 'Inhaler', 'Powder', 'Spray', 'Gel', 'Suspension', 'Lotion', 'Suppository'];
@@ -540,7 +540,7 @@ const NewPrescription = () => {
   }
 
   return (
-    <PageTransition>
+    
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-sans p-6 pb-28 max-w-[1500px] mx-auto text-[#1E293B]">
       
       {/* Page Header */}
@@ -1395,7 +1395,7 @@ const NewPrescription = () => {
       )}
 
     </div>
-    </PageTransition>
+    
   );
 };
 

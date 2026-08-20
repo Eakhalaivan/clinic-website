@@ -7,10 +7,10 @@ import {
   UserPlus, CalendarIcon, ChevronLeft, Circle, Phone, MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import DashboardShell from '../../components/dashboard/DashboardShell';
+import { DashboardShell, DashboardGrid, BottomRow } from '../../components/dashboard/shared/DashboardShell';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const NurseDashboard = () => {
@@ -37,7 +37,7 @@ const NurseDashboard = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell 
       tabs={tabs} 
       activeTab={activeTab} 
@@ -254,7 +254,7 @@ const NurseDashboard = () => {
 
       </div>
     </DashboardShell>
-    </PageTransition>
+    
   );
 };
 

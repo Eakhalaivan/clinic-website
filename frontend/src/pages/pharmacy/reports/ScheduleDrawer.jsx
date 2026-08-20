@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 const INPUT_CLS = 'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white';
@@ -41,7 +41,7 @@ export default function ScheduleDrawer({ report, onClose, onSaved }) {
   };
 
   return (
-    <PageTransition>
+    
     <AppModal
       isOpen
       onClose={onClose}
@@ -133,7 +133,7 @@ export default function ScheduleDrawer({ report, onClose, onSaved }) {
         </div>
       </div>
     </AppModal>
-    </PageTransition>
+    
   );
 }
 

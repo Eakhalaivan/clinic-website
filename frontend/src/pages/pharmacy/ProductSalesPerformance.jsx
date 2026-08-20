@@ -6,7 +6,7 @@ import { exportToCSV } from '../../utils/pharmacy/reportExport';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../utils/pharmacy/api';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, subMonths } from 'date-fns';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const TABS = [
@@ -576,7 +576,7 @@ export default function ProductSalesPerformance() {
   );
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6 pb-10">
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
@@ -624,6 +624,6 @@ export default function ProductSalesPerformance() {
       {activeTab === 'mom' && renderMoM()}
       {['categories', 'wards', 'reports'].includes(activeTab) && renderComingSoon(TABS.find(t => t.id === activeTab)?.label)}
     </div>
-    </PageTransition>
+    
   );
 }

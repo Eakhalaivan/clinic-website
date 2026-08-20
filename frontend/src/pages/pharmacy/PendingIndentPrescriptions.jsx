@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function PendingIndentPrescriptions() {
@@ -151,7 +151,7 @@ export default function PendingIndentPrescriptions() {
   ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Indent Prescription List</h2>
@@ -379,6 +379,6 @@ export default function PendingIndentPrescriptions() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

@@ -7,7 +7,7 @@ import useDebounce from '../../hooks/pharmacy/useDebounce';
 
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function UserManagement() {
@@ -428,7 +428,7 @@ export default function UserManagement() {
                         const roleName = typeof role === 'string' ? role : role.name;
                         const colorClass = getRoleColor(roleName);
                         return (
-    <PageTransition>
+    
                           <span key={roleName || idx} className={`text-xs px-2.5 py-1 rounded-lg font-bold border ${colorClass}`}>
                             {ROLE_LABELS[roleName] || roleName}
                           </span>
@@ -587,6 +587,6 @@ export default function UserManagement() {
         </div>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

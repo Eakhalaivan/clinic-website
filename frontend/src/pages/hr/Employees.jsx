@@ -6,7 +6,7 @@ import { UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 /**
@@ -128,7 +128,7 @@ const Employees = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <motion.div initial="hidden" animate="visible" variants={fadeIn} className="max-w-6xl mx-auto space-y-6">
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -216,7 +216,7 @@ const Employees = () => {
       </Modal>
 
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

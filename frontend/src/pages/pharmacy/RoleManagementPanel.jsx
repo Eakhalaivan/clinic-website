@@ -4,7 +4,7 @@ import logger from '../../utils/logger';
 import { MODULE_PERMISSIONS } from '../../config/pharmacy/roles.config';
 import api from '../../utils/pharmacy/api';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function RoleManagementPanel({ onBack }) {
@@ -313,7 +313,7 @@ export default function RoleManagementPanel({ onBack }) {
                         {perms.map(perm => {
                           const isSelected = formData.permissions.includes(perm.id) || formData.permissions.includes('ALL');
                           return (
-    <PageTransition>
+    
                             <button
                               key={perm.id}
                               type="button"
@@ -366,6 +366,6 @@ export default function RoleManagementPanel({ onBack }) {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'react-hot-toast';
 import { useStockStore } from '../../store/useStockStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function LowStockAlerts() {
@@ -84,7 +84,7 @@ export default function LowStockAlerts() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
@@ -149,6 +149,6 @@ export default function LowStockAlerts() {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

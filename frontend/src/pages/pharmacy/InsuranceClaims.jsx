@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function InsuranceClaims() {
@@ -132,7 +132,7 @@ export default function InsuranceClaims() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -411,6 +411,6 @@ export default function InsuranceClaims() {
         </form>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

@@ -4,7 +4,7 @@ import useDebounce from '../../hooks/pharmacy/useDebounce';
 import { useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ConsolidatedBills() {
@@ -124,7 +124,7 @@ export default function ConsolidatedBills() {
   const paginatedConsolidated = pageSize === 'All' ? filteredConsolidated : filteredConsolidated.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
               <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Consolidated Bills</h2>
@@ -244,6 +244,6 @@ export default function ConsolidatedBills() {
          )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

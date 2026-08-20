@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const CATEGORIES = [
@@ -83,7 +83,7 @@ const PrescriptionTemplates = () => {
   );
 
   return (
-    <PageTransition>
+    
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
 
       
@@ -386,7 +386,7 @@ const PrescriptionTemplates = () => {
         isDestructive={true}
       />
     </div>
-    </PageTransition>
+    
   );
 };
 

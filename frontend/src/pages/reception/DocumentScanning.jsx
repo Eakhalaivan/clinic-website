@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DOC_TYPES = ['Lab Report', 'Prescription', 'Medical Record', 'Radiology', 'Referral Letter', 'Other'];
@@ -53,7 +53,7 @@ const DocumentScanning = () => {
   });
 
   return (
-    <PageTransition>
+    
     <motion.div
       initial="hidden"
       animate="visible"
@@ -221,7 +221,7 @@ const DocumentScanning = () => {
         </>
       )}
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

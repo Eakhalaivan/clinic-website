@@ -11,7 +11,7 @@ import Badge from '../../components/ui/Badge';
 import Skeleton from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const QueueManagement = () => {
@@ -46,7 +46,7 @@ const QueueManagement = () => {
   const completedQueue = queueList.filter(q => q.status === 'COMPLETED' || q.status === 'NO_SHOW');
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -153,7 +153,7 @@ const QueueManagement = () => {
         </Card>
       </div>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

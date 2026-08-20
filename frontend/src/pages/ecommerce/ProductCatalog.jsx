@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ProductCatalog() {
@@ -46,7 +46,7 @@ export default function ProductCatalog() {
   const categories = ['ALL', ...new Set(products.map(p => p.category).filter(Boolean))];
 
   return (
-    <PageTransition>
+    
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in font-sans">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <div>
@@ -158,6 +158,6 @@ export default function ProductCatalog() {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

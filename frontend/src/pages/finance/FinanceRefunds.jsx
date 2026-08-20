@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { axiosPrivate } from '../../api/axios';
 import { fadeIn } from '../../components/ui/motion';
 import useAuthStore from '../../store/authStore';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const FinanceRefunds = () => {
@@ -96,7 +96,7 @@ const FinanceRefunds = () => {
   };
 
   return (
-    <PageTransition>
+    
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -217,7 +217,7 @@ const FinanceRefunds = () => {
         </form>
       </Modal>
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

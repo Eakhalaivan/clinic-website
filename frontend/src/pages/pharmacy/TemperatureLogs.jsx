@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function TemperatureLogs() {
@@ -147,7 +147,7 @@ export default function TemperatureLogs() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -430,6 +430,6 @@ export default function TemperatureLogs() {
         </form>
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { format } from 'date-fns';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const fetchClearances = async () => {
@@ -105,7 +105,7 @@ export default function PharmacyClearance() {
   }
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pharmacy Clearance</h2>
@@ -221,6 +221,6 @@ export default function PharmacyClearance() {
         )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

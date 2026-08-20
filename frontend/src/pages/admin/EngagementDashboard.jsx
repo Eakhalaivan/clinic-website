@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const EngagementDashboard = () => {
@@ -29,7 +29,7 @@ const EngagementDashboard = () => {
   });
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6" style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <h1 className="text-xl sm:text-2xl font-bold mb-6" style={{ color: 'var(--color-text)' }}>Engagement Dashboard</h1>
 
@@ -121,7 +121,7 @@ const EngagementDashboard = () => {
       )}
 
     </div>
-    </PageTransition>
+    
   );
 };
 

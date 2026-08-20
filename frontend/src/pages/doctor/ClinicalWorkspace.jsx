@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 import { 
   ArrowLeft, Stethoscope, Lock, Save, CheckCircle, AlertTriangle, 
   Activity, Video, FileText, List, Pill, Send, Paperclip, MessageSquare,
@@ -623,7 +623,6 @@ const ClinicalWorkspace = () => {
         
       </div>
     </div>
-    </PageTransition>
   );
 };
 

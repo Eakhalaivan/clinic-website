@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const MarketingAnalytics = () => {
@@ -143,7 +143,7 @@ const MarketingAnalytics = () => {
                         const clickRate = opened > 0 ? ((clicked / opened) * 100).toFixed(1) : 0;
                         
                         return (
-    <PageTransition>
+    
                           <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                             <td className="p-4 font-semibold text-[var(--color-navy-900)]">{c.title}</td>
                             <td className="p-4 text-xs font-medium">
@@ -177,7 +177,7 @@ const MarketingAnalytics = () => {
         </>
       )}
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

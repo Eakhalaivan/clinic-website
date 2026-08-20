@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import logger from '../../../utils/logger';
 import api from '../../../utils/pharmacy/api';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 export default function SupplierAnalytics() {
@@ -42,7 +42,7 @@ export default function SupplierAnalytics() {
 ];
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -127,6 +127,6 @@ export default function SupplierAnalytics() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

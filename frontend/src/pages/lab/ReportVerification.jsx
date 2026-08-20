@@ -4,7 +4,7 @@ import { axiosPrivate } from '../../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../../components/ui/motion';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const ReportVerification = () => {
@@ -69,7 +69,7 @@ const ReportVerification = () => {
   );
 
   return (
-    <PageTransition>
+    
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Report Verification</h1>
 
@@ -172,7 +172,7 @@ const ReportVerification = () => {
         </motion.div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

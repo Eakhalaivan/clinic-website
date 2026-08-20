@@ -5,7 +5,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { toast } from 'react-hot-toast';
 import { today, monthStart, fmtDateTime, fmtDateTimeEnd, fmtDate, urgencyBadge } from './reportCatalog';
 import { doExportPDF, doExportExcel, doExportCSV, doExportImage } from './reportExportUtils';
-import PageTransition from '../../../components/ui/PageTransition';
+
 
 
 /**
@@ -230,7 +230,7 @@ export default function ReportPreviewPanel({ report, onClose, onSchedule }) {
                 const i   = virtualRow.index;
                 const row = data[i];
                 return (
-    <PageTransition>
+    
                   <tr key={i} data-index={i} ref={rowVirtualizer.measureElement}
                     className={`border-b border-slate-50 hover:bg-blue-50/30 transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/30'}`}>
                     {report.columns.map(col => (
@@ -267,7 +267,7 @@ export default function ReportPreviewPanel({ report, onClose, onSchedule }) {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }
 

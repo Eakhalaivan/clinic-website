@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const REJECTION_REASONS = ['Damaged', 'Wrong Item', 'Short Expiry', 'Quality Fail'];
@@ -132,7 +132,7 @@ export default function GRNEntry({ onBack }) {
   const tableDateCls = "w-full px-3 py-1.5 text-sm border border-slate-200 rounded-full outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] bg-white transition-colors placeholder:text-slate-400 text-slate-600";
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -302,6 +302,6 @@ export default function GRNEntry({ onBack }) {
         </button>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

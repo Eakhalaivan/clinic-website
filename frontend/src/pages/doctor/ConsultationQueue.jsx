@@ -183,7 +183,6 @@ const ConsultationQueue = () => {
         </div>
       </div>
     </div>
-    </PageTransition>
   );
 };
 

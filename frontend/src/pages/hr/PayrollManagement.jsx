@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const PayrollManagement = () => {
@@ -87,7 +87,7 @@ const PayrollManagement = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Payroll Management</h1>
@@ -233,7 +233,7 @@ const PayrollManagement = () => {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 };
 

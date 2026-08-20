@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import { getPortalConfig } from '../../config/portalConfig';
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { ShoppingBag, Truck, Package } from 'lucide-react';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const EcommerceDashboard = () => {
@@ -98,7 +98,7 @@ const EcommerceDashboard = () => {
   ];
 
   return (
-    <PageTransition>
+    
     <DashboardShell
       tabs={tabs}
       activeTab={activeTab}
@@ -277,7 +277,7 @@ const EcommerceDashboard = () => {
         </div>
       </Modal>
     </DashboardShell>
-    </PageTransition>
+    
   );
 };
 

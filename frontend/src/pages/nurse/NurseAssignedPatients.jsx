@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserRound, HeartPulse } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EmptyState from '../../components/ui/EmptyState';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 const NurseAssignedPatients = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const NurseAssignedPatients = () => {
   };
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-5">
         <div>
@@ -76,7 +76,7 @@ const NurseAssignedPatients = () => {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 };
 

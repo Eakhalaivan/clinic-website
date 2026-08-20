@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const WardManagement = () => {
@@ -17,7 +17,7 @@ const WardManagement = () => {
   if (error) return <div className="p-6 text-sm text-red-600 font-medium">Failed to load patient assignments.</div>;
 
   return (
-    <PageTransition>
+    
     <div className="p-4 sm:p-6" style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <h1 className="text-xl sm:text-2xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
         <BedDouble size={22} color="#0f766e" aria-hidden="true" /> My Patient Assignments
@@ -42,7 +42,7 @@ const WardManagement = () => {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 };
 

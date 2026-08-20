@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { BedDouble } from 'lucide-react';
 import { staggerChildren, fadeIn } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const STATUS_COLORS = {
@@ -148,7 +148,7 @@ const BedStatusBoard = () => {
                         if (room.beds.length === 0) return null;
                         
                         return (
-    <PageTransition>
+    
                           <div key={room.id}>
                             <h4 className="text-sm font-semibold text-[var(--color-navy-800)] mb-3 flex items-center gap-2">
                               Room {room.roomNumber}
@@ -185,7 +185,7 @@ const BedStatusBoard = () => {
       )}
 
     </motion.div>
-    </PageTransition>
+    
   );
 };
 

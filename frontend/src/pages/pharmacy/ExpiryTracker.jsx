@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function ExpiryTracker() {
@@ -173,7 +173,7 @@ export default function ExpiryTracker() {
                 {virtualItems.map(virtualRow => {
                   const batch = batches[virtualRow.index];
                   return (
-    <PageTransition>
+    
                     <tr key={batch.id || virtualRow.index} data-index={virtualRow.index} ref={rowVirtualizer.measureElement} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-3 font-bold text-slate-700">
                         <div>{batch.medicineName}</div>
@@ -293,6 +293,6 @@ export default function ExpiryTracker() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

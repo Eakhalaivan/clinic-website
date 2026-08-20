@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function DrugInteractions() {
@@ -96,7 +96,7 @@ export default function DrugInteractions() {
   };
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
@@ -250,6 +250,6 @@ export default function DrugInteractions() {
         </div>
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

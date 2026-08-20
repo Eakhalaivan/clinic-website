@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '../../store/authStore';
 import { axiosPrivate } from '../../api/axios';
 import { toast } from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -115,7 +115,7 @@ const DoctorScheduleSettings = () => {
   if (isLoading) return <div className="p-8">Loading settings...</div>;
 
   return (
-    <PageTransition>
+    
     <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto">
       <PageHeader 
         title="Schedule Settings" 
@@ -286,7 +286,7 @@ const DoctorScheduleSettings = () => {
         </Card>
       )}
     </div>
-    </PageTransition>
+    
   );
 };
 

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { CheckCircle, Truck, Clock, Package, AlertCircle, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { staggerChildren, fadeUp, listStagger } from '../../components/ui/motion';
-import PageTransition from '../../components/ui/PageTransition';
+
 import PageLoadingSkeleton from '../../components/ui/PageLoadingSkeleton';
 
 export default function Orders() {
@@ -69,7 +69,7 @@ export default function Orders() {
   }
 
   return (
-    <PageTransition>
+    
       <div className="space-y-6">
         <motion.div variants={fadeUp} initial="hidden" animate="visible" className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-gray-900">My Orders</h2>
@@ -174,6 +174,6 @@ export default function Orders() {
         )}
       </div>
     </div>
-    </PageTransition>
+    
   );
 }

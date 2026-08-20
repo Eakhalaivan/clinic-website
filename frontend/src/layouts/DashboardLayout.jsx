@@ -3,7 +3,17 @@ import { useLocation, useNavigate, Link, Navigate, Outlet } from 'react-router-d
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../api/axios';
-import PageTransition from '../components/ui/PageTransition';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
+import { 
+  LogOut, ChevronDown, Search, Bell, Moon, MessageSquare, 
+  Stethoscope, ShieldPlus, Plus, Zap, Activity, ArrowLeft
+} from 'lucide-react';
+import DashboardGrid from '../components/dashboard/DashboardGrid';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import CommandPalette from '../components/ui/CommandPalette';
+import NotificationBell from '../components/NotificationBell';
+import MessageDropdown from '../components/MessageDropdown';
+import ActivityDropdown from '../components/ActivityDropdown';
 
 import { getPortalConfig } from '../config/portalConfig';
 import useAuthStore, { isTokenValid } from '../store/authStore';
@@ -220,11 +230,9 @@ const DashboardLayout = ({ portalSlug, allowedRoles }) => {
             : 'overflow-x-hidden overflow-y-auto relative'
         }`}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <PageTransition key={location.pathname} className="flex-1 flex flex-col">
-            <Outlet />
-          </PageTransition>
-        </AnimatePresence>
+        <div key={location.pathname} className="flex-1 flex flex-col">
+          <Outlet />
+        </div>
       </main>
     </div>
     </ErrorBoundary>

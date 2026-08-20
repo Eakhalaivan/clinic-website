@@ -6,7 +6,7 @@ import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import api from '../../utils/pharmacy/api';
 import { v4 as uuidv4 } from 'uuid';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function DispenseWorklists() {
@@ -90,7 +90,7 @@ export default function DispenseWorklists() {
   });
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Pending Dispense List</h2>
@@ -222,6 +222,6 @@ export default function DispenseWorklists() {
         )}
       </AppModal>
     </div>
-    </PageTransition>
+    
   );
 }

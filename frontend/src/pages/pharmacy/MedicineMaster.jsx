@@ -17,13 +17,13 @@ import {
   Package, Search, Plus, Loader2, Pill, Activity, Barcode, 
   Settings2, Heart, CheckCircle2, TrendingUp, Filter, Trash2, Edit2, Hexagon, Factory, X, Calendar, AlertTriangle
 } from 'lucide-react';
-import AppModal from '../../components/ui/AppModal';
+import AppModal from '../../components/pharmacy/ui/AppModal';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { usePageData } from '../../hooks/pharmacy/usePageData';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import useDebounce from '../../hooks/pharmacy/useDebounce';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function MedicineMaster() {
@@ -285,7 +285,7 @@ export default function MedicineMaster() {
   ], []);
 
   return (
-    <PageTransition>
+    
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-1">
@@ -857,6 +857,6 @@ export default function MedicineMaster() {
         isLoading={deleteMedicineMutation.isPending}
       />
     </div>
-    </PageTransition>
+    
   );
 }

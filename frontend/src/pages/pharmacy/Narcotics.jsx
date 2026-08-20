@@ -4,7 +4,7 @@ import { ShieldCheck, Users, FileText, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 export default function Narcotics() {
@@ -247,7 +247,7 @@ export default function Narcotics() {
                   {virtualItems.map(virtualRow => {
                     const entry = registerEntries[virtualRow.index];
                     return (
-    <PageTransition>
+    
                       <tr key={entry.id || virtualRow.index} data-index={virtualRow.index} ref={rowVirtualizer.measureElement} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                         <td className="px-4 py-3 text-slate-400 font-mono">{entry.createdAt?.split('T')?.[0] || entry.transactionDate}</td>
                         <td className="px-4 py-3">
@@ -362,6 +362,6 @@ export default function Narcotics() {
         </div>
       )}
     </div>
-    </PageTransition>
+    
   );
 }

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
 import { format, addDays, isSameDay, startOfDay } from 'date-fns';
 import toast from 'react-hot-toast';
-import PageTransition from '../../components/ui/PageTransition';
+
 
 
 const STATUS_COLORS = {
@@ -203,7 +203,7 @@ const OtSchedulingCalendar = () => {
               .sort((a, b) => new Date(a.scheduledStartTime) - new Date(b.scheduledStartTime));
 
             return (
-    <PageTransition>
+    
               <div key={ot.id} className="flex-1 min-w-[350px] bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
                 <div className="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
                   <h3 className="font-bold text-slate-800">{ot.otName}</h3>
@@ -479,7 +479,7 @@ const OtSchedulingCalendar = () => {
       )}
 
     </div>
-    </PageTransition>
+    
   );
 };
 
