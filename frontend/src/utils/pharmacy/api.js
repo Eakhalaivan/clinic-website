@@ -1,6 +1,5 @@
 import logger from '../../utils/logger';
 import axios from 'axios';
-import toast from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 
 const api = axios.create({

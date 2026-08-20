@@ -17,6 +17,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:587}
@@ -27,7 +31,7 @@ spring:
       mail.smtp.starttls.enable: true
 
 jwt:
-  secret: ${JWT_SECRET:default_secret_key_that_is_long_enough_for_hs256_algorithm_12345}
+  secret: ${JWT_SECRET}
   access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000} # 15 minutes
 
 cors:

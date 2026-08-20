@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
-import { LifeBuoy, ArrowLeft, MessageSquare, CheckCircle2, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 import { fadeIn } from '../../components/ui/motion';
-import EmptyState from '../../components/ui/EmptyState';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const SupportTicketing = () => {
   const [filter, setFilter] = useState('ALL');
@@ -42,6 +40,7 @@ const SupportTicketing = () => {
   };
 
   return (
+    <PageTransition>
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -149,6 +148,7 @@ const SupportTicketing = () => {
         </Card.Body>
       </Card>
     </motion.div>
+    </PageTransition>
   );
 };
 
