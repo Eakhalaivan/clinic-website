@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, ScanBarcode, Send, RefreshCw, AlertCircle, Play, Square, QrCode, ShoppingCart, Truck, Package, Barcode, Scan, ClipboardList, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Truck, Package } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import pharmacyService from '../../utils/pharmacy/pharmacyService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 export default function BarcodeScanner() {
   const [barcodeValue, setBarcodeValue] = useState('');
@@ -113,6 +115,7 @@ export default function BarcodeScanner() {
               ].map(mod => {
                 const Icon = mod.icon;
                 return (
+    <PageTransition>
                   <button
                     key={mod.id}
                     onClick={() => setScanModule(mod.id)}
@@ -241,5 +244,6 @@ export default function BarcodeScanner() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { axiosPrivate } from '../../api/axios';
-import { ConfigDrivenDashboard } from '../../components/dashboard/ConfigDrivenDashboard';
 import { dashboardConfig } from '../../config/dashboardConfig';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const InsuranceDashboard = () => {
   const [activeTab, setActiveTab] = useState('claims');
@@ -29,12 +30,14 @@ const InsuranceDashboard = () => {
   };
 
   return (
+    <PageTransition>
     <ConfigDrivenDashboard 
       config={dashboardConfig.ROLE_INSURANCE}
       data={data}
       activeTab={activeTab}
       onTabChange={setActiveTab}
     />
+    </PageTransition>
   );
 };
 

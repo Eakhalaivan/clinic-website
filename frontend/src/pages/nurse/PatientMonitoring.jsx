@@ -1,11 +1,9 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
-import { Activity, ArrowLeft, HeartPulse, Thermometer, Wind } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import Card from '../../components/ui/Card';
 import { fadeIn } from '../../components/ui/motion';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const PatientMonitoring = () => {
   // Fetch assigned patients first
@@ -91,6 +89,7 @@ const PatientMonitoring = () => {
             const hasAlert = isCriticalBp || isCriticalHr || isCriticalSpo2;
 
             return (
+    <PageTransition>
               <Card key={patient.patientId} className={hasAlert ? 'border-rose-300 shadow-sm shadow-rose-100 ring-1 ring-rose-200' : ''}>
                 <Card.Header className={`flex justify-between items-start ${hasAlert ? 'bg-rose-50/50' : 'bg-slate-50/50'}`}>
                   <div>
@@ -167,6 +166,7 @@ const PatientMonitoring = () => {
         )}
       </div>
     </motion.div>
+    </PageTransition>
   );
 };
 
