@@ -2,7 +2,7 @@ package com.healthcare.clinic.doctor.controller;
 
 import com.healthcare.clinic.doctor.entity.SoapNote;
 import com.healthcare.clinic.doctor.service.SoapNoteService;
-import com.healthcare.clinic.identity.entity.User;
+import com.healthcare.clinic.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,8 +19,8 @@ public class SoapNoteController {
     private final SoapNoteService soapNoteService;
 
     @GetMapping
-    public ResponseEntity<SoapNote> getSoapNote(@AuthenticationPrincipal User user, @PathVariable Long encounterId) {
-        return soapNoteService.getSoapNote(user, encounterId)
+    public ResponseEntity<SoapNote> getSoapNote(@AuthenticationPrincipal UserPrincipal user, @PathVariable Long encounterId) {
+        return soapNoteService.getSoapNote(user.getUserId(), encounterId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
@@ -28,9 +28,9 @@ public class SoapNoteController {
     @PostMapping
     @AuditableAction(module = "CLINICAL_ENCOUNTER", action = "EDIT_SOAP", resourceType = "SoapNote", sensitivityLevel = "HIGH")
     public ResponseEntity<SoapNote> saveSoapNote(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable Long encounterId,
             @RequestBody SoapNote soapNote) {
-        return ResponseEntity.ok(soapNoteService.saveSoapNote(user, encounterId, soapNote));
+        return ResponseEntity.ok(soapNoteService.saveSoapNote(user.getUserId(), encounterId, soapNote));
     }
 }

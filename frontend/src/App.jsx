@@ -1,17 +1,19 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { MotionConfig } from 'framer-motion';
+import AIAssistantWidget from './components/ui/AIAssistantWidget';
 import PageLoadingSkeleton from './components/ui/PageLoadingSkeleton';
+import { AuthProvider as PharmacyAuthProvider } from './context/pharmacy/AuthContext';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout';
-import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import MainLayout from './components/pharmacy/layout/MainLayout';
 
 // Route guard
 import RoleRoute from './components/auth/RoleRoute';
-
 // Public pages
 const Home = lazy(() => import('./pages/public/Home'));
 const DoctorList = lazy(() => import('./pages/public/DoctorList'));
@@ -178,8 +180,6 @@ const PatientSupport = lazy(() => import('./pages/support/PatientSupport'));
 
 // Pharmacy full module routes
 import { PharmacyRoutes } from './pages/pharmacy/PharmacyRoutes';
-import MainLayout from './components/pharmacy/layout/MainLayout';
-import { AuthProvider as PharmacyAuthProvider } from './context/pharmacy/AuthContext';
 
 // HR Module routes
 const Attendance = lazy(() => import('./pages/hr/Attendance'));
@@ -192,7 +192,6 @@ const FinancialReports = lazy(() => import('./pages/analytics/FinancialReports')
 
 // No placeholders allowed in production
 
-import AIAssistantWidget from './components/ui/AIAssistantWidget';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -247,9 +246,36 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Toaster position="top-right" />
-        <AIAssistantWidget />
-        <Suspense fallback={<PageLoadingSkeleton />}>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '12px',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+              fontSize: '14px',
+              fontWeight: 500,
+            },
+            success: {
+              iconTheme: {
+                primary: 'var(--color-success)',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: 'var(--color-danger)',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+        <MotionConfig reducedMotion="user">
+          <Suspense fallback={<PageLoadingSkeleton />}>
+            <AIAssistantWidget />
             <Routes>
 
           {/* ── Public Routes ───────────────────────────────────────────── */}
@@ -687,7 +713,8 @@ function App() {
           } />
 
         </Routes>
-            </Suspense>
+          </Suspense>
+        </MotionConfig>
       </BrowserRouter>
     </QueryClientProvider>
   );

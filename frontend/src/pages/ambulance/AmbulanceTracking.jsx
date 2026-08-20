@@ -1,11 +1,9 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { axiosPrivate } from '../../api/axios';
-import { Map, ArrowLeft, Truck, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import Card from '../../components/ui/Card';
 import { fadeIn } from '../../components/ui/motion';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const AmbulanceTracking = () => {
   const { data: fleet = [], isLoading } = useQuery({
@@ -18,6 +16,7 @@ const AmbulanceTracking = () => {
   });
 
   return (
+    <PageTransition>
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -137,6 +136,7 @@ const AmbulanceTracking = () => {
         </div>
       </div>
     </motion.div>
+    </PageTransition>
   );
 };
 

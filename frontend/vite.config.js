@@ -39,7 +39,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Let Vite/Rollup handle chunking to prevent execution order / context undefined errors
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom']
+        }
       }
     }
   },
