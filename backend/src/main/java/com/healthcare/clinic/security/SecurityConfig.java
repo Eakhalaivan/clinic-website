@@ -69,7 +69,7 @@ public class SecurityConfig {
                 if (!isProd) {
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                 }
-                auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/doctors", "/api/departments").permitAll()
+                auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/doctors").permitAll()
                     .anyRequest().authenticated();
             });
         
