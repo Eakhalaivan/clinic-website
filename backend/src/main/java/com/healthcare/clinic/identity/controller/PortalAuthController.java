@@ -203,7 +203,7 @@ public class PortalAuthController {
         if (roleName == null) return false;
         String normalizedRole = roleName.toUpperCase().replace("ROLE_", "");
         String normalizedPortal = portal.toUpperCase().replace("-", "_");
-        return normalizedRole.equals(normalizedPortal) || "ADMIN".equals(normalizedRole);
+        return normalizedRole.equals(normalizedPortal) || "ADMIN".equals(normalizedRole) || "SUPER_ADMIN".equals(normalizedRole) || "SYSTEM_ADMIN".equals(normalizedRole);
     }
 }
 

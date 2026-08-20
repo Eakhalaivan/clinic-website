@@ -135,8 +135,10 @@ public class DataSeeder implements CommandLineRunner {
         user.setEnabled(true);
 
         Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            roleRepository.findByName(roleName).ifPresent(roles::add);
+        if (roleNames != null) {
+            for (String roleName : roleNames) {
+                roleRepository.findByName(roleName).ifPresent(roles::add);
+            }
         }
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
@@ -168,7 +170,7 @@ public class DataSeeder implements CommandLineRunner {
             case "ROLE_FINANCE" -> "finance";
             case "ROLE_INVENTORY_MANAGER", "ROLE_STORE_MANAGER" -> "inventory";
             case "ROLE_MARKETING" -> "marketing";
-            case "ROLE_SUPPORT", "ROLE_CUSTOMER_SUPPORT" -> "customer-support";
+            case "ROLE_SUPPORT", "ROLE_CUSTOMER_SUPPORT" -> "staff";
             case "ROLE_VENDOR" -> "vendor";
             case "ROLE_INSURANCE" -> "insurance";
             case "ROLE_AMBULANCE" -> "ambulance";
