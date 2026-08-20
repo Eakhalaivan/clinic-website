@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import logger from '../../utils/logger';
-import { Ticket, Printer, ArrowLeft, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Ticket, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import EmptyState from '../../components/ui/EmptyState';
 import { fadeIn, staggerChildren } from '../../components/ui/motion';
 import { axiosPrivate } from '../../api/axios';
 import useAuthStore from '../../store/authStore';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const TokenGeneration = () => {
   const [issuedToken, setIssuedToken] = useState(null);
@@ -111,6 +108,7 @@ const TokenGeneration = () => {
               walkIns.map((w) => {
                 const name = w.patient ? `${w.patient.firstName} ${w.patient.lastName}` : `${w.firstName} ${w.lastName}`;
                 return (
+    <PageTransition>
                   <div 
                     key={w.id} 
                     className="flex items-center justify-between p-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 hover:bg-[var(--color-surface-alt)] transition-colors"
@@ -192,6 +190,7 @@ const TokenGeneration = () => {
         </Card>
       </div>
     </motion.div>
+    </PageTransition>
   );
 };
 

@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Plus, ArrowLeft, Package } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import FormField from '../../components/ui/FormField';
 import { fadeIn } from '../../components/ui/motion';
-import EmptyState from '../../components/ui/EmptyState';
 import { axiosPrivate } from '../../api/axios';
+import PageTransition from '../../components/ui/PageTransition';
+
 
 const EcommerceAdmin = () => {
   const [showAdd, setShowAdd] = useState(false);
@@ -62,6 +59,7 @@ const EcommerceAdmin = () => {
   };
 
   return (
+    <PageTransition>
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -178,6 +176,7 @@ const EcommerceAdmin = () => {
         </Card.Body>
       </Card>
     </motion.div>
+    </PageTransition>
   );
 };
 

@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import NotificationBell from '../components/NotificationBell';
-import ErrorBoundary from '../components/ui/ErrorBoundary';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from '../components/ui/PageTransition';
 import './AuthLayout.css';
 
 const AuthLayout = ({ allowedRoles }) => {
@@ -22,15 +21,19 @@ const AuthLayout = ({ allowedRoles }) => {
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
     const closeSidebar = () => setSidebarOpen(false);
 
-    const NavLinkItem = ({ to, label }) => {
-        const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
+    const NavLinkItem = ({ to, label, exact = false }) => {
+        const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
         return (
-            <Link 
-                to={to} 
-                className={`portal-nav-link ${isActive ? 'active' : ''}`}
-                onClick={closeSidebar}
-            >
-                {label}
+            <Link to={to} className={`portal-nav-link relative ${isActive ? 'active' : ''}`} onClick={closeSidebar}>
+                {isActive && (
+                    <motion.div
+                        layoutId="activeNavAuth"
+                        className="absolute inset-0 bg-blue-50 border-l-4 border-blue-600 z-[-1]"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                )}
+                <span className="relative z-10">{label}</span>
             </Link>
         );
     };
@@ -110,8 +113,12 @@ const AuthLayout = ({ allowedRoles }) => {
                         <NotificationBell />
                     </div>
                 </header>
-                <div className="portal-content">
-                    <Outlet />
+                <div className="portal-content relative">
+                    <AnimatePresence mode="wait" initial={false}>
+                        <PageTransition key={location.pathname} className="absolute inset-0">
+                            <Outlet />
+                        </PageTransition>
+                    </AnimatePresence>
                 </div>
             </main>
         </div>

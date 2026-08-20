@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/v1/appointments/hold")
+@RequestMapping("/api/appointments/hold")
 @PreAuthorize("hasAuthority('ROLE_RECEPTION') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_PATIENT') or hasAuthority('ROLE_SUPER_ADMIN')")
 @RequiredArgsConstructor
 public class AppointmentHoldController {

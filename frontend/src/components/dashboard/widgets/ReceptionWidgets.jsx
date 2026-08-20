@@ -1,12 +1,4 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Users, Clock, UserPlus, ArrowRight } from 'lucide-react';
-import Card from '../../ui/Card';
-import Button from '../../ui/Button';
-import DataTable from '../../ui/DataTable';
-import KPICard from '../../ui/KPICard';
-import Badge from '../../ui/Badge';
 import { fadeIn } from '../../ui/motion';
 
 export const ReceptionKPIWidget = ({ walkInsData, isLoading }) => (

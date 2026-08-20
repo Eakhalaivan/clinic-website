@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import './PublicLayout.css';
+import { useLocation, Link, Outlet } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '../components/ui/ErrorBoundary';
+import PageTransition from '../components/ui/PageTransition';
+import './PublicLayout.css';
 
 const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,8 +38,12 @@ const PublicLayout = () => {
 
 
 
-      <main className="public-main">
-        <Outlet />
+      <main className="public-main overflow-x-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <PageTransition key={location.pathname}>
+            <Outlet />
+          </PageTransition>
+        </AnimatePresence>
       </main>
       {location.pathname !== '/' && (
         <footer className="public-footer">

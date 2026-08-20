@@ -1,8 +1,8 @@
 package com.healthcare.clinic.patient.controller;
 
 import com.healthcare.clinic.identity.entity.User;
-import com.healthcare.clinic.ai.entity.AiChatMessage;
-import com.healthcare.clinic.ai.entity.AiChatSession;
+import com.healthcare.clinic.patient.entity.AiChatMessage;
+import com.healthcare.clinic.patient.entity.AiChatSession;
 import com.healthcare.clinic.patient.service.AiAssistantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

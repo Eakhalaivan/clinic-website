@@ -15,10 +15,10 @@ import java.util.Optional;
 @Repository("inpatientBedRepository")
 public interface BedRepository extends JpaRepository<Bed, Long> {
     
-    @Query("SELECT b FROM InpatientBed b JOIN FETCH b.room r JOIN FETCH r.ward w WHERE w.branchId = :branchId")
+    @Query("SELECT b FROM Bed b JOIN FETCH b.room r JOIN FETCH r.ward w WHERE w.branchId = :branchId")
     List<Bed> findByBranchId(@Param("branchId") Long branchId);
     
-    @Query("SELECT b FROM InpatientBed b JOIN FETCH b.room r JOIN FETCH r.ward w WHERE b.status = :status AND w.branchId = :branchId")
+    @Query("SELECT b FROM Bed b JOIN FETCH b.room r JOIN FETCH r.ward w WHERE b.status = :status AND w.branchId = :branchId")
     List<Bed> findByStatusAndBranchId(@Param("status") String status, @Param("branchId") Long branchId);
 
     @Lock(LockModeType.OPTIMISTIC)
