@@ -96,7 +96,10 @@ public class ClinicDatabaseConfig {
                 "com.healthcare.clinic.tenant",
                 "com.healthcare.clinic.vendor",
                 "com.healthcare.clinic.ai",
-                "com.healthcare.clinic.fhir"
+                "com.healthcare.clinic.fhir",
+                "com.healthcare.clinic.admin",
+                "com.healthcare.clinic.superadmin",
+                "com.healthcare.clinic.support"
         );
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
