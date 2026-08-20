@@ -48,6 +48,63 @@ public class ClinicDatabaseConfig {
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.healthcare.clinic");
         em.setPersistenceUnitName("clinic");
+<<<<<<< HEAD
+        em.setPackagesToScan(
+                "com.healthcare.clinic.ai",
+                "com.healthcare.clinic.ambulance",
+                "com.healthcare.clinic.analytics",
+                "com.healthcare.clinic.appointment",
+                "com.healthcare.clinic.audit",
+                "com.healthcare.clinic.backoffice",
+                "com.healthcare.clinic.billing",
+                "com.healthcare.clinic.branch",
+                "com.healthcare.clinic.clinicaldecision",
+                "com.healthcare.clinic.common",
+                "com.healthcare.clinic.department",
+                "com.healthcare.clinic.doctor",
+                "com.healthcare.clinic.document",
+                "com.healthcare.clinic.ecommerce",
+                "com.healthcare.clinic.emergency",
+                "com.healthcare.clinic.emr",
+                "com.healthcare.clinic.engagement",
+                "com.healthcare.clinic.exception",
+                "com.healthcare.clinic.fhir",
+                "com.healthcare.clinic.finance",
+                "com.healthcare.clinic.health",
+                "com.healthcare.clinic.homevisit",
+                "com.healthcare.clinic.hr",
+                "com.healthcare.clinic.identity",
+                "com.healthcare.clinic.inpatient",
+                "com.healthcare.clinic.insurance",
+                "com.healthcare.clinic.integration",
+                "com.healthcare.clinic.inventory",
+                "com.healthcare.clinic.laboratory",
+                "com.healthcare.clinic.marketing",
+                "com.healthcare.clinic.medicalrecord",
+                "com.healthcare.clinic.notification",
+                "com.healthcare.clinic.nursing",
+                "com.healthcare.clinic.patient",
+                "com.healthcare.clinic.radiology",
+                "com.healthcare.clinic.reception",
+                "com.healthcare.clinic.security",
+                "com.healthcare.clinic.subscription",
+                "com.healthcare.clinic.surgery",
+                "com.healthcare.clinic.telemedicine",
+                "com.healthcare.clinic.tenant",
+                "com.healthcare.clinic.vendor",
+                "com.healthcare.clinic.ai",
+                "com.healthcare.clinic.fhir",
+                "com.healthcare.clinic.admin",
+                "com.healthcare.clinic.superadmin",
+                "com.healthcare.clinic.support"
+        );
+
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+        HashMap<String, Object> properties = new HashMap<>();
+        String dialect = env.getProperty("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
+        String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto", "create-drop");
+=======
                 
         em.setJpaVendorAdapter(new org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter());
         
@@ -57,6 +114,7 @@ public class ClinicDatabaseConfig {
         if (dialect.contains("H2")) {
             ddlAuto = "update";
         }
+>>>>>>> e9a38d1b14cc9189a3bf7c52bc8cf0e72a5cf0c1
         properties.put("hibernate.dialect", dialect);
         properties.put("hibernate.hbm2ddl.auto", ddlAuto);
         properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
